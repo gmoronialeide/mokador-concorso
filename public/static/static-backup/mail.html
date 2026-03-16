@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hai vinto! - Mokador</title>
+    <style>
+        /* Reset stili per client email */
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            background-color: #DFD6C1;
+            /* --brown-extra-light */
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        table {
+            border-spacing: 0;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            border: 0;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+            -ms-interpolation-mode: bicubic;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* Layout */
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #DFD6C1;
+            padding-bottom: 40px;
+        }
+
+        .main {
+            background-color: #ffffff;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 600px;
+            border-collapse: collapse;
+        }
+
+        /* Header */
+        .header {
+            background-color: #ffffff;
+            /* --brown-extra-dark */
+            padding: 40px 20px 0 20px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 300px;
+            height: auto;
+        }
+
+        /* Content */
+        .content-padding {
+            padding: 40px 30px;
+        }
+
+        .title {
+            color: #2B1D18;
+            font-family: Arial, sans-serif;
+            font-size: 32px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+            text-align: center;
+        }
+
+        .divider {
+            width: 80px;
+            height: 3px;
+            background-color: #614637;
+            /* --brown-medium */
+            margin: 15px auto 25px;
+        }
+
+        .subtitle {
+            color: #9D4A15;
+            /* --orange */
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .prize-card {
+            background-color: #F9F5EB;
+            border: 1px solid #DFD6C1;
+            padding: 25px;
+            border-radius: 4px;
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .prize-name {
+            color: #2B1D18;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .prize-description {
+            color: #614637;
+            font-size: 16px;
+            margin: 10px 0 0;
+        }
+
+        /* Text blocks */
+        .body-text {
+            color: #4F3328;
+            /* --brown-dark */
+            font-size: 16px;
+            line-height: 24px;
+            margin-bottom: 25px;
+        }
+
+        .list-item {
+            margin-bottom: 12px;
+            padding-left: 10px;
+        }
+
+        /* Button */
+        .button-wrapper {
+            text-align: center;
+            padding: 20px 0 40px;
+        }
+
+        .btn-mokador {
+            background-color: #9D4A15;
+            color: #ffffff !important;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        /* Final Evidence */
+        .evidence-block {
+            background-color: #2B1D18;
+            color: #ffffff;
+            padding: 30px 25px;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .evidence-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .evidence-sub {
+            font-size: 14px;
+            font-weight: normal;
+            margin-top: 8px;
+            display: block;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            font-size: 12px;
+            color: #614637;
+        }
+
+        .footer a {
+            color: #9D4A15;
+            font-weight: bold;
+        }
+
+        /* Typography fallback */
+        h1,
+        h2,
+        h3 {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <center class="wrapper">
+        <table class="main" width="100%">
+            <!-- HEADER -->
+            <tr>
+                <td class="header">
+                    <a href="#" target="_blank">
+                        <!-- Nota: Percorso relativo per sviluppo, da sostituire con URL assoluto in produzione -->
+                        <img src="../../img/mokador-concorso-logo.svg" alt="Mokador" class="logo" width="200">
+                    </a>
+                </td>
+            </tr>
+
+            <!-- CONTENUTO PRINCIPALE -->
+            <tr>
+                <td class="content-padding">
+                    <h1 class="title">Hai vinto!</h1>
+                    <div class="divider"></div>
+
+                    <p class="subtitle">Complimenti! La fortuna ti ha sorriso.</p>
+
+                    <div class="prize-card">
+                        <h2 class="prize-name">Grembiule a pettorina Mokador</h2>
+                    </div>
+
+                    <div class="body-text">
+                        <p>Gentile *nome utente*,</p>
+                        <p>siamo felici di confermarti che la tua giocata è risultata vincente! Ecco le istruzioni per
+                            riscuotere il tuo premio in pochi semplici passi rispondendo a questa mail:</p>
+
+                        <div style="margin: 20px 0;">
+                            <div class="list-item"><strong>1.</strong> Allega un documento di identità valido fronte e
+                                retro.</div>
+                            <div class="list-item"><strong>2.</strong> Specifica l'indirizzo di spedizione del premio
+                                qualora differente da quello specificato in fase di registrazione.</div>
+                            <div class="list-item"><strong>3.</strong> Attendi conferma da parte del nostro team.
+                            </div>
+                        </div>
+
+                        <p>Ricorda: hai a disposizione <strong>5 giorni</strong> per completare la procedura.</p>
+                    </div>
+
+                    <!-- FRASE FINALE IN EVIDENZA -->
+                    <div class="evidence-block">
+                        <p class="evidence-text">⚠️ CONSERVA LO SCONTRINO ORIGINALE!</p>
+                        <span class="evidence-sub">È fondamentale per l'estrazione finale del super premio.</span>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- FOOTER -->
+            <tr>
+                <td class="footer">
+                    <p>Copyright © 2026 Mokador | Tutti i diritti riservati</p>
+                    <p>Hai bisogno di aiuto? Scrivici a <a href="mailto:concorso@mokador.it">concorso@mokador.it</a></p>
+                    <p style="margin-top: 15px; font-style: italic;">Ricevi questa email perché hai partecipato al
+                        concorso "Mokador ti porta in vacanza".</p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+
+</html>

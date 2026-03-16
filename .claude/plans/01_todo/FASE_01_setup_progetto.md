@@ -2,46 +2,54 @@
 
 **Priorità:** CRITICA
 **Dipendenze:** Nessuna
-**Stima effort:** Prima fase da completare
+**Stato:** COMPLETATA
 
 ---
 
 ## 1.1 Inizializzazione Laravel 12
 
-- [ ] Creare progetto Laravel 12 tramite Composer
-- [ ] Configurare `.env` (DB, APP_URL = invacanza.mokador.it, APP_NAME, MAIL, ecc.)
-- [ ] Configurare `config/database.php` per MySQL 5.7 (charset `utf8mb4`, collation `utf8mb4_unicode_ci`, engine `InnoDB`)
-- [ ] Configurare timezone Italia (`Europe/Rome`) in `config/app.php`
-- [ ] Configurare locale `it` in `config/app.php`
-- [ ] Configurare filesystem disk per upload scontrini (`storage/app/receipts`) in `config/filesystems.php`
-- [ ] Aggiungere `.env.example` con tutti i parametri necessari documentati
+- [x] Creare progetto Laravel 12 tramite Composer (v12.54.1)
+- [x] Configurare `.env` (DB MySQL su database-condiviso, APP_URL = invacanza.mokador.it, APP_NAME, MAIL, ecc.)
+- [x] Configurare `config/database.php` per MySQL (charset `utf8mb4`, collation `utf8mb4_unicode_ci`)
+- [x] Configurare timezone Italia (`Europe/Rome`) in `config/app.php`
+- [x] Configurare locale `it` in `config/app.php`
+- [x] Configurare filesystem disk `receipts` per upload scontrini in `config/filesystems.php`
+- [x] Aggiungere `.env.example` con tutti i parametri necessari documentati
 
-## 1.2 Installazione Filament 5
+## 1.2 Installazione Filament
 
-- [ ] Installare Filament 5 via Composer
-- [ ] Configurare Filament Panel per backoffice su path `/admin`
-- [ ] Configurare Guard separato per admin (non condivide autenticazione con utenti frontend)
-- [ ] Creare AdminUser model separato da User
-- [ ] Configurare tema/colori Filament (palette Mokador: marrone/arancione)
+- [x] Installare Filament 3 via Composer (v3.3.49 - compatibile con Laravel 12)
+- [x] Configurare Filament Panel per backoffice su path `/admin`
+- [x] Configurare Guard `admin` separato (non condivide autenticazione con utenti frontend)
+- [x] Creare Admin model separato da User (`app/Models/Admin.php`)
+- [x] Configurare tema/colori Filament (palette Mokador: primary #9D4A15, gray #4F3328)
 
 ## 1.3 Struttura directory assets
 
-- [ ] Spostare/copiare gli assets statici esistenti (`css/`, `js/`, `img/`) nella struttura Laravel `public/`
-- [ ] Verificare che i path nei template siano corretti con `asset()` helper
-- [ ] Configurare Vite (o escluderlo se non serve bundling, dato che CSS/JS sono già pronti)
+- [x] Copiare gli assets statici esistenti (`css/`, `js/`, `img/`) nella struttura Laravel `public/`
+- [x] HTML statici mantenuti in `public/static/` come riferimento per i Blade templates
+- [x] Vite presente ma non necessario per bundling (CSS/JS già pronti)
 
 ## 1.4 Configurazione ambiente
 
-- [ ] Configurare CSRF protection
-- [ ] Configurare rate limiting in `bootstrap/app.php` o `RouteServiceProvider`
-- [ ] Configurare session driver (database, per affidabilità)
-- [ ] Configurare queue driver (database o sync, da decidere in base al server)
-- [ ] Configurare logging (daily, canale dedicato per le giocate)
+- [x] CSRF protection attiva (default Laravel)
+- [x] Configurare rate limiting in `bootstrap/app.php` (auth: 10/min, play: 5/min)
+- [x] Session driver: database
+- [x] Queue driver: database
+- [x] Logging: daily + canale `concorso` dedicato per le giocate (90 giorni retention)
+
+## 1.5 Database e Seeder
+
+- [x] Creato database `mokador_concorso` su MySQL
+- [x] Migration tabella `admins` eseguita
+- [x] Migration tabelle default Laravel (users, sessions, cache, jobs) eseguite
+- [x] AdminSeeder: admin di default creato (admin@mokador.it)
 
 ---
 
 ## Note
 
-- Il progetto Laravel va creato nella root `mokador-concorso/` integrando i file statici esistenti
-- Gli HTML statici in `public/static/` serviranno come riferimento per i Blade templates (Fase 4)
-- MySQL 5.7.44: non usare features MySQL 8+ (CTE, JSON_TABLE, window functions)
+- Il progetto Laravel è stato creato nella root integrando i file statici esistenti
+- Gli HTML statici in `public/static/` servono come riferimento per i Blade templates (Fase 4)
+- MySQL 8.0 in uso (database-condiviso), ma codice compatibile MySQL 5.7
+- Filament 3.x (non 5) è la versione corrente compatibile con Laravel 12

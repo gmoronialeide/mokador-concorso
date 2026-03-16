@@ -60,6 +60,7 @@ cap: required|string|size:5
 password: required|string|min:8|confirmed
 privacy_consent: required|accepted
 marketing_consent: nullable|boolean
+newsletter_consent: nullable|boolean
 ```
 
 ### GameController

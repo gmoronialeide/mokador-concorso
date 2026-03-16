@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(cd:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(docker exec:*)",
+      "Bash(docker compose:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(pip3 install:*)",
+      "Bash(sudo apt-get:*)",
+      "Bash(which composer:*)",
+      "Bash(which docker:*)"
     ]
   }
 }

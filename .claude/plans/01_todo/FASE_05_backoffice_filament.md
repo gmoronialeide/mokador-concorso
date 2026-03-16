@@ -37,7 +37,7 @@
 ## 5.3 UserResource (`app/Filament/Resources/UserResource.php`)
 
 ### Lista (Table)
-- [ ] Colonne: ID, Nome, Cognome, Email, Telefono, Città, Registrato il, N. giocate, Bannato
+- [ ] Colonne: ID, Nome, Cognome, Email, Telefono, Città, Registrato il, N. giocate, Newsletter, Bannato
 - [ ] Filtri: bannato/non bannato, città, provincia, data registrazione
 - [ ] Ricerca: nome, cognome, email, telefono
 - [ ] Ordinamento: data registrazione, nome

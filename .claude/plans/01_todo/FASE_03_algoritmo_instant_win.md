@@ -51,16 +51,23 @@ Flusso:
 1. Ricevi la giocata appena registrata
 2. Determina data e ora corrente
 3. Apri transazione DB con lock
-4. Cerca slot vincenti disponibili:
-   - scheduled_date = oggi
-   - scheduled_time <= ora corrente
-   - is_assigned = false
-   - ORDER BY scheduled_time ASC (primo slot disponibile)
-   - FOR UPDATE (lock pessimistico per concorrenza)
-5. Se nessuno slot trovato → return null (non vince)
-6. Verifica vincolo punto vendita:
+4. Verifica vincolo punto vendita:
    - Il punto vendita del giocatore ha già vinto questa settimana?
-   - Se sì → return null (lo slot resta disponibile per altri)
+   - Se sì → return null (non può vincere, lo slot resta disponibile per altri)
+5. Cerca slot vincenti disponibili:
+   - scheduled_date = oggi
+   - is_assigned = false
+   - FOR UPDATE (lock pessimistico per concorrenza)
+   - DUE MODALITÀ DI ASSEGNAZIONE:
+     a) MODALITÀ NORMALE (scheduled_time <= ora corrente):
+        - ORDER BY scheduled_time ASC (primo slot disponibile)
+     b) MODALITÀ "REGOLA ORE 12" (ora corrente >= 12:00):
+        - Se ci sono slot del giorno NON ANCORA assegnati (indipendentemente
+          dalla scheduled_time), il primo che gioca dopo le 12:00 vince
+        - Questo garantisce che se entro le 12 nessuno ha vinto,
+          il primo giocatore dopo le 12 si aggiudica il premio
+        - ORDER BY scheduled_time ASC
+6. Se nessuno slot trovato → return null (non vince)
 7. Assegna lo slot:
    - winning_slot.is_assigned = true
    - winning_slot.play_id = play.id
@@ -72,7 +79,14 @@ Flusso:
 9. Return Prize
 ```
 
+**REGOLA ORE 12:00 (da Excel premi giornalieri):**
+Se entro le 12:00 nessuno dei premi giornalieri è stato ancora vinto, il primo
+giocatore che gioca dopo le 12:00 vince il premio. Resta comunque attivo il vincolo
+1 premio/punto vendita/settimana: se il PV ha già vinto nella settimana, quella
+giocata non può vincere e lo slot resta disponibile per il prossimo giocatore valido.
+
 - [ ] Implementare metodo `attempt(Play $play): ?Prize`
+- [ ] Implementare "Regola ore 12": dopo le 12:00, se ci sono slot non assegnati per il giorno, il primo giocatore valido vince (ignora scheduled_time)
 - [ ] Usare `DB::transaction()` con isolation level adeguato
 - [ ] Usare `lockForUpdate()` (Eloquent) per lock pessimistico
 - [ ] Gestire correttamente le eccezioni (rollback automatico)
@@ -112,6 +126,10 @@ Logica:
 - [ ] **Test unitario:** vincita assegna correttamente lo slot e aggiorna play
 - [ ] **Test unitario:** non vincita quando nessuno slot disponibile
 - [ ] **Test unitario:** vincolo punto vendita rispettato (max 1/settimana)
+- [ ] **Test unitario:** vincolo PV: giocata da PV che ha già vinto nella settimana NON vince, ma lo slot resta disponibile per altri
+- [ ] **Test regola ore 12:** prima delle 12, slot con scheduled_time futuro NON viene assegnato
+- [ ] **Test regola ore 12:** dopo le 12, slot non assegnato viene dato al primo giocatore valido (ignora scheduled_time)
+- [ ] **Test regola ore 12 + vincolo PV:** dopo le 12, se il PV ha già vinto, la giocata NON vince e lo slot resta per il prossimo
 - [ ] **Test concorrenza:** due giocate simultanee non vincono lo stesso slot (lock)
 - [ ] **Test recovery:** slot non assegnati vengono correttamente spostati
 - [ ] **Test scenario pochi giocatori:** tutti i premi vengono comunque distribuiti nel tempo

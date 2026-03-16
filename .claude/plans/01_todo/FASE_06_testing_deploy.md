@@ -16,6 +16,8 @@
 - [ ] Test concorrenza: lock pessimistico previene doppia assegnazione
 - [ ] Test recovery: slot non assegnati vengono recuperati
 - [ ] Test confini temporali: giocata prima delle 08:00, dopo le 22:00
+- [ ] Test regola ore 12: dopo le 12 se nessun premio assegnato, il primo giocatore valido vince
+- [ ] Test regola ore 12 + vincolo PV: dopo le 12, PV che ha già vinto nella settimana non vince
 - [ ] Test date: giocata fuori periodo concorso rifiutata
 
 ### Test Autenticazione

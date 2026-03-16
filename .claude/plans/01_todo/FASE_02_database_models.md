@@ -22,6 +22,7 @@
 - [ ] password (string - bcrypt hash)
 - [ ] privacy_consent (boolean, default false)
 - [ ] marketing_consent (boolean, default false)
+- [ ] newsletter_consent (boolean, default false) - consenso ricezione newsletter
 - [ ] is_banned (boolean, default false)
 - [ ] ban_reason (text, nullable)
 - [ ] email_verified_at (timestamp, nullable)
@@ -97,7 +98,7 @@
 - [ ] Attributo `wins_count`
 - [ ] Metodo `hasPlayedToday(): bool`
 - [ ] Hidden: password, remember_token
-- [ ] Casts: birth_date -> date, is_banned -> boolean
+- [ ] Casts: birth_date -> date, is_banned -> boolean, newsletter_consent -> boolean
 
 ### Store
 - [ ] Scope `active()`

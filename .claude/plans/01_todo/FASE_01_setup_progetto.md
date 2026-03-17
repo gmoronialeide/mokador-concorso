@@ -52,4 +52,4 @@
 - Il progetto Laravel è stato creato nella root integrando i file statici esistenti
 - Gli HTML statici in `public/static/` servono come riferimento per i Blade templates (Fase 4)
 - MySQL 8.0 in uso (database-condiviso), ma codice compatibile MySQL 5.7
-- Filament 3.x (non 5) è la versione corrente compatibile con Laravel 12
+- Filament 5.x è la versione corrente compatibile con Laravel 12

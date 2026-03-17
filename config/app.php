@@ -123,4 +123,13 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Concorso Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'concorso_start_date' => env('CONCORSO_START_DATE', '2026-04-20'),
+    'concorso_end_date' => env('CONCORSO_END_DATE', '2026-05-17'),
+
 ];

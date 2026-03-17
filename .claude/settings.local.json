@@ -10,7 +10,45 @@
       "Bash(pip3 install:*)",
       "Bash(sudo apt-get:*)",
       "Bash(which composer:*)",
-      "Bash(which docker:*)"
+      "Bash(which docker:*)",
+      "Read(//home/guido/.docker/**)",
+      "Bash(cp:*)",
+      "Bash(docker info:*)",
+      "Bash(powershell.exe -Command \"Start-Process 'C:\\\\Program Files\\\\Docker\\\\Docker\\\\Docker Desktop.exe'\" 2>&1)",
+      "Read(//var/run/**)",
+      "Read(//mnt/wsl/**)",
+      "Read(//run/**)",
+      "Bash(DOCKER_HOST=\"unix:///mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.proxy.sock\" docker info 2>&1 | head -5)",
+      "Bash(DOCKER_HOST=\"unix:///mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.proxy.sock\" docker info 2>&1 | grep \"Server Version\")",
+      "Bash(DOCKER_HOST=\"unix:///mnt/wsl/docker-desktop/shared-sockets/guest-services/docker.proxy.sock\" docker info 2>&1 | tail -10)",
+      "Bash(sudo DOCKER_HOST=\"unix:///mnt/wsl/docker-desktop/shared-sockets/host-services/docker.proxy.sock\" docker info 2>&1 | tail -5)",
+      "Bash(DOCKER_HOST=\"unix:///mnt/wsl/docker-desktop/shared-sockets/host-services/docker.proxy.sock\" docker info 2>&1 | tail -5)",
+      "Bash(powershell.exe -Command \"Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux | Format-List FeatureName,State\" 2>&1)",
+      "Bash(powershell.exe -Command \"Get-Service LxssManager | Format-List Name,Status,StartType\" 2>&1)",
+      "Bash(powershell.exe -Command \"Get-Service vmcompute,HvHost -ErrorAction SilentlyContinue | Format-List Name,Status,StartType\" 2>&1)",
+      "Bash(powershell.exe -Command \"wsl --status\" 2>&1)",
+      "Bash(powershell.exe -Command \"Get-WinEvent -LogName 'Microsoft-Windows-Lxss-Manager/Operational' -MaxEvents 20 -ErrorAction SilentlyContinue | Select-Object TimeCreated,LevelDisplayName,Message | Format-Table -Wrap\" 2>&1)",
+      "Bash(powershell.exe -Command \"Start-Service LxssManager; Get-Service LxssManager | Format-List Name,Status\" 2>&1)",
+      "Bash(powershell.exe -Command \"Get-WinEvent -LogName System -MaxEvents 50 | Where-Object { \\\\$_.LevelDisplayName -ne 'Informazioni' -and \\\\$_.LevelDisplayName -ne 'Information' } | Select-Object TimeCreated,LevelDisplayName,ProviderName,Message | Format-List\" 2>&1)",
+      "Bash(powershell.exe -Command \"Get-ChildItem -Path \\(Join-Path \\\\$env:APPDATA 'Docker'\\) -Recurse -Filter '*.log' -ErrorAction SilentlyContinue | Select-Object FullName,Length,LastWriteTime | Format-Table\" 2>&1)",
+      "Bash(sudo service:*)",
+      "Bash(sudo systemctl:*)",
+      "Bash(docker version:*)",
+      "Bash(ls:*)",
+      "Bash(php artisan:*)",
+      "Bash(grep -E \"\\\\.\\(json|yaml|yml|xml|conf|nginx\\)$|artisan|Dockerfile\")",
+      "WebFetch(domain:filamentphp.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(docker ps:*)",
+      "Bash(python3 -m json.tool)",
+      "Bash(docker inspect:*)",
+      "Read(//mnt/c/docker/mokador-concorso/**)",
+      "Read(//mnt/c/docker/**)",
+      "Bash(2)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "laravel-boost"
+  ]
 }

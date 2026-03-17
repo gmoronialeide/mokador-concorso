@@ -2,48 +2,87 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Notifications\QueuedVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
+        'surname',
+        'birth_date',
         'email',
+        'phone',
+        'address',
+        'city',
+        'province',
+        'cap',
         'password',
+        'privacy_consent',
+        'marketing_consent',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
+            'birth_date' => 'date',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'privacy_consent' => 'boolean',
+            'marketing_consent' => 'boolean',
+            'is_banned' => 'boolean',
         ];
+    }
+
+    public function plays(): HasMany
+    {
+        return $this->hasMany(Play::class);
+    }
+
+    public function scopeBanned(Builder $query): Builder
+    {
+        return $query->where('is_banned', true);
+    }
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_banned', false);
+    }
+
+    public function getPlaysCountAttribute(): int
+    {
+        return $this->plays()->count();
+    }
+
+    public function getWinsCountAttribute(): int
+    {
+        return $this->plays()->where('is_winner', true)->count();
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new QueuedVerifyEmail());
+    }
+
+    public function hasPlayedToday(): bool
+    {
+        return $this->plays()
+            ->whereDate('played_at', Carbon::today())
+            ->exists();
     }
 }

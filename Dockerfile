@@ -1,6 +1,6 @@
-FROM php:8.3-apache
+FROM php:8.3-fpm
 
-# Installa dipendenze di sistema
+# Installa dipendenze di sistema + nginx + supervisord
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libicu-dev \
     unzip \
+    nginx \
+    supervisor \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         pdo \
@@ -28,16 +30,36 @@ RUN apt-get update && apt-get install -y \
         opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Abilita mod_rewrite per Laravel
-RUN a2enmod rewrite headers
+# Configurazione OPcache
+RUN echo '\
+opcache.enable=1\n\
+opcache.memory_consumption=256\n\
+opcache.interned_strings_buffer=16\n\
+opcache.max_accelerated_files=20000\n\
+opcache.validate_timestamps=1\n\
+opcache.revalidate_freq=2\n\
+opcache.save_comments=1\n\
+' > /usr/local/etc/php/conf.d/opcache.ini
 
-# Imposta il document root su /var/www/html/public
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+# Configurazione PHP-FPM per performance
+RUN echo '[www]\n\
+pm = dynamic\n\
+pm.max_children = 50\n\
+pm.start_servers = 10\n\
+pm.min_spare_servers = 5\n\
+pm.max_spare_servers = 20\n\
+pm.max_requests = 1000\n\
+' > /usr/local/etc/php-fpm.d/zzz-performance.conf
 
-# Permetti .htaccess override
-RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+# Configurazione PHP custom
+COPY docker/php.ini /usr/local/etc/php/conf.d/zzz-custom.ini
+
+# Configurazione Nginx
+RUN rm /etc/nginx/sites-enabled/default
+COPY docker/nginx.conf /etc/nginx/sites-enabled/default
+
+# Configurazione Supervisord
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Installa Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -54,3 +76,5 @@ WORKDIR /var/www/html
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

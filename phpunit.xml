@@ -32,5 +32,7 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="CONCORSO_START_DATE" value="2026-04-20"/>
+        <env name="CONCORSO_END_DATE" value="2026-05-17"/>
     </php>
 </phpunit>

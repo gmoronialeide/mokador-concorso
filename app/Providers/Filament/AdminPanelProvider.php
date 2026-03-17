@@ -21,8 +21,19 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->authGuard('admin')
             ->colors([
-                'primary' => Color::hex('#9D4A15'),
-                'gray' => Color::hex('#4F3328'),
+                'primary' => [
+                    50 => '245, 241, 237',
+                    100 => '230, 222, 214',
+                    200 => '199, 185, 171',
+                    300 => '163, 143, 127',
+                    400 => '120, 98, 82',
+                    500 => '88, 62, 51',
+                    600 => '75, 52, 42',
+                    700 => '62, 42, 33',
+                    800 => '50, 34, 27',
+                    900 => '40, 27, 21',
+                    950 => '28, 18, 14',
+                ],
             ])
             ->brandName('Mokador Concorso')
             ->brandLogo(asset('img/mokador-concorso-logo.svg'))

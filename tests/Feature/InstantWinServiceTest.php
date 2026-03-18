@@ -257,6 +257,50 @@ class InstantWinServiceTest extends TestCase
         $this->assertFalse($remainingSlot->is_assigned);
     }
 
+    public function test_rule_12_remaining_slots_go_to_next_players(): void
+    {
+        // 3 slot nel giorno: A alle 09:00, B alle 10:00, C alle 11:00
+        $this->createSlot('A', '2026-04-20', '09:00:00');
+        $this->createSlot('B', '2026-04-20', '10:00:00');
+        $this->createSlot('C', '2026-04-20', '11:00:00');
+
+        // Alle 10:30 il primo utente vince lo slot A (09:00 già passato)
+        Carbon::setTestNow('2026-04-20 10:30:00');
+        $user1 = $this->createUser();
+        $play1 = $this->createPlay($user1, 'STORE01');
+        $prize1 = $this->service->attempt($play1);
+        $this->assertNotNull($prize1, 'Deve vincere lo slot A delle 09:00');
+
+        // Alle 10:31 il secondo utente vince lo slot B (10:00 già passato)
+        Carbon::setTestNow('2026-04-20 10:31:00');
+        $user2 = $this->createUser();
+        $play2 = $this->createPlay($user2, 'STORE02');
+        $prize2 = $this->service->attempt($play2);
+        $this->assertNotNull($prize2, 'Deve vincere lo slot B delle 10:00');
+
+        // Slot C (11:00) ancora non passato, nessuno vince alle 10:32
+        Carbon::setTestNow('2026-04-20 10:32:00');
+        $user3 = $this->createUser();
+        $play3 = $this->createPlay($user3, 'STORE03');
+        $prize3 = $this->service->attempt($play3);
+        $this->assertNull($prize3, 'Slot C delle 11:00 non ancora raggiungibile');
+
+        // Dopo le 12: lo slot C (rimasto non assegnato) va al primo che gioca
+        Carbon::setTestNow('2026-04-20 13:00:00');
+        $user4 = $this->createUser();
+        $play4 = $this->createPlay($user4, 'STORE04');
+        $prize4 = $this->service->attempt($play4);
+        $this->assertNotNull($prize4, 'Dopo le 12, slot C rimasto deve andare al primo giocatore');
+        $this->assertEquals('C', $prize4->code);
+
+        // Nessun altro slot rimasto
+        Carbon::setTestNow('2026-04-20 13:01:00');
+        $user5 = $this->createUser();
+        $play5 = $this->createPlay($user5, 'STORE05');
+        $prize5 = $this->service->attempt($play5);
+        $this->assertNull($prize5, 'Nessuno slot rimasto, non deve vincere');
+    }
+
     // --- Test concorrenza (lock) ---
 
     public function test_same_slot_not_assigned_twice(): void

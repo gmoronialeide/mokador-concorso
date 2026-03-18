@@ -154,12 +154,12 @@
     </x-filament::section>
 
     {{-- ============================================================ --}}
-    {{-- SEZIONE 3 — Dettaglio giornaliero per settimana              --}}
+    {{-- SEZIONE 3 — Tabelle settimanali (formato griglia)            --}}
     {{-- ============================================================ --}}
     @php
         $allSlots = $this->getAllSlotsByDate();
         $today = $this->getToday();
-        $dayNames = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+        $prizes = $this->getPrizesOrdered();
     @endphp
 
     @foreach ($this->getWeeks() as $week)
@@ -185,99 +185,80 @@
                 </div>
             </x-slot>
 
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                @foreach ($week['days'] as $day)
-                    @php
-                        $dateKey = $day->format('Y-m-d');
-                        $daySlots = $allSlots->get($dateKey, collect());
-                        $isToday = $dateKey === $today;
-                        $isPast = $dateKey < $today;
-                        $dayName = $dayNames[$day->dayOfWeekIso - 1];
-                        $dayAssigned = $daySlots->where('is_assigned', true)->count();
-                    @endphp
-
-                    <div style="border-radius: 12px; border: 2px solid {{ $isToday ? '#9D4A15' : '#e5e7eb' }}; background: {{ $isToday ? '#fdf8f5' : ($isPast ? '#fafafa' : '#ffffff') }}; overflow: hidden;">
-
-                        {{-- Header giorno --}}
-                        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid {{ $isToday ? '#f3e8e0' : '#f3f4f6' }};">
-
-                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 8px; background: {{ $isToday ? '#9D4A15' : ($isPast ? '#e5e7eb' : '#f3f4f6') }}; color: {{ $isToday ? '#ffffff' : ($isPast ? '#6b7280' : '#374151') }}; flex-shrink: 0;">
-                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; line-height: 1;">{{ $dayName }}</span>
-                                <span style="font-size: 16px; font-weight: 700; line-height: 1.2;">{{ $day->format('d') }}</span>
-                            </div>
-
-                            <div style="flex: 1;">
-                                <span style="font-size: 14px; font-weight: 600; color: {{ $isToday ? '#9D4A15' : '#111827' }};">
-                                    {{ ucfirst($day->translatedFormat('l d F Y')) }}
-                                </span>
-                            </div>
-
-                            @if ($isToday)
-                                <span style="padding: 4px 12px; border-radius: 9999px; background: #9D4A15; color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;">OGGI</span>
-                            @endif
-
-                            @if ($daySlots->isNotEmpty())
+            <div class="overflow-x-auto -mx-2">
+                <table class="w-full min-w-[700px] border-collapse text-sm">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e5e7eb;">
+                            <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #4b5563; min-width: 260px;">Premio</th>
+                            @foreach ($week['days'] as $day)
                                 @php
-                                    $allDone = $dayAssigned === $daySlots->count();
-                                    $badgeBg = $allDone ? '#dcfce7' : ($isPast && !$allDone ? '#fef3c7' : '#f3f4f6');
-                                    $badgeColor = $allDone ? '#166534' : ($isPast && !$allDone ? '#92400e' : '#4b5563');
+                                    $dateKey = $day->format('Y-m-d');
+                                    $isToday = $dateKey === $today;
+                                    $dayNames = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+                                    $dayName = $dayNames[$day->dayOfWeekIso - 1];
                                 @endphp
-                                <span style="padding: 4px 12px; border-radius: 9999px; background: {{ $badgeBg }}; font-size: 12px; font-weight: 600; color: {{ $badgeColor }};">
-                                    {{ $dayAssigned }}/{{ $daySlots->count() }} assegnati
-                                </span>
-                            @else
-                                <span style="font-size: 12px; color: #9ca3af;">Nessun premio</span>
-                            @endif
-                        </div>
-
-                        {{-- Slot del giorno --}}
-                        @if ($daySlots->isNotEmpty())
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; padding: 16px;">
-                                @foreach ($daySlots as $slot)
-                                    @php
-                                        $cardBorder = $slot->is_assigned ? '#86efac' : ($isPast ? '#fca5a5' : '#e5e7eb');
-                                        $cardBg = $slot->is_assigned ? '#f0fdf4' : ($isPast ? '#fef2f2' : '#ffffff');
-                                    @endphp
-                                    <div style="border-radius: 8px; border: 2px solid {{ $cardBorder }}; background: {{ $cardBg }}; padding: 12px;">
-                                        <div style="display: flex; align-items: flex-start; gap: 10px;">
-                                            {{-- Badge premio --}}
-                                            @php
-                                                $badgeBg2 = $slot->is_assigned ? '#bbf7d0' : ($isPast ? '#fecaca' : '#e5e7eb');
-                                                $badgeColor2 = $slot->is_assigned ? '#166534' : ($isPast ? '#991b1b' : '#374151');
-                                            @endphp
-                                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: {{ $badgeBg2 }}; color: {{ $badgeColor2 }}; font-size: 13px; font-weight: 700; flex-shrink: 0;">
-                                                {{ $slot->prize->code }}
-                                            </span>
-
-                                            <div style="flex: 1; min-width: 0;">
-                                                {{-- Nome premio --}}
-                                                <p style="font-size: 12px; font-weight: 500; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0;">
-                                                    {{ $slot->prize->name }}
-                                                </p>
-
-                                                {{-- Orario --}}
-                                                <p style="font-size: 15px; font-weight: 700; color: {{ $isToday ? '#9D4A15' : '#374151' }}; margin: 2px 0 0 0;">
-                                                    {{ substr($slot->scheduled_time, 0, 5) }}
-                                                </p>
-
-                                                {{-- Stato / vincitore --}}
-                                                @if ($slot->is_assigned && $slot->play && $slot->play->user)
-                                                    <p style="margin: 6px 0 0 0; font-size: 12px; font-weight: 600; color: #166534; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                                        {{ $slot->play->user->surname }} {{ $slot->play->user->name }}
-                                                    </p>
-                                                @elseif ($isPast)
-                                                    <p style="margin: 6px 0 0 0; font-size: 12px; font-weight: 500; color: #dc2626;">Non assegnato</p>
-                                                @else
-                                                    <p style="margin: 6px 0 0 0; font-size: 12px; color: #9ca3af;">In attesa</p>
-                                                @endif
-                                            </div>
-                                        </div>
+                                <th style="padding: 12px 8px; text-align: center; font-weight: 600; min-width: 55px; {{ $isToday ? 'color: #9D4A15; background: #fdf8f5;' : 'color: #4b5563;' }}">
+                                    <div>{{ $dayName }}</div>
+                                    <div style="font-size: 11px; font-weight: 400; {{ $isToday ? 'color: #9D4A15;' : 'color: #9ca3af;' }}">{{ $day->format('d/m') }}</div>
+                                </th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($prizes as $prize)
+                            <tr style="border-bottom: 1px solid #f3f4f6;">
+                                <td style="padding: 12px 16px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #f3e8e0; color: #9D4A15; font-size: 12px; font-weight: 700; flex-shrink: 0;">
+                                            {{ $prize->code }}
+                                        </span>
+                                        <span style="font-weight: 500; color: #111827;">{{ $prize->name }}</span>
                                     </div>
+                                </td>
+                                @foreach ($week['days'] as $day)
+                                    @php
+                                        $dateKey = $day->format('Y-m-d');
+                                        $isToday = $dateKey === $today;
+                                        $isPast = $dateKey < $today;
+                                        $daySlots = $allSlots->get($dateKey, collect());
+                                        $slot = $daySlots->firstWhere('prize_id', $prize->id);
+                                        $cellBg = $isToday ? '#fdf8f5' : 'transparent';
+                                    @endphp
+                                    <td style="padding: 8px; text-align: center; vertical-align: middle; background: {{ $cellBg }};">
+                                        @if ($slot)
+                                            @if ($slot->is_assigned)
+                                                {{-- VERDE: assegnato — link alla giocata --}}
+                                                <a href="/admin/plays/{{ $slot->play_id }}" target="_blank" title="{{ $slot->play?->user?->surname }} {{ $slot->play?->user?->name }} — PV {{ $slot->play?->store_code }}" style="text-decoration: none;">
+                                                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #dcfce7; color: #166534; font-size: 11px; font-weight: 700; cursor: pointer; border: 2px solid #86efac; transition: transform 0.1s;"
+                                                          onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                                        ✓
+                                                    </span>
+                                                </a>
+                                            @elseif ($isToday)
+                                                {{-- ARANCIONE: giornata in corso --}}
+                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #fff7ed; color: #9a3412; font-size: 11px; font-weight: 700; border: 2px solid #fdba74;" title="Oggi — {{ substr($slot->scheduled_time, 0, 5) }}">
+                                                    {{ substr($slot->scheduled_time, 0, 5) }}
+                                                </span>
+                                            @elseif ($isPast)
+                                                {{-- ROSSO: passato non assegnato --}}
+                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 700; border: 2px solid #fca5a5;" title="Non assegnato">
+                                                    ✗
+                                                </span>
+                                            @else
+                                                {{-- GRIGIO: futuro --}}
+                                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6; color: #9ca3af; font-size: 11px; font-weight: 600; border: 2px solid #e5e7eb;" title="{{ substr($slot->scheduled_time, 0, 5) }}">
+                                                    {{ substr($slot->scheduled_time, 0, 5) }}
+                                                </span>
+                                            @endif
+                                        @else
+                                            <span style="color: #d1d5db;">—</span>
+                                        @endif
+                                    </td>
                                 @endforeach
-                            </div>
-                        @endif
-                    </div>
-                @endforeach
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </x-filament::section>
     @endforeach
@@ -286,20 +267,20 @@
     <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 4px; font-size: 12px; color: #6b7280;">
         <span style="font-weight: 600; color: #374151;">Legenda:</span>
         <span style="display: flex; align-items: center; gap: 6px;">
-            <span style="display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid #86efac; background: #f0fdf4;"></span>
-            Assegnato
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: #dcfce7; color: #166534; font-size: 10px; font-weight: 700; border: 2px solid #86efac;">✓</span>
+            Assegnato (click per dettaglio)
         </span>
         <span style="display: flex; align-items: center; gap: 6px;">
-            <span style="display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid #fca5a5; background: #fef2f2;"></span>
-            Scaduto
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: #fee2e2; color: #991b1b; font-size: 10px; font-weight: 700; border: 2px solid #fca5a5;">✗</span>
+            Non assegnato (passato)
         </span>
         <span style="display: flex; align-items: center; gap: 6px;">
-            <span style="display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid #e5e7eb; background: #ffffff;"></span>
-            In attesa
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: #fff7ed; color: #9a3412; font-size: 9px; font-weight: 700; border: 2px solid #fdba74;">...</span>
+            In corso (oggi)
         </span>
         <span style="display: flex; align-items: center; gap: 6px;">
-            <span style="display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid #9D4A15; background: #fdf8f5;"></span>
-            Oggi
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: #f3f4f6; color: #9ca3af; font-size: 9px; font-weight: 600; border: 2px solid #e5e7eb;">...</span>
+            Futuro
         </span>
     </div>
 

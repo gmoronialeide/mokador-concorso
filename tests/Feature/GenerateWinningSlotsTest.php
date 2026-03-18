@@ -44,11 +44,20 @@ class GenerateWinningSlotsTest extends TestCase
         $this->artisan('concorso:generate-slots')
             ->assertSuccessful();
 
+        $startDate = config('app.concorso_start_date');
         $slots = WinningSlot::all();
+
         foreach ($slots as $slot) {
             $hour = (int) substr($slot->scheduled_time, 0, 2);
-            $this->assertGreaterThanOrEqual(8, $hour, "Ora troppo presto: {$slot->scheduled_time}");
-            $this->assertLessThanOrEqual(21, $hour, "Ora troppo tardi: {$slot->scheduled_time}");
+            $this->assertLessThanOrEqual(11, $hour, "Ora troppo tardi: {$slot->scheduled_time}");
+
+            if ($slot->scheduled_date->format('Y-m-d') === $startDate) {
+                // Primo giorno: dalle 07:00
+                $this->assertGreaterThanOrEqual(7, $hour, "Primo giorno, ora troppo presto: {$slot->scheduled_time}");
+            } else {
+                // Altri giorni: dalle 00:00
+                $this->assertGreaterThanOrEqual(0, $hour);
+            }
         }
     }
 

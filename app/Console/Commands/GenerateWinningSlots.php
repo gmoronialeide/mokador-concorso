@@ -55,7 +55,7 @@ class GenerateWinningSlots extends Command
                 $this->error("Impossibile resettare: {$assignedCount} slot già assegnati. Il concorso è in corso.");
                 return self::FAILURE;
             }
-            WinningSlot::truncate();
+            WinningSlot::query()->delete();
             $this->info('Slot esistenti eliminati.');
         }
 
@@ -76,7 +76,9 @@ class GenerateWinningSlots extends Command
                     continue;
                 }
 
-                $hour = random_int(8, 21);
+                // Primo giorno: 07:00–11:59, tutti gli altri: 00:00–11:59
+                $minHour = ($day === 0) ? 7 : 0;
+                $hour = random_int($minHour, 11);
                 $minute = random_int(0, 59);
                 $second = random_int(0, 59);
                 $time = sprintf('%02d:%02d:%02d', $hour, $minute, $second);

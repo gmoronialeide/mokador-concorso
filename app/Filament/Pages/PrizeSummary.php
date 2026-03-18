@@ -96,6 +96,12 @@ class PrizeSummary extends Page
             ->groupBy(fn (WinningSlot $slot) => $slot->scheduled_date->format('Y-m-d'));
     }
 
+    /** Premi ordinati per codice (per le tabelle settimanali). */
+    public function getPrizesOrdered(): Collection
+    {
+        return Prize::orderBy('code')->get();
+    }
+
     public function getToday(): string
     {
         return Carbon::today()->format('Y-m-d');

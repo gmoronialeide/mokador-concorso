@@ -4,60 +4,55 @@
     {{-- SEZIONE 1 — Griglia programmazione settimanale               --}}
     {{-- ============================================================ --}}
     <x-filament::section>
-        <x-slot name="heading">
-            <div class="flex items-center gap-2">
-                <x-filament::icon icon="heroicon-o-calendar-days" class="h-5 w-5 text-gray-400" />
-                Programmazione Settimanale
-            </div>
-        </x-slot>
+        <x-slot name="heading">Programmazione Settimanale</x-slot>
         <x-slot name="description">Griglia premi per giorno della settimana (4 settimane, 104 premi totali)</x-slot>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+        <div class="overflow-x-auto -mx-2">
+            <table class="w-full min-w-[700px] border-collapse text-sm">
                 <thead>
-                    <tr class="border-b-2 border-gray-200">
-                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Premio</th>
+                    <tr style="border-bottom: 2px solid #e5e7eb;">
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #4b5563; min-width: 260px;">Premio</th>
                         @foreach (['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'] as $d)
-                            <th class="px-3 py-3 text-center font-semibold text-gray-600">{{ $d }}</th>
+                            <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #4b5563; min-width: 50px;">{{ $d }}</th>
                         @endforeach
-                        <th class="px-3 py-3 text-center font-semibold text-gray-600 border-l-2 border-gray-200">/ Sett.</th>
-                        <th class="px-3 py-3 text-center font-semibold text-gray-600">Totale</th>
+                        <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #4b5563; min-width: 55px; border-left: 2px solid #e5e7eb;">/ Sett.</th>
+                        <th style="padding: 12px 8px; text-align: center; font-weight: 600; color: #4b5563; min-width: 55px;">Totale</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody>
                     @php $weekTotal = 0; $grandTotal = 0; @endphp
                     @foreach ($this->getScheduleGrid() as $row)
                         @php $weekTotal += $row['per_week']; $grandTotal += $row['total']; @endphp
-                        <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-4 py-3">
-                                <div class="flex items-center gap-2.5">
-                                    <span class="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-bold text-primary-700">
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="padding: 12px 16px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #f3e8e0; color: #9D4A15; font-size: 12px; font-weight: 700; flex-shrink: 0;">
                                         {{ $row['code'] }}
                                     </span>
-                                    <span class="font-medium text-gray-900">{{ $row['name'] }}</span>
+                                    <span style="font-weight: 500; color: #111827;">{{ $row['name'] }}</span>
                                 </div>
                             </td>
                             @for ($d = 1; $d <= 7; $d++)
-                                <td class="px-3 py-3 text-center">
+                                <td style="padding: 12px 8px; text-align: center;">
                                     @if (in_array($d, $row['days']))
-                                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-success-100 text-xs font-bold text-success-700">
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #dcfce7; color: #166534; font-size: 12px; font-weight: 700;">
                                             1
                                         </span>
                                     @else
-                                        <span class="text-gray-300">—</span>
+                                        <span style="color: #d1d5db;">—</span>
                                     @endif
                                 </td>
                             @endfor
-                            <td class="px-3 py-3 text-center font-semibold text-gray-700 border-l-2 border-gray-200">{{ $row['per_week'] }}</td>
-                            <td class="px-3 py-3 text-center font-semibold text-gray-700">{{ $row['total'] }}</td>
+                            <td style="padding: 12px 8px; text-align: center; font-weight: 600; color: #374151; border-left: 2px solid #e5e7eb;">{{ $row['per_week'] }}</td>
+                            <td style="padding: 12px 8px; text-align: center; font-weight: 600; color: #374151;">{{ $row['total'] }}</td>
                         </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
-                    <tr class="border-t-2 border-gray-300 bg-gray-50">
-                        <td class="px-4 py-3 font-bold text-gray-700" colspan="8">Totale premi</td>
-                        <td class="px-3 py-3 text-center font-bold text-gray-900 border-l-2 border-gray-200">{{ $weekTotal }}</td>
-                        <td class="px-3 py-3 text-center font-bold text-gray-900">{{ $grandTotal }}</td>
+                    <tr style="border-top: 2px solid #d1d5db; background: #f9fafb;">
+                        <td style="padding: 12px 16px; font-weight: 700; color: #374151;" colspan="8">Totale premi</td>
+                        <td style="padding: 12px 8px; text-align: center; font-weight: 700; color: #111827; border-left: 2px solid #e5e7eb;">{{ $weekTotal }}</td>
+                        <td style="padding: 12px 8px; text-align: center; font-weight: 700; color: #111827;">{{ $grandTotal }}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -68,29 +63,24 @@
     {{-- SEZIONE 2 — Stato assegnazione premi                         --}}
     {{-- ============================================================ --}}
     <x-filament::section>
-        <x-slot name="heading">
-            <div class="flex items-center gap-2">
-                <x-filament::icon icon="heroicon-o-chart-bar" class="h-5 w-5 text-gray-400" />
-                Stato Assegnazione
-            </div>
-        </x-slot>
+        <x-slot name="heading">Stato Assegnazione</x-slot>
         <x-slot name="description">Premi assegnati, scaduti e ancora disponibili</x-slot>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+        <div class="overflow-x-auto -mx-2">
+            <table class="w-full min-w-[750px] border-collapse text-sm">
                 <thead>
-                    <tr class="border-b-2 border-gray-200">
-                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Premio</th>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-600">Nome</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-600">Valore</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-600">Totale</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-600">Assegnati</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-600">Scaduti</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-600">Disponibili</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-600" style="min-width: 120px">Progresso</th>
+                    <tr style="border-bottom: 2px solid #e5e7eb;">
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #4b5563; width: 50px;">Cod.</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #4b5563; min-width: 200px;">Nome</th>
+                        <th style="padding: 12px 16px; text-align: right; font-weight: 600; color: #4b5563; min-width: 70px;">Valore</th>
+                        <th style="padding: 12px 16px; text-align: center; font-weight: 600; color: #4b5563; min-width: 65px;">Totale</th>
+                        <th style="padding: 12px 16px; text-align: center; font-weight: 600; color: #4b5563; min-width: 80px;">Assegnati</th>
+                        <th style="padding: 12px 16px; text-align: center; font-weight: 600; color: #4b5563; min-width: 65px;">Scaduti</th>
+                        <th style="padding: 12px 16px; text-align: center; font-weight: 600; color: #4b5563; min-width: 85px;">Disponibili</th>
+                        <th style="padding: 12px 16px; text-align: center; font-weight: 600; color: #4b5563; min-width: 130px;">Progresso</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody>
                     @php
                         $totals = ['total' => 0, 'assigned' => 0, 'expired' => 0, 'available' => 0];
                     @endphp
@@ -104,44 +94,44 @@
                             $pctAssigned = $prize->total_slots > 0 ? round($prize->assigned_slots / $prize->total_slots * 100) : 0;
                             $pctExpired = $prize->total_slots > 0 ? round($prize->expired_slots / $prize->total_slots * 100) : 0;
                         @endphp
-                        <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-4 py-3">
-                                <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-xs font-bold text-primary-700">
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="padding: 12px 16px;">
+                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #f3e8e0; color: #9D4A15; font-size: 12px; font-weight: 700;">
                                     {{ $prize->code }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 font-medium text-gray-900">{{ $prize->name }}</td>
-                            <td class="px-4 py-3 text-right text-gray-600">€ {{ number_format($prize->value, 2, ',', '.') }}</td>
-                            <td class="px-4 py-3 text-center font-semibold text-gray-700">{{ $prize->total_slots }}</td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="inline-flex min-w-[2rem] items-center justify-center rounded-full bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-700 ring-1 ring-success-600/20">
+                            <td style="padding: 12px 16px; font-weight: 500; color: #111827;">{{ $prize->name }}</td>
+                            <td style="padding: 12px 16px; text-align: right; color: #4b5563;">€ {{ number_format($prize->value, 2, ',', '.') }}</td>
+                            <td style="padding: 12px 16px; text-align: center; font-weight: 600; color: #374151;">{{ $prize->total_slots }}</td>
+                            <td style="padding: 12px 16px; text-align: center;">
+                                <span style="display: inline-block; min-width: 28px; padding: 3px 10px; border-radius: 9999px; background: #dcfce7; color: #166534; font-size: 12px; font-weight: 600;">
                                     {{ $prize->assigned_slots }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td style="padding: 12px 16px; text-align: center;">
                                 @if ($prize->expired_slots > 0)
-                                    <span class="inline-flex min-w-[2rem] items-center justify-center rounded-full bg-danger-50 px-2.5 py-1 text-xs font-semibold text-danger-700 ring-1 ring-danger-600/20">
+                                    <span style="display: inline-block; min-width: 28px; padding: 3px 10px; border-radius: 9999px; background: #fee2e2; color: #991b1b; font-size: 12px; font-weight: 600;">
                                         {{ $prize->expired_slots }}
                                     </span>
                                 @else
-                                    <span class="text-gray-300">0</span>
+                                    <span style="color: #d1d5db;">0</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td style="padding: 12px 16px; text-align: center;">
                                 @if ($available > 0)
-                                    <span class="inline-flex min-w-[2rem] items-center justify-center rounded-full bg-info-50 px-2.5 py-1 text-xs font-semibold text-info-700 ring-1 ring-info-600/20">
+                                    <span style="display: inline-block; min-width: 28px; padding: 3px 10px; border-radius: 9999px; background: #dbeafe; color: #1e40af; font-size: 12px; font-weight: 600;">
                                         {{ $available }}
                                     </span>
                                 @else
-                                    <span class="text-gray-300">0</span>
+                                    <span style="color: #d1d5db;">0</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3">
-                                <div class="flex h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
-                                    <div class="bg-success-500 transition-all" style="width: {{ $pctAssigned }}%"></div>
-                                    <div class="bg-danger-400 transition-all" style="width: {{ $pctExpired }}%"></div>
+                            <td style="padding: 12px 16px;">
+                                <div style="display: flex; height: 10px; width: 100%; overflow: hidden; border-radius: 9999px; background: #f3f4f6;">
+                                    <div style="background: #22c55e; width: {{ $pctAssigned }}%; transition: width 0.3s;"></div>
+                                    <div style="background: #f87171; width: {{ $pctExpired }}%; transition: width 0.3s;"></div>
                                 </div>
-                                <p class="mt-1 text-center text-[10px] text-gray-400">{{ $pctAssigned }}% assegnati</p>
+                                <p style="margin-top: 4px; text-align: center; font-size: 11px; color: #9ca3af;">{{ $pctAssigned }}% assegnati</p>
                             </td>
                         </tr>
                     @endforeach
@@ -150,13 +140,13 @@
                     @php
                         $pctTotAssigned = $totals['total'] > 0 ? round($totals['assigned'] / $totals['total'] * 100) : 0;
                     @endphp
-                    <tr class="border-t-2 border-gray-300 bg-gray-50">
-                        <td class="px-4 py-3 font-bold text-gray-700" colspan="3">Totale</td>
-                        <td class="px-4 py-3 text-center font-bold text-gray-900">{{ $totals['total'] }}</td>
-                        <td class="px-4 py-3 text-center font-bold text-success-700">{{ $totals['assigned'] }}</td>
-                        <td class="px-4 py-3 text-center font-bold text-danger-700">{{ $totals['expired'] }}</td>
-                        <td class="px-4 py-3 text-center font-bold text-info-700">{{ $totals['available'] }}</td>
-                        <td class="px-4 py-3 text-center text-xs font-semibold text-gray-500">{{ $pctTotAssigned }}%</td>
+                    <tr style="border-top: 2px solid #d1d5db; background: #f9fafb;">
+                        <td style="padding: 12px 16px; font-weight: 700; color: #374151;" colspan="3">Totale</td>
+                        <td style="padding: 12px 16px; text-align: center; font-weight: 700; color: #111827;">{{ $totals['total'] }}</td>
+                        <td style="padding: 12px 16px; text-align: center; font-weight: 700; color: #166534;">{{ $totals['assigned'] }}</td>
+                        <td style="padding: 12px 16px; text-align: center; font-weight: 700; color: #991b1b;">{{ $totals['expired'] }}</td>
+                        <td style="padding: 12px 16px; text-align: center; font-weight: 700; color: #1e40af;">{{ $totals['available'] }}</td>
+                        <td style="padding: 12px 16px; text-align: center; font-size: 12px; font-weight: 600; color: #6b7280;">{{ $pctTotAssigned }}%</td>
                     </tr>
                 </tfoot>
             </table>
@@ -181,21 +171,21 @@
 
         <x-filament::section collapsible>
             <x-slot name="heading">
-                <div class="flex items-center gap-3">
-                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 text-sm font-bold text-primary-700">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #f3e8e0; color: #9D4A15; font-size: 14px; font-weight: 700;">
                         {{ $week['number'] }}
                     </span>
                     <div>
-                        <span class="font-semibold">{{ $week['label'] }}</span>
-                        <span class="ml-2 text-sm font-normal text-gray-400">{{ $week['range'] }}</span>
+                        <span style="font-weight: 600;">{{ $week['label'] }}</span>
+                        <span style="margin-left: 8px; font-size: 13px; font-weight: 400; color: #9ca3af;">{{ $week['range'] }}</span>
                     </div>
-                    <span class="ml-auto inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
+                    <span style="margin-left: auto; display: inline-block; padding: 4px 12px; border-radius: 9999px; background: #f3f4f6; font-size: 12px; font-weight: 500; color: #4b5563;">
                         {{ $weekAssigned }}/{{ $weekTotal }} assegnati
                     </span>
                 </div>
             </x-slot>
 
-            <div class="space-y-4">
+            <div style="display: flex; flex-direction: column; gap: 16px;">
                 @foreach ($week['days'] as $day)
                     @php
                         $dateKey = $day->format('Y-m-d');
@@ -206,89 +196,79 @@
                         $dayAssigned = $daySlots->where('is_assigned', true)->count();
                     @endphp
 
-                    <div class="rounded-xl border-2 transition-colors
-                        {{ $isToday
-                            ? 'border-primary-400 bg-primary-50/30 shadow-sm shadow-primary-100'
-                            : ($isPast
-                                ? 'border-gray-200 bg-gray-50/30'
-                                : 'border-gray-200 bg-white') }}">
+                    <div style="border-radius: 12px; border: 2px solid {{ $isToday ? '#9D4A15' : '#e5e7eb' }}; background: {{ $isToday ? '#fdf8f5' : ($isPast ? '#fafafa' : '#ffffff') }}; overflow: hidden;">
 
                         {{-- Header giorno --}}
-                        <div class="flex items-center gap-3 border-b px-5 py-3
-                            {{ $isToday ? 'border-primary-200' : 'border-gray-100' }}">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid {{ $isToday ? '#f3e8e0' : '#f3f4f6' }};">
 
-                            <div class="flex h-10 w-10 flex-shrink-0 flex-col items-center justify-center rounded-lg
-                                {{ $isToday ? 'bg-primary-500 text-white' : ($isPast ? 'bg-gray-200 text-gray-500' : 'bg-gray-100 text-gray-600') }}">
-                                <span class="text-[10px] font-bold uppercase leading-none">{{ $dayName }}</span>
-                                <span class="text-sm font-bold leading-tight">{{ $day->format('d') }}</span>
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 8px; background: {{ $isToday ? '#9D4A15' : ($isPast ? '#e5e7eb' : '#f3f4f6') }}; color: {{ $isToday ? '#ffffff' : ($isPast ? '#6b7280' : '#374151') }}; flex-shrink: 0;">
+                                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; line-height: 1;">{{ $dayName }}</span>
+                                <span style="font-size: 16px; font-weight: 700; line-height: 1.2;">{{ $day->format('d') }}</span>
                             </div>
 
-                            <div class="flex-1">
-                                <span class="text-sm font-semibold {{ $isToday ? 'text-primary-800' : 'text-gray-800' }}">
-                                    {{ $day->translatedFormat('l d F Y') }}
+                            <div style="flex: 1;">
+                                <span style="font-size: 14px; font-weight: 600; color: {{ $isToday ? '#9D4A15' : '#111827' }};">
+                                    {{ ucfirst($day->translatedFormat('l d F Y')) }}
                                 </span>
                             </div>
 
                             @if ($isToday)
-                                <span class="rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow-sm">OGGI</span>
+                                <span style="padding: 4px 12px; border-radius: 9999px; background: #9D4A15; color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;">OGGI</span>
                             @endif
 
                             @if ($daySlots->isNotEmpty())
-                                <span class="rounded-full px-3 py-1 text-xs font-semibold
-                                    {{ $dayAssigned === $daySlots->count()
-                                        ? 'bg-success-100 text-success-700'
-                                        : ($isPast && $dayAssigned < $daySlots->count()
-                                            ? 'bg-warning-100 text-warning-700'
-                                            : 'bg-gray-100 text-gray-600') }}">
+                                @php
+                                    $allDone = $dayAssigned === $daySlots->count();
+                                    $badgeBg = $allDone ? '#dcfce7' : ($isPast && !$allDone ? '#fef3c7' : '#f3f4f6');
+                                    $badgeColor = $allDone ? '#166534' : ($isPast && !$allDone ? '#92400e' : '#4b5563');
+                                @endphp
+                                <span style="padding: 4px 12px; border-radius: 9999px; background: {{ $badgeBg }}; font-size: 12px; font-weight: 600; color: {{ $badgeColor }};">
                                     {{ $dayAssigned }}/{{ $daySlots->count() }} assegnati
                                 </span>
                             @else
-                                <span class="text-xs text-gray-400">Nessun premio</span>
+                                <span style="font-size: 12px; color: #9ca3af;">Nessun premio</span>
                             @endif
                         </div>
 
                         {{-- Slot del giorno --}}
                         @if ($daySlots->isNotEmpty())
-                            <div class="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; padding: 16px;">
                                 @foreach ($daySlots as $slot)
-                                    <div class="rounded-lg border-2 p-3 transition-colors
-                                        {{ $slot->is_assigned
-                                            ? 'border-success-300 bg-success-50'
-                                            : ($isPast
-                                                ? 'border-danger-200 bg-danger-50/50'
-                                                : 'border-gray-200 bg-white') }}">
-
-                                        <div class="flex items-start gap-2.5">
+                                    @php
+                                        $cardBorder = $slot->is_assigned ? '#86efac' : ($isPast ? '#fca5a5' : '#e5e7eb');
+                                        $cardBg = $slot->is_assigned ? '#f0fdf4' : ($isPast ? '#fef2f2' : '#ffffff');
+                                    @endphp
+                                    <div style="border-radius: 8px; border: 2px solid {{ $cardBorder }}; background: {{ $cardBg }}; padding: 12px;">
+                                        <div style="display: flex; align-items: flex-start; gap: 10px;">
                                             {{-- Badge premio --}}
-                                            <span class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-xs font-bold
-                                                {{ $slot->is_assigned
-                                                    ? 'bg-success-200 text-success-800'
-                                                    : ($isPast
-                                                        ? 'bg-danger-200 text-danger-800'
-                                                        : 'bg-gray-200 text-gray-700') }}">
+                                            @php
+                                                $badgeBg2 = $slot->is_assigned ? '#bbf7d0' : ($isPast ? '#fecaca' : '#e5e7eb');
+                                                $badgeColor2 = $slot->is_assigned ? '#166534' : ($isPast ? '#991b1b' : '#374151');
+                                            @endphp
+                                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: {{ $badgeBg2 }}; color: {{ $badgeColor2 }}; font-size: 13px; font-weight: 700; flex-shrink: 0;">
                                                 {{ $slot->prize->code }}
                                             </span>
 
-                                            <div class="min-w-0 flex-1">
+                                            <div style="flex: 1; min-width: 0;">
                                                 {{-- Nome premio --}}
-                                                <p class="truncate text-xs font-medium text-gray-500">
+                                                <p style="font-size: 12px; font-weight: 500; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0;">
                                                     {{ $slot->prize->name }}
                                                 </p>
 
                                                 {{-- Orario --}}
-                                                <p class="text-sm font-semibold {{ $isToday ? 'text-primary-700' : 'text-gray-700' }}">
+                                                <p style="font-size: 15px; font-weight: 700; color: {{ $isToday ? '#9D4A15' : '#374151' }}; margin: 2px 0 0 0;">
                                                     {{ substr($slot->scheduled_time, 0, 5) }}
                                                 </p>
 
                                                 {{-- Stato / vincitore --}}
                                                 @if ($slot->is_assigned && $slot->play && $slot->play->user)
-                                                    <p class="mt-1 truncate text-xs font-semibold text-success-700">
+                                                    <p style="margin: 6px 0 0 0; font-size: 12px; font-weight: 600; color: #166534; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                                         {{ $slot->play->user->surname }} {{ $slot->play->user->name }}
                                                     </p>
                                                 @elseif ($isPast)
-                                                    <p class="mt-1 text-xs font-medium text-danger-600">Non assegnato</p>
+                                                    <p style="margin: 6px 0 0 0; font-size: 12px; font-weight: 500; color: #dc2626;">Non assegnato</p>
                                                 @else
-                                                    <p class="mt-1 text-xs text-gray-400">In attesa</p>
+                                                    <p style="margin: 6px 0 0 0; font-size: 12px; color: #9ca3af;">In attesa</p>
                                                 @endif
                                             </div>
                                         </div>
@@ -303,23 +283,23 @@
     @endforeach
 
     {{-- Legenda --}}
-    <div class="flex flex-wrap items-center gap-4 px-1 text-xs text-gray-500">
-        <span class="font-semibold text-gray-600">Legenda:</span>
-        <span class="flex items-center gap-1.5">
-            <span class="inline-block h-3 w-3 rounded border-2 border-success-300 bg-success-50"></span>
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 4px; font-size: 12px; color: #6b7280;">
+        <span style="font-weight: 600; color: #374151;">Legenda:</span>
+        <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid #86efac; background: #f0fdf4;"></span>
             Assegnato
         </span>
-        <span class="flex items-center gap-1.5">
-            <span class="inline-block h-3 w-3 rounded border-2 border-danger-200 bg-danger-50"></span>
-            Scaduto (non assegnato)
+        <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid #fca5a5; background: #fef2f2;"></span>
+            Scaduto
         </span>
-        <span class="flex items-center gap-1.5">
-            <span class="inline-block h-3 w-3 rounded border-2 border-gray-200 bg-white"></span>
+        <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid #e5e7eb; background: #ffffff;"></span>
             In attesa
         </span>
-        <span class="flex items-center gap-1.5">
-            <span class="inline-block h-3 w-3 rounded border-2 border-primary-400 bg-primary-50"></span>
-            Giorno corrente
+        <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid #9D4A15; background: #fdf8f5;"></span>
+            Oggi
         </span>
     </div>
 

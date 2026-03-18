@@ -115,7 +115,7 @@ class BackofficeTest extends TestCase
 
     // --- PlayResource ban/unban ---
 
-    public function test_ban_winning_play_frees_slot(): void
+    public function test_ban_winning_play_keeps_slot_and_prize(): void
     {
         $this->actingAs($this->admin, 'admin');
 
@@ -148,23 +148,27 @@ class BackofficeTest extends TestCase
         $play->refresh();
         $slot->refresh();
 
+        // Giocata bannata ma premio e slot restano assegnati
         $this->assertTrue($play->is_banned);
-        $this->assertFalse($play->is_winner);
-        $this->assertNull($play->prize_id);
-        $this->assertFalse($slot->is_assigned);
-        $this->assertNull($slot->play_id);
+        $this->assertTrue($play->is_winner);
+        $this->assertEquals($prize->id, $play->prize_id);
+        $this->assertTrue($slot->is_assigned);
+        $this->assertEquals($play->id, $slot->play_id);
     }
 
-    public function test_unban_play_does_not_reassign_prize(): void
+    public function test_unban_winning_play_keeps_prize(): void
     {
         $this->actingAs($this->admin, 'admin');
 
         $user = User::factory()->create();
+        $prize = Prize::where('code', 'A')->first();
         $play = Play::create([
             'user_id' => $user->id,
             'store_code' => 'STORE01',
             'receipt_image' => 'receipts/test.jpg',
             'played_at' => '2026-04-20 15:00:00',
+            'is_winner' => true,
+            'prize_id' => $prize->id,
             'is_banned' => true,
             'ban_reason' => 'Test ban',
             'banned_at' => now(),
@@ -176,8 +180,9 @@ class BackofficeTest extends TestCase
 
         $play->refresh();
         $this->assertFalse($play->is_banned);
-        $this->assertFalse($play->is_winner);
-        $this->assertNull($play->prize_id);
+        // Il premio resta assegnato dopo lo sban
+        $this->assertTrue($play->is_winner);
+        $this->assertEquals($prize->id, $play->prize_id);
     }
 
     // --- UserResource ban/unban ---

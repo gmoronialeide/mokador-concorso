@@ -73,22 +73,13 @@ class PlayResource extends Resource
                             ->required(),
                     ])
                     ->action(function (Play $record, array $data): void {
-                        // Se la giocata era vincente, libera lo slot
-                        if ($record->is_winner && $record->winningSlot) {
-                            $record->winningSlot->update([
-                                'is_assigned' => false,
-                                'play_id' => null,
-                                'assigned_at' => null,
-                            ]);
-                        }
-
+                        // Il premio e lo slot NON vengono liberati:
+                        // - Il PV resta "ha già vinto" per la settimana
+                        // - Il premio resta assegnato (non torna in gioco)
                         $record->update([
                             'is_banned' => true,
                             'ban_reason' => $data['ban_reason'],
                             'banned_at' => now(),
-                            'is_winner' => false,
-                            'prize_id' => null,
-                            'winning_slot_id' => null,
                         ]);
                     })
                     ->visible(fn (Play $record): bool => ! $record->is_banned),

@@ -82,7 +82,7 @@
                         <span class="footer-separator">|</span>
                         <p><a href="">Cookie policy</a></p>
                         <span class="footer-separator">|</span>
-                        <p><a href="">Concorso sviluppato da Aleide</a></p>
+                        <p><a href="https://www.aleidewebagency.com/" rel="nofollow" target="_blank" title="Realizzazione Concorso a Premi online">Concorso sviluppato da Aleide</a></p>
                     </div>
                 </div>
             </div>

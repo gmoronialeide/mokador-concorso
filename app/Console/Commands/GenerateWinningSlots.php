@@ -66,22 +66,38 @@ class GenerateWinningSlots extends Command
 
         $slots = [];
         $summary = [];
+        $minGapMinutes = 50;
 
         for ($day = 0; $day < 28; $day++) {
             $date = $startDate->copy()->addDays($day);
             $dayOfWeek = (int) $date->isoFormat('E'); // 1=Lun, 7=Dom
 
+            // Raccoglie i premi attivi per questo giorno
+            $dayPrizes = [];
             foreach ($schedule as $prizeCode => $activeDays) {
-                if (! in_array($dayOfWeek, $activeDays)) {
-                    continue;
+                if (in_array($dayOfWeek, $activeDays)) {
+                    $dayPrizes[] = $prizeCode;
                 }
+            }
 
-                // Primo giorno: 07:00–11:59, tutti gli altri: 00:00–11:59
-                $minHour = ($day === 0) ? 7 : 0;
-                $hour = random_int($minHour, 11);
-                $minute = random_int(0, 59);
-                $second = random_int(0, 59);
-                $time = sprintf('%02d:%02d:%02d', $hour, $minute, $second);
+            if (empty($dayPrizes)) {
+                continue;
+            }
+
+            // Genera orari con distanza minima di 50 minuti
+            // Primo giorno: 07:00–11:59 (420–719 min), altri: 00:00–11:59 (0–719 min)
+            $minMinute = ($day === 0) ? 420 : 0;  // 420 = 7*60
+            $maxMinute = 719;                       // 719 = 11*60+59
+            // Max 2 slot prima delle 07:00 (tranne primo giorno che parte da 07:00)
+            $maxBeforeSeven = ($day === 0) ? 0 : 2;
+            $times = $this->generateSpacedTimes(count($dayPrizes), $minMinute, $maxMinute, $minGapMinutes, $maxBeforeSeven);
+
+            // Mescola l'ordine dei premi così non sono sempre A, B, C...
+            shuffle($dayPrizes);
+
+            foreach ($dayPrizes as $i => $prizeCode) {
+                $totalMinutes = $times[$i];
+                $time = sprintf('%02d:%02d:%02d', intdiv($totalMinutes, 60), $totalMinutes % 60, random_int(0, 59));
 
                 $slots[] = [
                     'prize_id' => $prizes[$prizeCode]->id,
@@ -141,5 +157,60 @@ class GenerateWinningSlots extends Command
 
         $this->info('Slot vincenti inseriti con successo.');
         return self::SUCCESS;
+    }
+
+    /**
+     * Genera N orari casuali (in minuti dal mezzanotte) con:
+     * - distanza minima garantita tra slot consecutivi
+     * - max N slot prima delle 07:00
+     *
+     * @return array<int> Minuti ordinati in modo crescente
+     */
+    private function generateSpacedTimes(int $count, int $minMinute, int $maxMinute, int $gap, int $maxBeforeSeven = PHP_INT_MAX): array
+    {
+        $sevenAm = 420; // 7 * 60
+        $maxAttempts = 200;
+
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            $times = [];
+            for ($i = 0; $i < $count; $i++) {
+                $times[] = random_int($minMinute, $maxMinute);
+            }
+            sort($times);
+
+            // Check distanza minima
+            $valid = true;
+            for ($i = 1; $i < $count; $i++) {
+                if ($times[$i] - $times[$i - 1] < $gap) {
+                    $valid = false;
+                    break;
+                }
+            }
+
+            if (! $valid) {
+                continue;
+            }
+
+            // Check max slot prima delle 07:00
+            $beforeSeven = count(array_filter($times, fn ($t) => $t < $sevenAm));
+            if ($beforeSeven > $maxBeforeSeven) {
+                continue;
+            }
+
+            return $times;
+        }
+
+        // Fallback: distribuzione uniforme con gap garantito
+        $times = [];
+        $rangePerSlot = intdiv($maxMinute - $minMinute, $count);
+        for ($i = 0; $i < $count; $i++) {
+            $slotMin = $minMinute + ($i * $rangePerSlot);
+            $slotMax = min($slotMin + $rangePerSlot - $gap, $maxMinute);
+            $times[] = random_int($slotMin, max($slotMin, $slotMax));
+        }
+
+        sort($times);
+
+        return $times;
     }
 }

@@ -101,13 +101,16 @@ class InstantWinService
     /**
      * Verifica se un punto vendita ha già vinto nella settimana della data specificata.
      */
+    /**
+     * Verifica se un punto vendita ha già vinto nella settimana.
+     * Include anche vincite bannate: un PV bannato NON torna in gioco.
+     */
     public function hasStoreWonThisWeek(string $storeCode, string $date): bool
     {
         [$weekStart, $weekEnd] = $this->getWeekBounds($date);
 
         return Play::where('store_code', $storeCode)
             ->where('is_winner', true)
-            ->where('is_banned', false)
             ->whereBetween('played_at', [
                 $weekStart->startOfDay(),
                 $weekEnd->endOfDay(),

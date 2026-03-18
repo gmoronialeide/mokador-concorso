@@ -228,6 +228,29 @@ class InstantWinServiceTest extends TestCase
         $this->assertNotNull($prize2, 'Stesso PV deve poter vincere in settimane diverse');
     }
 
+    public function test_banned_winning_play_still_blocks_store(): void
+    {
+        Carbon::setTestNow('2026-04-20 15:00:00');
+
+        $this->createSlot('A', '2026-04-20', '14:00:00');
+        $this->createSlot('B', '2026-04-20', '14:30:00');
+
+        // STORE01 vince il primo slot
+        $user1 = $this->createUser();
+        $play1 = $this->createPlay($user1, 'STORE01');
+        $prize1 = $this->service->attempt($play1);
+        $this->assertNotNull($prize1);
+
+        // La giocata viene bannata (ma is_winner resta true, premio resta assegnato)
+        $play1->update(['is_banned' => true, 'ban_reason' => 'Scontrino falso', 'banned_at' => now()]);
+
+        // STORE01 tenta di nuovo — deve essere ancora bloccato
+        $user2 = $this->createUser();
+        $play2 = $this->createPlay($user2, 'STORE01');
+        $prize2 = $this->service->attempt($play2);
+        $this->assertNull($prize2, 'PV con vincita bannata non deve poter vincere di nuovo nella stessa settimana');
+    }
+
     // --- Test regola ore 12 + vincolo PV ---
 
     public function test_rule_12_respects_store_constraint(): void

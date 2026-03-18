@@ -3,7 +3,7 @@
     {{-- ============================================================ --}}
     {{-- SEZIONE 1 — Griglia programmazione settimanale               --}}
     {{-- ============================================================ --}}
-    <x-filament::section>
+    <x-filament::section collapsible collapsed>
         <x-slot name="heading">Programmazione Settimanale</x-slot>
         <x-slot name="description">Griglia premi per giorno della settimana (4 settimane, 104 premi totali)</x-slot>
 
@@ -62,7 +62,7 @@
     {{-- ============================================================ --}}
     {{-- SEZIONE 2 — Stato assegnazione premi                         --}}
     {{-- ============================================================ --}}
-    <x-filament::section>
+    <x-filament::section collapsible>
         <x-slot name="heading">Stato Assegnazione</x-slot>
         <x-slot name="description">Premi assegnati, scaduti e ancora disponibili</x-slot>
 
@@ -160,6 +160,7 @@
         $allSlots = $this->getAllSlotsByDate();
         $today = $this->getToday();
         $prizes = $this->getPrizesOrdered();
+        $activeWeek = $this->getActiveWeekNumber();
     @endphp
 
     @foreach ($this->getWeeks() as $week)
@@ -169,7 +170,7 @@
             $weekTotal = $weekSlots->count();
         @endphp
 
-        <x-filament::section collapsible>
+        <x-filament::section collapsible :collapsed="$week['number'] !== $activeWeek">
             <x-slot name="heading">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #f3e8e0; color: #9D4A15; font-size: 14px; font-weight: 700;">
@@ -226,7 +227,15 @@
                                     @endphp
                                     <td style="padding: 8px; text-align: center; vertical-align: middle; background: {{ $cellBg }};">
                                         @if ($slot)
-                                            @if ($slot->is_assigned)
+                                            @if ($slot->is_assigned && $slot->play?->is_banned)
+                                                {{-- VIOLA: assegnato ma giocata bannata — link alla giocata --}}
+                                                <a href="/admin/plays/{{ $slot->play_id }}" target="_blank" title="BANNATA — {{ $slot->play?->user?->surname }} {{ $slot->play?->user?->name }} — PV {{ $slot->play?->store_code }}" style="text-decoration: none;">
+                                                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #f3e8ff; color: #6b21a8; font-size: 11px; font-weight: 700; cursor: pointer; border: 2px solid #c084fc; transition: transform 0.1s;"
+                                                          onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                                        ✗
+                                                    </span>
+                                                </a>
+                                            @elseif ($slot->is_assigned)
                                                 {{-- VERDE: assegnato — link alla giocata --}}
                                                 <a href="/admin/plays/{{ $slot->play_id }}" target="_blank" title="{{ $slot->play?->user?->surname }} {{ $slot->play?->user?->name }} — PV {{ $slot->play?->store_code }}" style="text-decoration: none;">
                                                     <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #dcfce7; color: #166534; font-size: 11px; font-weight: 700; cursor: pointer; border: 2px solid #86efac; transition: transform 0.1s;"
@@ -269,6 +278,10 @@
         <span style="display: flex; align-items: center; gap: 6px;">
             <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: #dcfce7; color: #166534; font-size: 10px; font-weight: 700; border: 2px solid #86efac;">✓</span>
             Assegnato (click per dettaglio)
+        </span>
+        <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: #f3e8ff; color: #6b21a8; font-size: 10px; font-weight: 700; border: 2px solid #c084fc;">✗</span>
+            Bannato (click per dettaglio)
         </span>
         <span style="display: flex; align-items: center; gap: 6px;">
             <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 4px; background: #fee2e2; color: #991b1b; font-size: 10px; font-weight: 700; border: 2px solid #fca5a5;">✗</span>

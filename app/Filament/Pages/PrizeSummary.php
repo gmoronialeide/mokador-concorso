@@ -102,6 +102,22 @@ class PrizeSummary extends Page
         return Prize::orderBy('code')->get();
     }
 
+    /** Numero della settimana corrente o prima futura (1-4), o null se tutte passate. */
+    public function getActiveWeekNumber(): ?int
+    {
+        $start = Carbon::parse(config('app.concorso_start_date'));
+        $today = Carbon::today();
+
+        for ($w = 0; $w < 4; $w++) {
+            $weekEnd = $start->copy()->addWeeks($w)->addDays(6);
+            if ($today->lte($weekEnd)) {
+                return $w + 1;
+            }
+        }
+
+        return null;
+    }
+
     public function getToday(): string
     {
         return Carbon::today()->format('Y-m-d');

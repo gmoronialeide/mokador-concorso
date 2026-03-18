@@ -50,8 +50,10 @@ class PlayResource extends Resource
                 TextColumn::make('played_at')->label('Data giocata')->dateTime('d/m/Y H:i')->sortable(),
                 IconColumn::make('is_winner')->label('Vincente')->boolean(),
                 TextColumn::make('prize.name')->label('Premio')->placeholder('-'),
-                IconColumn::make('is_banned')->label('Bannata')->boolean()
-                    ->trueColor('danger')->falseColor('success'),
+                IconColumn::make('is_banned')->label('Valida')
+                    ->icon(fn (bool $state): string => $state ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn (bool $state): string => $state ? 'danger' : 'success')
+                    ->tooltip(fn (bool $state): string => $state ? 'Bannata' : 'Valida'),
             ])
             ->defaultSort('played_at', 'desc')
             ->filters([
@@ -61,6 +63,15 @@ class PlayResource extends Resource
                     ->options(Prize::pluck('name', 'id')),
             ])
             ->actions([
+                Action::make('receipt')
+                    ->label('Scontrino')
+                    ->icon('heroicon-o-camera')
+                    ->color('gray')
+                    ->modalHeading('Scontrino')
+                    ->modalWidth('md')
+                    ->modalContent(fn (Play $record) => view('filament.modals.receipt-preview', ['record' => $record]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Chiudi'),
                 ViewAction::make(),
                 Action::make('ban')
                     ->label('Banna')
@@ -114,9 +125,9 @@ class PlayResource extends Resource
                         ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
                 ])->columns(4),
                 Section::make('Scontrino')->schema([
-                    ImageEntry::make('receipt_image')->label('')
-                        ->disk('receipts')
-                        ->height(400),
+                    \Filament\Infolists\Components\ViewEntry::make('receipt_image')
+                        ->label('')
+                        ->view('filament.infolists.receipt-image'),
                 ]),
                 Section::make('Utente')->schema([
                     TextEntry::make('user.name')->label('Nome'),

@@ -24,13 +24,17 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Credenziali non valide.'])->onlyInput('email');
         }
 
-        $request->session()->regenerate();
-
         $user = Auth::user();
 
         if (! $user->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice');
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors(['email' => 'Devi confermare la tua email prima di accedere. Controlla la tua casella di posta.'])->onlyInput('email');
         }
+
+        $request->session()->regenerate();
 
         return redirect()->intended(route('game.show'));
     }

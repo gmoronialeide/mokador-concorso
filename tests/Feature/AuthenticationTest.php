@@ -127,7 +127,7 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_login_unverified_redirects_to_verification(): void
+    public function test_login_unverified_shows_error_and_stays_guest(): void
     {
         $user = User::factory()->unverified()->create(['password' => 'Password1A']);
 
@@ -137,7 +137,8 @@ class AuthenticationTest extends TestCase
             'cf-turnstile-response' => 'test-token',
         ]);
 
-        $response->assertRedirect(route('verification.notice'));
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
     }
 
     // --- Auth guards ---

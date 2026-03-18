@@ -22,8 +22,10 @@ class PlaysRelationManager extends RelationManager
                 TextColumn::make('store_code')->label('Punto Vendita'),
                 IconColumn::make('is_winner')->label('Vincente')->boolean(),
                 TextColumn::make('prize.name')->label('Premio')->placeholder('-'),
-                IconColumn::make('is_banned')->label('Bannata')->boolean()
-                    ->trueColor('danger')->falseColor('success'),
+                IconColumn::make('is_banned')->label('Valida')
+                    ->icon(fn (bool $state): string => $state ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn (bool $state): string => $state ? 'danger' : 'success')
+                    ->tooltip(fn (bool $state): string => $state ? 'Bannata' : 'Valida'),
             ])
             ->defaultSort('played_at', 'desc');
     }

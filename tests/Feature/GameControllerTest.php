@@ -22,7 +22,7 @@ class GameControllerTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake('receipts');
+        Storage::fake();
     }
 
     private function createVerifiedUser(array $overrides = []): User

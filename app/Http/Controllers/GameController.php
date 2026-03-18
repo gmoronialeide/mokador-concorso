@@ -6,6 +6,7 @@ use App\Http\Requests\PlayGameRequest;
 use App\Mail\WinNotification;
 use App\Models\Play;
 use App\Models\Prize;
+use App\Models\Store;
 use App\Services\InstantWinService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
@@ -20,8 +21,9 @@ class GameController extends Controller
         $user = Auth::user();
         $alreadyPlayed = $user->hasPlayedToday();
         $contestActive = $this->isContestActive();
+        $stores = Store::active()->orderBy('name')->get(['code', 'name', 'city', 'province']);
 
-        return view('game.play', compact('alreadyPlayed', 'contestActive'));
+        return view('game.play', compact('alreadyPlayed', 'contestActive', 'stores'));
     }
 
     public function play(PlayGameRequest $request, InstantWinService $instantWin): RedirectResponse
@@ -36,7 +38,7 @@ class GameController extends Controller
             return back()->with('error', 'Hai già giocato oggi. Torna domani!');
         }
 
-        $receiptPath = $request->file('receipt')->store('', 'receipts');
+        $receiptPath = $request->file('receipt')->store('receipts');
 
         $play = Play::create([
             'user_id' => $user->id,
@@ -62,6 +64,7 @@ class GameController extends Controller
         $result = request()->query('result', 'lost');
 
         if ($result === 'won' && session()->has('prize_id')) {
+            session()->reflash();
             $redirectUrl = route('game.won');
         } else {
             $redirectUrl = route('game.lost');

@@ -45,7 +45,8 @@
       "Read(//mnt/c/docker/mokador-concorso/**)",
       "Read(//mnt/c/docker/**)",
       "Bash(2)",
-      "Bash(grep -r class.*Login /home/guido/projects/mokador-concorso2/vendor/filament/filament/src/Http/Middleware/)"
+      "Bash(grep -r class.*Login /home/guido/projects/mokador-concorso2/vendor/filament/filament/src/Http/Middleware/)",
+      "WebFetch(domain:filamentexamples.com)"
     ]
   },
   "enableAllProjectMcpServers": true,

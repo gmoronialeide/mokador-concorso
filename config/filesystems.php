@@ -50,6 +50,7 @@ return [
         'receipts' => [
             'driver' => 'local',
             'root' => storage_path('app/private/receipts'),
+            'serve' => true,
             'throw' => false,
             'report' => false,
         ],

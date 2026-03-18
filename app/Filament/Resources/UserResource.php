@@ -51,8 +51,10 @@ class UserResource extends Resource
                 TextColumn::make('created_at')->label('Registrato il')->dateTime('d/m/Y H:i')->sortable(),
                 TextColumn::make('plays_count')->label('Giocate')->counts('plays'),
                 IconColumn::make('marketing_consent')->label('Marketing')->boolean(),
-                IconColumn::make('is_banned')->label('Bannato')->boolean()
-                    ->trueColor('danger')->falseColor('success'),
+                IconColumn::make('is_banned')->label('Valido')
+                    ->icon(fn (bool $state): string => $state ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn (bool $state): string => $state ? 'danger' : 'success')
+                    ->tooltip(fn (bool $state): string => $state ? 'Bannato' : 'Valido'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

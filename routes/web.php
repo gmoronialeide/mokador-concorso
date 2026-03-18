@@ -7,6 +7,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\StoreController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 // Public
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -19,9 +20,9 @@ Route::get('/privacy', fn () => redirect(asset('docs/privacy.pdf')))->name('priv
 // Guest only
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth');
     Route::get('/registrati', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/registrati', [AuthController::class, 'register']);
+    Route::post('/registrati', [AuthController::class, 'register'])->middleware('throttle:auth');
 
     // Password reset
     Route::get('/password/recupera', [PasswordResetController::class, 'requestForm'])->name('password.request');
@@ -57,8 +58,15 @@ Route::middleware('auth')->group(function () {
 // Auth + verified email required
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/gioca-ora', [GameController::class, 'show'])->name('game.show');
-    Route::post('/gioca-ora', [GameController::class, 'play'])->name('game.play');
+    Route::post('/gioca-ora', [GameController::class, 'play'])->name('game.play')->middleware('throttle:play');
     Route::get('/loading', [GameController::class, 'loading'])->name('game.loading');
     Route::get('/hai-vinto', [GameController::class, 'won'])->name('game.won');
     Route::get('/non-hai-vinto', [GameController::class, 'lost'])->name('game.lost');
 });
+
+// Admin-only: serve private receipt images
+Route::get('/admin/receipts/{path}', function (string $path) {
+    abort_unless(Storage::exists("receipts/{$path}"), 404);
+
+    return Storage::response("receipts/{$path}");
+})->where('path', '.*')->middleware('auth:admin')->name('admin.receipt');

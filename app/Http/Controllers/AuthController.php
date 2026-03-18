@@ -20,7 +20,7 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): RedirectResponse
     {
-        if (! Auth::attempt($request->validated())) {
+        if (! Auth::attempt($request->only('email', 'password'))) {
             return back()->withErrors(['email' => 'Credenziali non valide.'])->onlyInput('email');
         }
 
@@ -52,7 +52,7 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
+        $validated = $request->safe()->except(['cf-turnstile-response', 'password_confirmation', 'privacy_consent']);
         $validated['marketing_consent'] = $request->boolean('marketing_consent');
         $validated['privacy_consent'] = true;
 

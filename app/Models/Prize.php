@@ -34,6 +34,11 @@ class Prize extends Model
         return $this->hasMany(Play::class);
     }
 
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(PrizeSchedule::class)->orderBy('day_of_week');
+    }
+
     public function getAssignedCountAttribute(): int
     {
         return $this->winningSlots()->where('is_assigned', true)->count();

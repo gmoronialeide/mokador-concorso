@@ -132,4 +132,14 @@ return [
     'concorso_start_date' => env('CONCORSO_START_DATE', '2026-04-20'),
     'concorso_end_date' => env('CONCORSO_END_DATE', '2026-05-17'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'admin_name' => env('ADMIN_NAME', 'Admin Mokador'),
+    'admin_email' => env('ADMIN_EMAIL', 'admin@mokador.it'),
+    'admin_password' => env('ADMIN_PASSWORD', 'changeme123'),
+
 ];

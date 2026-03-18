@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Prize;
 use App\Models\WinningSlot;
-use Database\Seeders\PrizeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +14,7 @@ class GenerateWinningSlotsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(PrizeSeeder::class);
+
     }
 
     public function test_generates_exactly_104_slots(): void

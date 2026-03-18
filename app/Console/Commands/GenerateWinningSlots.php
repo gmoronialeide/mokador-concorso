@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Prize;
+use App\Models\PrizeSchedule;
 use App\Models\WinningSlot;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -17,18 +18,6 @@ class GenerateWinningSlots extends Command
 
     protected $description = 'Genera i 104 slot vincenti distribuiti nei 28 giorni del concorso';
 
-    /**
-     * Programmazione premi per giorno della settimana (1=Lunedì, 7=Domenica).
-     * Ogni riga: codice premio => [giorni attivi].
-     */
-    private const SCHEDULE = [
-        'A' => [1, 2, 3, 4, 5, 6, 7], // tutti i giorni — 7/sett — 28 tot
-        'B' => [1, 2, 3, 4, 5, 6, 7], // tutti i giorni — 7/sett — 28 tot
-        'C' => [1, 3, 5, 6, 7],       // lun, mer, ven, sab, dom — 5/sett — 20 tot
-        'D' => [2, 3, 4, 6],          // mar, mer, gio, sab — 4/sett — 16 tot
-        'E' => [1, 4, 6],             // lun, gio, sab — 3/sett — 12 tot
-    ];
-
     public function handle(): int
     {
         $startDate = Carbon::parse(config('app.concorso_start_date'));
@@ -42,7 +31,18 @@ class GenerateWinningSlots extends Command
 
         $prizes = Prize::all()->keyBy('code');
         if ($prizes->count() !== 5) {
-            $this->error('Devono esistere esattamente 5 premi (A-E). Esegui il PrizeSeeder.');
+            $this->error('Devono esistere esattamente 5 premi (A-E). Verifica la migrazione seed_production_data.');
+            return self::FAILURE;
+        }
+
+        // Legge la griglia premi dal DB (tabella prize_schedule)
+        $schedule = PrizeSchedule::all()
+            ->groupBy(fn (PrizeSchedule $ps) => $prizes->firstWhere('id', $ps->prize_id)?->code)
+            ->map(fn ($group) => $group->pluck('day_of_week')->toArray())
+            ->toArray();
+
+        if (empty($schedule)) {
+            $this->error('Griglia premi vuota. Verifica la migrazione create_prize_schedule_table.');
             return self::FAILURE;
         }
 
@@ -71,7 +71,7 @@ class GenerateWinningSlots extends Command
             $date = $startDate->copy()->addDays($day);
             $dayOfWeek = (int) $date->isoFormat('E'); // 1=Lun, 7=Dom
 
-            foreach (self::SCHEDULE as $prizeCode => $activeDays) {
+            foreach ($schedule as $prizeCode => $activeDays) {
                 if (! in_array($dayOfWeek, $activeDays)) {
                     continue;
                 }

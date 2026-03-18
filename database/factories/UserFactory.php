@@ -25,10 +25,19 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'name' => fake()->firstName(),
+            'surname' => fake()->lastName(),
+            'birth_date' => fake()->dateTimeBetween('-60 years', '-19 years')->format('Y-m-d'),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'phone' => '3' . fake()->numerify('#########'),
+            'address' => fake()->streetAddress(),
+            'city' => fake()->city(),
+            'province' => fake()->randomElement(['BO', 'MI', 'RM', 'NA', 'TO', 'FI', 'VE', 'GE', 'PA', 'BA']),
+            'cap' => fake()->numerify('#####'),
             'password' => static::$password ??= Hash::make('password'),
+            'privacy_consent' => true,
+            'marketing_consent' => false,
+            'email_verified_at' => now(),
             'remember_token' => Str::random(10),
         ];
     }
@@ -40,6 +49,21 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function banned(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_banned' => true,
+            'ban_reason' => 'Banned for testing',
+        ]);
+    }
+
+    public function minor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'birth_date' => now()->subYears(16)->format('Y-m-d'),
         ]);
     }
 }

@@ -7,7 +7,6 @@ use App\Models\Prize;
 use App\Models\User;
 use App\Models\WinningSlot;
 use App\Services\InstantWinService;
-use Database\Seeders\PrizeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -21,7 +20,7 @@ class InstantWinServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(PrizeSeeder::class);
+
         $this->service = new InstantWinService();
     }
 

@@ -2,18 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
+    /**
+     * I dati di produzione (premi, premi finali, admin) sono inseriti
+     * dalla migrazione 2026_03_18_100000_seed_production_data.
+     */
     public function run(): void
     {
-        $this->call([
-            AdminSeeder::class,
-            PrizeSeeder::class,
-        ]);
+        //
     }
 }

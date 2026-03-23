@@ -13,6 +13,15 @@ class RegisterRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->phone) {
+            $phone = preg_replace('/\s+/', '', $this->phone);
+            $phone = preg_replace('/^\+39/', '', $phone);
+            $this->merge(['phone' => $phone]);
+        }
+    }
+
     /** @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
@@ -21,7 +30,7 @@ class RegisterRequest extends FormRequest
             'surname' => ['required', 'string', 'max:100'],
             'birth_date' => ['required', 'date', 'before:-18 years'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['required', 'string', 'max:20', 'regex:/^(\+39\s?)?3\d{8,9}$/'],
+            'phone' => ['required', 'string', 'max:20', 'regex:/^3\d{8,9}$/', 'unique:users,phone'],
             'address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:100'],
             'province' => ['required', 'string', 'size:2'],
@@ -45,6 +54,7 @@ class RegisterRequest extends FormRequest
             'cap.size' => 'Il CAP deve essere di 5 cifre.',
             'cap.regex' => 'Il CAP deve contenere solo 5 cifre numeriche.',
             'phone.regex' => 'Inserisci un numero di cellulare italiano valido (es. 3331234567).',
+            'phone.unique' => 'Questo numero di telefono è già registrato.',
             'cf-turnstile-response.required' => 'Completa la verifica captcha.',
         ];
     }

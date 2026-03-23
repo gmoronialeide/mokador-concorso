@@ -31,7 +31,13 @@
                             <input type="text" id="citta" name="city" placeholder="Città" value="{{ old('city') }}" required>                        </div>
                         <div class="form-register-col">
                             <label for="provincia">Provincia<span>*</span></label>
-                            <input type="text" id="provincia" name="province" placeholder="Provincia" value="{{ old('province') }}" maxlength="2" required>                        </div>
+                            <select id="provincia" name="province" required>
+                                <option value="">Seleziona</option>
+                                @foreach($provinces as $province)
+                                    <option value="{{ $province->code }}" @selected(old('province') === $province->code)>{{ $province->code }} - {{ $province->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="form-register-col">
                             <label for="cap">CAP<span>*</span></label>
                             <input type="text" id="cap" name="cap" placeholder="CAP" value="{{ old('cap') }}" maxlength="5" required>                        </div>
@@ -54,7 +60,7 @@
                     <div class="w-100 d-flex justify-content-center align-items-center gap-2 flex-column">
                         <div class="checkbox-policy">
                             <input type="checkbox" id="privacy-consent" name="privacy_consent" value="1" {{ old('privacy_consent') ? 'checked' : '' }}>
-                            <label for="privacy-consent">Esprimo il consenso al trattamento dei miei dati personali (es. raccolta archiviazione, conservazione, consultazione, etc.).<span>*</span></label>
+                            <label for="privacy-consent">Esprimo il consenso al trattamento dei miei dati personali (es. raccolta archiviazione, conservazione, consultazione, etc.). <a href="{{ route('privacy') }}" target="_blank" rel="noopener">Leggi l'informativa</a><span>*</span></label>
                         </div>                        <div class="checkbox-policy">
                             <input type="checkbox" id="marketing-consent" name="marketing_consent" value="1" {{ old('marketing_consent') ? 'checked' : '' }}>
                             <label for="marketing-consent">Esprimo il consenso al trattamento dei miei dati personali per le finalità promozionali, pubblicitarie e di marketing.</label>

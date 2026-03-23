@@ -9,6 +9,7 @@ class DatabaseSeeder extends Seeder
     /**
      * I dati di produzione (premi, premi finali, admin) sono inseriti
      * dalla migrazione 2026_03_18_100000_seed_production_data.
+     * Le province sono inserite dalla migrazione create_provinces_table.
      */
     public function run(): void
     {

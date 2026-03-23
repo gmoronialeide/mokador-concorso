@@ -54,7 +54,7 @@
         document.getElementById('data-di-nascita').value = '2015-06-15';    // minorenne
         document.getElementById('indirizzo').value = '';                     // vuoto
         document.getElementById('citta').value = '';                         // vuoto
-        document.getElementById('provincia').value = 'XYZ';                 // 3 caratteri (deve essere 2)
+        document.getElementById('provincia').value = '';                      // nessuna selezione
         document.getElementById('cap').value = 'ABCDE';                      // non numerico
         document.getElementById('telefono').value = '0000';                 // non è un cellulare valido
         document.getElementById('email').value = 'non-una-email';           // formato email invalido

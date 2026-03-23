@@ -12,9 +12,27 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="icon" href="{{ asset('img/loco-icon.svg') }}" type="image/svg+xml">
     @stack('head')
+    @production
+    <!-- Google Tag Manager by gtm4wp.com -->
+    <script data-cfasync="false" data-pagespeed-no-defer>
+        var dataLayer_content = {"pageType":"frontpage","pagePostType2":"single-page","pagePostAuthor":"mokador"};
+        dataLayer.push(dataLayer_content);
+    </script>
+    <script data-cfasync="false" data-pagespeed-no-defer>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PRL8WFGW');</script>
+    <!-- End Google Tag Manager -->
+    @endproduction
 </head>
 
 <body>
+    @production
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PRL8WFGW" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    @endproduction
 
     <header>
         <div class="container">
@@ -76,11 +94,11 @@
                 </div>
                 <div class="footer-dx">
                     <div class="footer-items">
-                        <p><a href="{{ route('regolamento') }}">Regolamento</a></p>
+                        <p><a href="{{ route('regolamento') }}" target="_blank" rel="noopener">Regolamento</a></p>
                         <span class="footer-separator">|</span>
-                        <p><a href="{{ route('privacy') }}">Privacy policy</a></p>
+                        <p><a href="{{ route('privacy') }}" target="_blank" rel="noopener">Privacy policy</a></p>
                         <span class="footer-separator">|</span>
-                        <p><a href="">Cookie policy</a></p>
+                        <p><a href="{{ route('cookie.policy') }}" target="_blank" rel="noopener">Cookie policy</a></p>
                         <span class="footer-separator">|</span>
                         <p><a href="https://www.aleidewebagency.com/" rel="nofollow" target="_blank" title="Realizzazione Concorso a Premi online">Concorso sviluppato da Aleide</a></p>
                     </div>

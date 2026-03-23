@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Models\Province;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -51,7 +52,9 @@ class AuthController extends Controller
 
     public function showRegister(): View
     {
-        return view('auth.register');
+        $provinces = Province::orderBy('name')->get();
+
+        return view('auth.register', compact('provinces'));
     }
 
     public function register(RegisterRequest $request): RedirectResponse

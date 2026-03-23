@@ -13,9 +13,11 @@ use Illuminate\Support\Facades\Storage;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/punti-vendita', [StoreController::class, 'index'])->name('stores.index');
 Route::get('/api/stores', [StoreController::class, 'search'])->name('stores.search');
-// PDF links — i file vanno caricati in public/docs/
-Route::get('/regolamento', fn () => redirect(asset('docs/regolamento.pdf')))->name('regolamento');
-Route::get('/privacy', fn () => redirect(asset('docs/privacy.pdf')))->name('privacy');
+// PDF regolamento
+Route::get('/regolamento', fn () => redirect(asset('pdf/regolamento.pdf')))->name('regolamento');
+// Legal documents (LegalBlink)
+Route::get('/privacy', fn () => redirect()->away('https://app.legalblink.it/api/documents/620230752e565d002878b88b/privacy-policy-per-siti-web-o-e-commerce-it'))->name('privacy');
+Route::get('/cookie-policy', fn () => redirect()->away('https://app.legalblink.it/api/documents/620230752e565d002878b88b/cookie-policy-it'))->name('cookie.policy');
 
 // Guest only
 Route::middleware('guest')->group(function () {

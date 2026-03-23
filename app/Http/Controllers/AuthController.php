@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -53,12 +54,29 @@ class AuthController extends Controller
     public function showRegister(): View
     {
         $provinces = Province::orderBy('name')->get();
+        $now = Carbon::now();
+        $startDate = Carbon::parse(config('app.concorso_start_date'));
+        $endDate = Carbon::parse(config('app.concorso_end_date'));
+        $contestNotStarted = $now->lt($startDate);
+        $contestEnded = $now->gt($endDate->endOfDay());
 
-        return view('auth.register', compact('provinces'));
+        return view('auth.register', compact('provinces', 'contestNotStarted', 'contestEnded', 'startDate'));
     }
 
     public function register(RegisterRequest $request): RedirectResponse
     {
+        $now = Carbon::now();
+        $startDate = Carbon::parse(config('app.concorso_start_date'));
+        $endDate = Carbon::parse(config('app.concorso_end_date'));
+
+        if ($now->lt($startDate)) {
+            return back()->with('error', 'Le iscrizioni non sono ancora aperte.');
+        }
+
+        if ($now->gt($endDate->endOfDay())) {
+            return back()->with('error', 'Il concorso è concluso.');
+        }
+
         $validated = $request->safe()->except(['cf-turnstile-response', 'password_confirmation', 'privacy_consent']);
         $validated['marketing_consent'] = $request->boolean('marketing_consent');
         $validated['privacy_consent'] = true;

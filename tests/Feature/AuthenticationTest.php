@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Coderflex\LaravelTurnstile\Facades\LaravelTurnstile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
@@ -13,6 +14,12 @@ use Tests\TestCase;
 class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Carbon::setTestNow('2026-04-25 10:00:00');
+    }
 
     // --- Registration ---
 

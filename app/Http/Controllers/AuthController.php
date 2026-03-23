@@ -9,7 +9,6 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -17,11 +16,17 @@ class AuthController extends Controller
 {
     public function showLogin(): View
     {
-        return view('auth.login');
+        return view('auth.login', $this->contestStatus());
     }
 
     public function login(LoginRequest $request): RedirectResponse
     {
+        $status = $this->contestStatus();
+
+        if ($status['contestNotStarted'] || $status['contestEnded']) {
+            return redirect()->route('home');
+        }
+
         if (! Auth::attempt($request->only('email', 'password'))) {
             return back()->withErrors(['email' => 'Credenziali non valide.'])->onlyInput('email');
         }
@@ -54,26 +59,22 @@ class AuthController extends Controller
     public function showRegister(): View
     {
         $provinces = Province::orderBy('name')->get();
-        $now = Carbon::now();
-        $startDate = Carbon::parse(config('app.concorso_start_date'));
-        $endDate = Carbon::parse(config('app.concorso_end_date'));
-        $contestNotStarted = $now->lt($startDate);
-        $contestEnded = $now->gt($endDate->endOfDay());
 
-        return view('auth.register', compact('provinces', 'contestNotStarted', 'contestEnded', 'startDate'));
+        return view('auth.register', array_merge(
+            $this->contestStatus(),
+            compact('provinces')
+        ));
     }
 
     public function register(RegisterRequest $request): RedirectResponse
     {
-        $now = Carbon::now();
-        $startDate = Carbon::parse(config('app.concorso_start_date'));
-        $endDate = Carbon::parse(config('app.concorso_end_date'));
+        $status = $this->contestStatus();
 
-        if ($now->lt($startDate)) {
+        if ($status['contestNotStarted']) {
             return back()->with('error', 'Le iscrizioni non sono ancora aperte.');
         }
 
-        if ($now->gt($endDate->endOfDay())) {
+        if ($status['contestEnded']) {
             return back()->with('error', 'Il concorso è concluso.');
         }
 

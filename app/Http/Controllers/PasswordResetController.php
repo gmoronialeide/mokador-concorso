@@ -15,11 +15,17 @@ class PasswordResetController extends Controller
 {
     public function requestForm(): View
     {
-        return view('auth.forgot-password');
+        return view('auth.forgot-password', $this->contestStatus());
     }
 
     public function sendResetLink(Request $request): RedirectResponse
     {
+        $status = $this->contestStatus();
+
+        if ($status['contestNotStarted'] || $status['contestEnded']) {
+            return redirect()->route('home');
+        }
+
         $request->validate([
             'email' => ['required', 'email'],
             'cf-turnstile-response' => ['required', new TurnstileCheck()],
@@ -39,14 +45,20 @@ class PasswordResetController extends Controller
 
     public function resetForm(Request $request, string $token): View
     {
-        return view('auth.reset-password', [
-            'token' => $token,
-            'email' => $request->query('email', ''),
-        ]);
+        return view('auth.reset-password', array_merge(
+            $this->contestStatus(),
+            ['token' => $token, 'email' => $request->query('email', '')]
+        ));
     }
 
     public function reset(Request $request): RedirectResponse
     {
+        $status = $this->contestStatus();
+
+        if ($status['contestNotStarted'] || $status['contestEnded']) {
+            return redirect()->route('home');
+        }
+
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
@@ -56,7 +68,7 @@ class PasswordResetController extends Controller
             'password.confirmed' => 'Le password non corrispondono.',
         ]);
 
-        $status = Password::reset(
+        $resetStatus = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, string $password): void {
                 $user->forceFill([
@@ -66,10 +78,10 @@ class PasswordResetController extends Controller
             }
         );
 
-        if ($status === Password::PASSWORD_RESET) {
+        if ($resetStatus === Password::PASSWORD_RESET) {
             return redirect()->route('login')->with('success', 'Password reimpostata! Puoi accedere con la nuova password.');
         }
 
-        return back()->withErrors(['email' => __($status)]);
+        return back()->withErrors(['email' => __($resetStatus)]);
     }
 }

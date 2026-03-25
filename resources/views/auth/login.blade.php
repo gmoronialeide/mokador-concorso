@@ -5,7 +5,7 @@
 @section('content')
     @include('partials.teaser', ['title' => 'Login'])
 
-    <section>
+    <section class="mb-5 pb-5">
         <div class="container">
             <div class="first-section">
                 @if ($contestEnded)

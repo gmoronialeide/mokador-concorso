@@ -5,6 +5,7 @@ use App\Http\Controllers\GameController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\StoreController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -32,10 +33,35 @@ Route::middleware('guest')->group(function () {
     Route::post('/password/reimposta', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
-// Auth required
+// Pagina post-registrazione (guest, no auth)
+Route::get('/registrazione-completata', [AuthController::class, 'registerSuccess'])->name('register.success');
+
+// Email verification
+Route::get('/email/verifica/{id}/{hash}', function (int $id, string $hash) {
+    $user = User::findOrFail($id);
+
+    if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
+        abort(403, 'Link di verifica non valido.');
+    }
+
+    if (! $user->hasVerifiedEmail()) {
+        $user->markEmailAsVerified();
+    }
+
+    return redirect()->route('login')->with('success', 'Email verificata! Ora puoi accedere e giocare.');
+})->middleware('signed')->name('verification.verify');
+
+// Auth required (no email verification needed)
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/registrazione-completata', [AuthController::class, 'registerSuccess'])->name('register.success');
+
+    // Resend verification
+    Route::get('/email/verifica', [AuthController::class, 'verificationNotice'])->name('verification.notice');
+    Route::post('/email/reinvia', [AuthController::class, 'verificationResend'])->name('verification.resend')->middleware('throttle:6,1');
+});
+
+// Auth + verified email required
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/gioca-ora', [GameController::class, 'show'])->name('game.show');
     Route::post('/gioca-ora', [GameController::class, 'play'])->name('game.play')->middleware('throttle:play');
     Route::get('/loading', [GameController::class, 'loading'])->name('game.loading');

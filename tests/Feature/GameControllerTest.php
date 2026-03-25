@@ -35,6 +35,8 @@ class GameControllerTest extends TestCase
         return Store::create([
             'code' => $code,
             'name' => 'Test Store',
+            'sign_name' => 'Test Store',
+            'vat_number' => '12345678901',
             'address' => 'Via Test 1',
             'city' => 'Bologna',
             'province' => 'BO',
@@ -143,6 +145,8 @@ class GameControllerTest extends TestCase
         Store::create([
             'code' => 'CLOSED01',
             'name' => 'Closed Store',
+            'sign_name' => 'Closed Store',
+            'vat_number' => '12345678902',
             'address' => 'Via Test 1',
             'city' => 'Bologna',
             'province' => 'BO',

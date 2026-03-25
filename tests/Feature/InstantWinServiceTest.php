@@ -31,7 +31,7 @@ class InstantWinServiceTest extends TestCase
             'surname' => 'Rossi',
             'birth_date' => '1990-01-01',
             'email' => 'mario' . uniqid() . '@test.it',
-            'phone' => '3331234567',
+            'phone' => '3' . substr(uniqid(), -9),
             'address' => 'Via Roma 1',
             'city' => 'Bologna',
             'province' => 'BO',

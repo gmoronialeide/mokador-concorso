@@ -5,7 +5,6 @@ use App\Http\Controllers\GameController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\StoreController;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,32 +32,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/password/reimposta', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
-// Email verification (no auth required — user clicks link from email)
-Route::get('/email/verifica/{id}/{hash}', function (int $id, string $hash) {
-    $user = User::findOrFail($id);
-
-    if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
-        abort(403, 'Link di verifica non valido.');
-    }
-
-    if (! $user->hasVerifiedEmail()) {
-        $user->markEmailAsVerified();
-    }
-
-    return redirect()->route('login')->with('success', 'Email verificata! Ora puoi accedere e giocare.');
-})->middleware('signed')->name('verification.verify');
-
-// Auth required (no email verification needed)
+// Auth required
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-    // Resend verification
-    Route::get('/email/verifica', [AuthController::class, 'verificationNotice'])->name('verification.notice');
-    Route::post('/email/reinvia', [AuthController::class, 'verificationResend'])->name('verification.resend')->middleware('throttle:6,1');
-});
-
-// Auth + verified email required
-Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/registrazione-completata', [AuthController::class, 'registerSuccess'])->name('register.success');
     Route::get('/gioca-ora', [GameController::class, 'show'])->name('game.show');
     Route::post('/gioca-ora', [GameController::class, 'play'])->name('game.play')->middleware('throttle:play');
     Route::get('/loading', [GameController::class, 'loading'])->name('game.loading');

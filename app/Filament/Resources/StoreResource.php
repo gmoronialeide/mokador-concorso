@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\StoreResource\Pages;
 use App\Models\Store;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Filament\Actions\DeleteBulkAction;
@@ -34,18 +35,30 @@ class StoreResource extends Resource
     {
         return $schema
             ->schema([
-                TextInput::make('code')->label('Codice')
-                    ->required()->unique(ignoreRecord: true)->maxLength(50),
-                TextInput::make('name')->label('Nome / Ragione sociale')
-                    ->required()->maxLength(255),
-                TextInput::make('address')->label('Indirizzo')
-                    ->required()->maxLength(255),
-                TextInput::make('city')->label('Città')
-                    ->required()->maxLength(100),
-                TextInput::make('province')->label('Provincia')
-                    ->required()->length(2)->maxLength(2),
-                TextInput::make('cap')->label('CAP')
-                    ->required()->length(5)->maxLength(5),
+                Section::make('Anagrafica')
+                    ->schema([
+                        TextInput::make('code')->label('Codice')
+                            ->required()->unique(ignoreRecord: true)->maxLength(50),
+                        TextInput::make('name')->label('Ragione sociale')
+                            ->required()->maxLength(255),
+                        TextInput::make('sign_name')->label('Insegna locale')
+                            ->required()->maxLength(255),
+                        TextInput::make('vat_number')->label('Partita IVA')
+                            ->required()->maxLength(20),
+                        TextInput::make('agent')->label('Agente')
+                            ->maxLength(255),
+                    ])->columns(2),
+                Section::make('Indirizzo')
+                    ->schema([
+                        TextInput::make('address')->label('Indirizzo')
+                            ->required()->maxLength(255),
+                        TextInput::make('city')->label('Città')
+                            ->required()->maxLength(100),
+                        TextInput::make('province')->label('Provincia')
+                            ->required()->length(2)->maxLength(2),
+                        TextInput::make('cap')->label('CAP')
+                            ->maxLength(5),
+                    ])->columns(2),
                 Toggle::make('is_active')->label('Attivo')
                     ->default(true),
             ]);
@@ -55,19 +68,27 @@ class StoreResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')->sortable(),
                 TextColumn::make('code')->label('Codice')->searchable()->sortable(),
-                TextColumn::make('name')->label('Nome')->searchable()->sortable(),
-                TextColumn::make('address')->label('Indirizzo'),
-                TextColumn::make('city')->label('Città')->searchable(),
+                TextColumn::make('name')->label('Ragione sociale')->searchable()->sortable()
+                    ->toggleable(),
+                TextColumn::make('sign_name')->label('Insegna')->searchable()->sortable(),
+                TextColumn::make('vat_number')->label('P.IVA')->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('agent')->label('Agente')->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('address')->label('Indirizzo')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('city')->label('Città')->searchable()->sortable(),
                 TextColumn::make('province')->label('Prov.')->sortable(),
                 IconColumn::make('is_active')->label('Attivo')->boolean(),
             ])
-            ->defaultSort('name')
+            ->defaultSort('sign_name')
             ->filters([
                 TernaryFilter::make('is_active')->label('Attivo'),
                 SelectFilter::make('province')->label('Provincia')
-                    ->options(fn () => Store::distinct()->pluck('province', 'province')->filter()->toArray()),
+                    ->options(fn () => Store::distinct()->pluck('province', 'province')->filter()->sort()->toArray()),
+                SelectFilter::make('agent')->label('Agente')
+                    ->options(fn () => Store::whereNotNull('agent')->distinct()->pluck('agent', 'agent')->filter()->sort()->toArray()),
             ])
             ->actions([
                 EditAction::make(),

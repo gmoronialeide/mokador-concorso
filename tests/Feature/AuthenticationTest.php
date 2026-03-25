@@ -48,7 +48,8 @@ class AuthenticationTest extends TestCase
             'cf-turnstile-response' => 'test-token',
         ]);
 
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('register.success'));
+        $this->assertAuthenticated();
         $this->assertDatabaseHas('users', ['email' => 'mario@test.it']);
     }
 
@@ -113,7 +114,6 @@ class AuthenticationTest extends TestCase
         $response = $this->post(route('login'), [
             'email' => $user->email,
             'password' => 'Password1A',
-            'cf-turnstile-response' => 'test-token',
         ]);
 
         $response->assertRedirect(route('game.show'));
@@ -127,25 +127,23 @@ class AuthenticationTest extends TestCase
         $response = $this->post(route('login'), [
             'email' => $user->email,
             'password' => 'WrongPassword1',
-            'cf-turnstile-response' => 'test-token',
         ]);
 
         $response->assertSessionHasErrors('email');
         $this->assertGuest();
     }
 
-    public function test_login_unverified_shows_error_and_stays_guest(): void
+    public function test_login_unverified_user_can_login(): void
     {
         $user = User::factory()->unverified()->create(['password' => 'Password1A']);
 
         $response = $this->post(route('login'), [
             'email' => $user->email,
             'password' => 'Password1A',
-            'cf-turnstile-response' => 'test-token',
         ]);
 
-        $response->assertSessionHasErrors('email');
-        $this->assertGuest();
+        $response->assertRedirect(route('game.show'));
+        $this->assertAuthenticatedAs($user);
     }
 
     // --- Auth guards ---
@@ -157,13 +155,13 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    public function test_game_page_requires_verified_email(): void
+    public function test_game_page_accessible_without_verified_email(): void
     {
         $user = User::factory()->unverified()->create();
 
         $response = $this->actingAs($user)->get(route('game.show'));
 
-        $response->assertRedirect(route('verification.notice'));
+        $response->assertStatus(200);
     }
 
     public function test_logout(): void
@@ -270,22 +268,17 @@ class AuthenticationTest extends TestCase
 
     // --- Turnstile ---
 
-    public function test_login_fails_with_invalid_turnstile(): void
+    public function test_login_without_turnstile_succeeds(): void
     {
-        LaravelTurnstile::shouldReceive('validate')
-            ->once()
-            ->andReturn(['success' => false]);
-
         $user = User::factory()->create(['password' => 'Password1A']);
 
         $response = $this->post(route('login'), [
             'email' => $user->email,
             'password' => 'Password1A',
-            'cf-turnstile-response' => 'invalid-token',
         ]);
 
-        $response->assertSessionHasErrors('cf-turnstile-response');
-        $this->assertGuest();
+        $response->assertRedirect(route('game.show'));
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_register_fails_with_invalid_turnstile(): void

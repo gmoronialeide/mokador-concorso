@@ -117,7 +117,7 @@
                 <div class="d-flex flex-column gap-3 align-items-center justify-content-center order-1 order-lg-2">
                     <p class="prize-numeration">1° PREMIO</p>
                     <h3 class="section-subtitle">soggiorno per 2 persone<br>al Family Hotel Gran Baita</h3>
-                    <p class="text-subtitle text-center">Il primo premio è <strong>una settimana per 2 persone</strong> presso il <a href="https://www.familyhotelgranbaita.it/">Family Hotel Gran Baita</a>, immerso nella splendida Val di Fassa, esplora e rilassati tra i paesaggi suggestivi delle Dolomiti.</p>
+                    <p class="text-subtitle text-center">Il primo premio è <strong>una settimana per 2 persone</strong> presso il <a href="https://www.familyhotelgranbaita.it/" target="_blank" rel="noopener">Family Hotel Gran Baita</a>, immerso nella splendida Val di Fassa, esplora e rilassati tra i paesaggi suggestivi delle Dolomiti.</p>
                     <p class="text-subtitle text-center">Il soggiorno è valido esclusivamente dall'11 al 18 luglio 2026. Il vincitore dovrà confermare la propria presenza direttamente all'hotel entro il 30 giugno 2026.</p>
                     <p class="text-subtitle text-center"><strong>Non sono incluse le spese di viaggio e i servizi non espressamente ricompresi</strong></p>
                 </div>

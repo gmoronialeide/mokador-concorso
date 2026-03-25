@@ -80,6 +80,8 @@ class BackofficeTest extends TestCase
             ->fillForm([
                 'code' => 'NEW01',
                 'name' => 'Nuovo Punto Vendita',
+                'sign_name' => 'Nuovo PV',
+                'vat_number' => '12345678901',
                 'address' => 'Via Nuova 1',
                 'city' => 'Roma',
                 'province' => 'RM',
@@ -99,6 +101,8 @@ class BackofficeTest extends TestCase
         $store = Store::create([
             'code' => 'EDIT01',
             'name' => 'Old Name',
+            'sign_name' => 'Old Sign',
+            'vat_number' => '12345678901',
             'address' => 'Via Test',
             'city' => 'Bologna',
             'province' => 'BO',

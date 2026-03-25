@@ -85,7 +85,7 @@
                 <div class="footer-sx">
                     <p>Per assistenza: <a href="mailto:concorso@mokador.it">concorso@mokador.it</a></p>
                     <div class="footer-items">
-                        <p>Copyright &copy; 2026 Mokador</p>
+                        <p>Copyright &copy; 2026 Mokador Srl</p>
                         <span class="footer-separator">|</span>
                         <p>Tutti i diritti riservati</p>
                         <span class="footer-separator">|</span>

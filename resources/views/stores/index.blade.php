@@ -31,7 +31,7 @@
                     @foreach ($stores as $store)
                         <li>
                             <img src="{{ asset('img/location-icon.svg') }}" alt="Location Icon">
-                            <p>{{ $store->name }} - {{ $store->address }} {{ $store->city }} ({{ $store->province }})</p>
+                            <p><strong>{{ $store->code }}</strong> — {{ $store->display_name }} — {{ $store->city }} ({{ $store->province }})</p>
                         </li>
                     @endforeach
                 </ul>

@@ -28,11 +28,10 @@
                     @csrf
                     <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required>
                     <input type="password" name="password" placeholder="Password" required>
-                    @include('partials.turnstile')
                     <button type="submit" class="btn-mokador">Accedi</button>
                 </form>
                 <p class="text-subtitle text-center"><a href="{{ route('password.request') }}">Password dimenticata?</a></p>
-                <p class="text-subtitle text-center">Non hai un account? <a href="{{ route('register') }}" class="btn-mokador ms-0 mt-3 mt-md-0 ms-md-3">Registrati</a></p>
+                <p class="text-subtitle text-center pb-4">Non hai un account? <a href="{{ route('register') }}" class="btn-mokador ms-0 mt-2 mt-md-0 ms-md-3">Registrati</a></p>
                 @endif
             </div>
         </div>

@@ -55,8 +55,8 @@
                             <label for="cap">CAP<span>*</span></label>
                             <input type="text" id="cap" name="cap" placeholder="CAP" value="{{ old('cap') }}" maxlength="5" required>                        </div>
                         <div class="form-register-col">
-                            <label for="telefono">Telefono<span>*</span></label>
-                            <input type="tel" id="telefono" name="phone" placeholder="Telefono" value="{{ old('phone') }}" required>                        </div>
+                            <label for="cellulare">Cellulare<span>*</span></label>
+                            <input type="tel" id="cellulare" name="phone" placeholder="Cellulare" value="{{ old('phone') }}" required>                        </div>
                     </div>
                     <div class="form-register-row">
                         <div class="form-register-col">

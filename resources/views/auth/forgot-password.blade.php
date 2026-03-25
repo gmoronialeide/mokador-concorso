@@ -27,7 +27,7 @@
                     @csrf
                     <input type="email" name="email" placeholder="Email" value="{{ old('email') }}">
                     @include('partials.turnstile')
-                    <button type="submit" class="btn-mokador">Invia link di recupero</button>
+                    <button type="submit" class="btn-mokador">Invia</button>
                 </form>
                 <p class="text-subtitle text-center"><a href="{{ route('login') }}">Torna al login</a></p>
                 @endif

@@ -39,7 +39,7 @@
         document.getElementById('citta').value = citta[cityIdx];
         document.getElementById('provincia').value = province[cityIdx];
         document.getElementById('cap').value = String(rand(10000, 99999));
-        document.getElementById('telefono').value = '33' + String(rand(10000000, 99999999));
+        document.getElementById('cellulare').value = '33' + String(rand(10000000, 99999999));
         document.getElementById('email').value = 'g.moroni+' + rand(1000, 99999) + '@aleide.it';
         document.getElementById('password').value = 'Password1';
         document.getElementById('conferma-password').value = 'Password1';
@@ -56,7 +56,7 @@
         document.getElementById('citta').value = '';                         // vuoto
         document.getElementById('provincia').value = '';                      // nessuna selezione
         document.getElementById('cap').value = 'ABCDE';                      // non numerico
-        document.getElementById('telefono').value = '0000';                 // non è un cellulare valido
+        document.getElementById('cellulare').value = '0000';                 // non è un cellulare valido
         document.getElementById('email').value = 'non-una-email';           // formato email invalido
         document.getElementById('password').value = 'abc';                  // troppo corta, no maiuscole, no numeri
         document.getElementById('conferma-password').value = 'xyz';         // non corrisponde

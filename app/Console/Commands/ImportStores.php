@@ -8,13 +8,13 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ImportStores extends Command
 {
-    protected $signature = 'stores:import {file : Path to the Excel file} {--sheet=0 : Sheet index (0-based)}';
+    protected $signature = 'stores:import {file* : Path to the Excel file} {--sheet=0 : Sheet index (0-based)}';
 
     protected $description = 'Import stores from an Excel file';
 
     public function handle(): int
     {
-        $file = $this->argument('file');
+        $file = implode(' ', (array) $this->argument('file'));
 
         if (! file_exists($file)) {
             $this->error("File not found: {$file}");

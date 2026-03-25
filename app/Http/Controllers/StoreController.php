@@ -30,7 +30,7 @@ class StoreController extends Controller
                 $query->where('city', 'LIKE', '%' . $request->input('city') . '%');
             }
 
-            $stores = $query->orderBy('name')->get();
+            $stores = $query->orderBy('sign_name')->get();
         }
 
         return view('stores.index', compact('provinces', 'stores'));

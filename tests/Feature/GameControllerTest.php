@@ -45,10 +45,10 @@ class GameControllerTest extends TestCase
         ]);
     }
 
-    private function validPlayData(string $storeCode = 'STORE01'): array
+    private function validPlayData(?int $storeId = null): array
     {
         return [
-            'store_code' => $storeCode,
+            'store_id' => $storeId ?? Store::where('code', 'STORE01')->value('id'),
             'receipt' => UploadedFile::fake()->image('receipt.jpg', 800, 600)->size(2048),
         ];
     }
@@ -127,22 +127,25 @@ class GameControllerTest extends TestCase
         $response->assertSessionHasErrors('receipt');
     }
 
-    public function test_play_nonexistent_store_code(): void
+    public function test_play_nonexistent_store(): void
     {
         Carbon::setTestNow('2026-04-25 10:00:00');
         $user = $this->createVerifiedUser();
         // No store created
 
-        $response = $this->actingAs($user)->post(route('game.play'), $this->validPlayData('INVALID'));
+        $response = $this->actingAs($user)->post(route('game.play'), [
+            'store_id' => 99999,
+            'receipt' => UploadedFile::fake()->image('receipt.jpg', 800, 600)->size(2048),
+        ]);
 
-        $response->assertSessionHasErrors('store_code');
+        $response->assertSessionHasErrors('store_id');
     }
 
     public function test_play_inactive_store(): void
     {
         Carbon::setTestNow('2026-04-25 10:00:00');
         $user = $this->createVerifiedUser();
-        Store::create([
+        $inactiveStore = Store::create([
             'code' => 'CLOSED01',
             'name' => 'Closed Store',
             'sign_name' => 'Closed Store',
@@ -154,9 +157,12 @@ class GameControllerTest extends TestCase
             'is_active' => false,
         ]);
 
-        $response = $this->actingAs($user)->post(route('game.play'), $this->validPlayData('CLOSED01'));
+        $response = $this->actingAs($user)->post(route('game.play'), [
+            'store_id' => $inactiveStore->id,
+            'receipt' => UploadedFile::fake()->image('receipt.jpg', 800, 600)->size(2048),
+        ]);
 
-        $response->assertSessionHasErrors('store_code');
+        $response->assertSessionHasErrors('store_id');
     }
 
     public function test_play_twice_same_day(): void

@@ -21,7 +21,7 @@ class GameController extends Controller
         $user = Auth::user();
         $alreadyPlayed = $user->hasPlayedToday();
         $contestActive = $this->isContestActive();
-        $stores = Store::active()->orderBy('sign_name')->get(['code', 'name', 'sign_name', 'city', 'province']);
+        $stores = Store::active()->orderBy('sign_name')->get(['id', 'code', 'name', 'sign_name', 'city', 'province']);
 
         return view('game.play', compact('alreadyPlayed', 'contestActive', 'stores'));
     }
@@ -39,10 +39,11 @@ class GameController extends Controller
         }
 
         $receiptPath = $request->file('receipt')->store('receipts');
+        $store = Store::findOrFail($request->validated('store_id'));
 
         $play = Play::create([
             'user_id' => $user->id,
-            'store_code' => $request->validated('store_code'),
+            'store_code' => $store->code,
             'receipt_image' => $receiptPath,
             'played_at' => Carbon::now(),
         ]);

@@ -16,12 +16,12 @@ class PlayGameRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'store_code' => [
+            'store_id' => [
                 'required',
-                'string',
+                'integer',
                 function (string $attribute, mixed $value, \Closure $fail): void {
-                    if (! Store::where('code', $value)->where('is_active', true)->exists()) {
-                        $fail('Il codice punto vendita non è valido o non è attivo.');
+                    if (! Store::where('id', $value)->where('is_active', true)->exists()) {
+                        $fail('Il punto vendita non è valido o non è attivo.');
                     }
                 },
             ],
@@ -33,7 +33,7 @@ class PlayGameRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'store_code.required' => 'Inserisci il codice del punto vendita.',
+            'store_id.required' => 'Seleziona il punto vendita.',
             'receipt.required' => 'Carica la foto dello scontrino.',
             'receipt.mimes' => 'Lo scontrino deve essere un\'immagine JPG o PNG.',
             'receipt.max' => 'Lo scontrino non può superare i 6MB.',

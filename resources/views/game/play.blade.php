@@ -87,10 +87,10 @@
                         @csrf
                         <div class="form-register-col">
                             <label for="punto-vendita">Punto vendita</label>
-                            <select id="punto-vendita" name="store_code" required>
+                            <select id="punto-vendita" name="store_id" required>
                                 <option value="" data-placeholder="true">Cerca punto vendita...</option>
                                 @foreach ($stores as $store)
-                                    <option value="{{ $store->code }}" @selected(old('store_code') === $store->code)>{{ $store->code }} - {{ $store->display_name }} ({{ $store->city }}, {{ $store->province }})</option>
+                                    <option value="{{ $store->id }}" @selected((int) old('store_id') === $store->id)>{{ $store->display_name }} — {{ $store->city }} ({{ $store->province }})</option>
                                 @endforeach
                             </select>
                         </div>

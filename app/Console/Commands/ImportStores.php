@@ -31,7 +31,6 @@ class ImportStores extends Command
         $this->info('Columns found: ' . implode(', ', array_filter($header)));
 
         $created = 0;
-        $updated = 0;
         $skipped = 0;
 
         foreach ($rows as $index => $row) {
@@ -44,6 +43,7 @@ class ImportStores extends Command
             }
 
             $data = [
+                'code' => $code,
                 'name' => trim((string) ($row['C'] ?? '')),
                 'sign_name' => trim((string) ($row['D'] ?? '')),
                 'vat_number' => trim((string) ($row['E'] ?? '')),
@@ -54,16 +54,11 @@ class ImportStores extends Command
                 'is_active' => true,
             ];
 
-            $store = Store::updateOrCreate(['code' => $code], $data);
-
-            if ($store->wasRecentlyCreated) {
-                $created++;
-            } else {
-                $updated++;
-            }
+            Store::create($data);
+            $created++;
         }
 
-        $this->info("Import completed: {$created} created, {$updated} updated, {$skipped} skipped.");
+        $this->info("Import completed: {$created} created, {$skipped} skipped.");
 
         return self::SUCCESS;
     }

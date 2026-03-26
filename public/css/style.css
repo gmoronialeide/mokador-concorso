@@ -206,6 +206,10 @@ header {
     align-items: center;
 }
 
+.header-content img {
+    max-width: 120px;
+}
+
 .header-content nav ul {
     display: flex;
     list-style: none;

@@ -90,7 +90,7 @@
                             <select id="punto-vendita" name="store_code" required>
                                 <option value="" data-placeholder="true">Cerca punto vendita...</option>
                                 @foreach ($stores as $store)
-                                    <option value="{{ $store->code }}" @selected(old('store_code') === $store->code)>{{ $store->code }} - {{ $store->name }} ({{ $store->city }}, {{ $store->province }})</option>
+                                    <option value="{{ $store->code }}" @selected(old('store_code') === $store->code)>{{ $store->code }} - {{ $store->display_name }} ({{ $store->city }}, {{ $store->province }})</option>
                                 @endforeach
                             </select>
                         </div>

@@ -49,7 +49,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $response->assertRedirect(route('register.success'));
-        $this->assertAuthenticated();
+        $this->assertGuest();
         $this->assertDatabaseHas('users', ['email' => 'mario@test.it']);
     }
 
@@ -133,7 +133,7 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_login_unverified_user_can_login(): void
+    public function test_login_unverified_shows_error_and_stays_guest(): void
     {
         $user = User::factory()->unverified()->create(['password' => 'Password1A']);
 
@@ -142,8 +142,8 @@ class AuthenticationTest extends TestCase
             'password' => 'Password1A',
         ]);
 
-        $response->assertRedirect(route('game.show'));
-        $this->assertAuthenticatedAs($user);
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
     }
 
     // --- Auth guards ---
@@ -155,13 +155,13 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    public function test_game_page_accessible_without_verified_email(): void
+    public function test_game_page_requires_verified_email(): void
     {
         $user = User::factory()->unverified()->create();
 
         $response = $this->actingAs($user)->get(route('game.show'));
 
-        $response->assertStatus(200);
+        $response->assertRedirect(route('verification.notice'));
     }
 
     public function test_logout(): void

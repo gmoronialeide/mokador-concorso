@@ -21,7 +21,7 @@ class GameController extends Controller
         $user = Auth::user();
         $alreadyPlayed = $user->hasPlayedToday();
         $contestActive = $this->isContestActive();
-        $stores = Store::active()->orderBy('name')->get(['code', 'name', 'city', 'province']);
+        $stores = Store::active()->orderBy('sign_name')->get(['code', 'name', 'sign_name', 'city', 'province']);
 
         return view('game.play', compact('alreadyPlayed', 'contestActive', 'stores'));
     }

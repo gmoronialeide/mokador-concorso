@@ -6,7 +6,9 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Province;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -30,6 +32,14 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
+
+        if (! $user->hasVerifiedEmail()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors(['email' => 'Devi confermare la tua email prima di accedere. Controlla la tua casella di posta.'])->onlyInput('email');
+        }
 
         $request->session()->regenerate();
 
@@ -76,8 +86,8 @@ class AuthController extends Controller
 
         $user = User::create($validated);
 
-        Auth::login($user);
-        $request->session()->regenerate();
+        $user->plainPassword = $plainPassword;
+        event(new Registered($user));
 
         return redirect()->route('register.success');
     }
@@ -85,5 +95,21 @@ class AuthController extends Controller
     public function registerSuccess(): View
     {
         return view('auth.registered');
+    }
+
+    public function verificationNotice(): View
+    {
+        return view('auth.verify-email');
+    }
+
+    public function verificationResend(Request $request): RedirectResponse
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->route('game.show');
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('success', 'Email di verifica inviata!');
     }
 }

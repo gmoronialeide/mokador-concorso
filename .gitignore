@@ -5,7 +5,7 @@ yarn-error.log
 
 # Laravel
 /.phpunit.cache
-/public/build
+#/public/build
 /public/hot
 /public/storage
 /storage/*.key

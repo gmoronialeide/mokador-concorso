@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Store extends Model
 {
@@ -26,6 +27,11 @@ class Store extends Model
         return [
             'is_active' => 'boolean',
         ];
+    }
+
+    public function plays(): HasMany
+    {
+        return $this->hasMany(Play::class, 'store_code', 'code');
     }
 
     /**

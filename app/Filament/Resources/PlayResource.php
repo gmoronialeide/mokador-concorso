@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PlayResource\Pages;
 use App\Models\Play;
 use App\Models\Prize;
-use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -17,7 +16,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Storage;
 
 class PlayResource extends Resource
 {
@@ -132,7 +130,8 @@ class PlayResource extends Resource
                 Section::make('Utente')->schema([
                     TextEntry::make('user.name')->label('Nome'),
                     TextEntry::make('user.surname')->label('Cognome'),
-                    TextEntry::make('user.email')->label('Email'),
+                    TextEntry::make('user.email')->label('Email')
+                        ->columnSpan(2),
                     TextEntry::make('user.phone')->label('Telefono'),
                 ])->columns(4),
                 Section::make('Premio')->schema([

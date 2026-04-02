@@ -48,7 +48,8 @@
       "Bash(grep -r class.*Login /home/guido/projects/mokador-concorso2/vendor/filament/filament/src/Http/Middleware/)",
       "WebFetch(domain:filamentexamples.com)",
       "Bash(docker.exe ps:*)",
-      "Bash(php -v)"
+      "Bash(php -v)",
+      "Bash(chmod +x:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

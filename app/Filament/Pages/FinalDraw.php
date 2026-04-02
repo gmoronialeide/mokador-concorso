@@ -2,9 +2,11 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\UserResource;
 use App\Models\FinalDrawResult;
 use App\Models\FinalPrize;
 use App\Models\Play;
+use App\Models\User;
 use App\Services\FinalDrawService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -29,6 +31,19 @@ class FinalDraw extends Page
     public function getEligibleUsersCount(): int
     {
         return app(FinalDrawService::class)->getEligibleUsers()->count();
+    }
+
+    public function getValidUsersCount(): int
+    {
+        return User::query()
+            ->where('is_banned', false)
+            ->whereHas('plays', fn ($q) => $q->where('is_banned', false))
+            ->count();
+    }
+
+    public function getUserViewUrl(int $userId): string
+    {
+        return UserResource::getUrl('view', ['record' => $userId]);
     }
 
     public function getEligiblePlaysCount(): int
@@ -181,7 +196,7 @@ class FinalDraw extends Page
     public function exportVerbaleAction(): Action
     {
         return Action::make('exportVerbale')
-            ->label('Esporta Verbale')
+            ->label('Esporta CSV per verbale')
             ->icon('heroicon-o-document-arrow-down')
             ->color('info')
             ->visible(fn () => $this->hasAllWinners() && $this->hasSubstitutes())
@@ -208,13 +223,11 @@ class FinalDraw extends Page
                     fputcsv($handle, ['Data generazione', now()->format('d/m/Y H:i:s')], ';');
                     fputcsv($handle, ['Partecipanti eleggibili totali', $eligibleCount], ';');
                     fputcsv($handle, ['Giocate valide totali nel pool', $playsCount], ';');
-                    fputcsv($handle, ['Algoritmo', 'Estrazione pesata con random_int() (CSPRNG) — peso = numero giocate valide per utente'], ';');
                     fputcsv($handle, [''], ';');
 
                     foreach ($prizes as $prize) {
                         fputcsv($handle, [''], ';');
                         fputcsv($handle, ["PREMIO {$prize->position}° — {$prize->name}"], ';');
-                        fputcsv($handle, ['Valore', number_format($prize->value, 2, ',', '.')], ';');
                         fputcsv($handle, ['Data estrazione', $prize->drawn_at->format('d/m/Y H:i:s')], ';');
                         fputcsv($handle, ['Estratto da', $prize->admin?->name ?? '—'], ';');
                         fputcsv($handle, [''], ';');

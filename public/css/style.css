@@ -1088,6 +1088,20 @@ select {
         gap: 2rem;
     }
 
+    .form-punti-vendita .form-register-col:first-child {
+        flex: 3;
+    }
+
+    .form-punti-vendita .form-register-col:nth-child(2) {
+        flex: 1;
+    }
+
+    .form-punti-vendita .btn-mokador {
+        white-space: nowrap;
+        padding: 0.8rem 1.2rem;
+        font-size: 1rem;
+    }
+
     .form-register-row {
         grid-template-columns: repeat(2, 1fr);
     }

@@ -6,10 +6,6 @@
                 "artisan",
                 "boost:mcp"
             ]
-        },
-        "ManagerAi": {
-            "type": "url",
-            "url": "http://localhost:8001/mcp/"
         }
     }
 }

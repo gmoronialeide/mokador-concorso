@@ -75,6 +75,11 @@ WORKDIR /var/www/html
 # Permessi per storage e cache di Laravel
 RUN chown -R www-data:www-data /var/www/html
 
+# Entrypoint che sistema i permessi ad ogni avvio
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 EXPOSE 80
 
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

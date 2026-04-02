@@ -122,11 +122,13 @@ class UserResource extends Resource
                     TextEntry::make('name')->label('Nome'),
                     TextEntry::make('surname')->label('Cognome'),
                     TextEntry::make('birth_date')->label('Data di nascita')->date('d/m/Y'),
-                    TextEntry::make('email'),
+                    TextEntry::make('email')
+                        ->columnSpan(2),
                     TextEntry::make('phone')->label('Telefono'),
                 ])->columns(3),
                 Section::make('Indirizzo')->schema([
-                    TextEntry::make('address')->label('Indirizzo'),
+                    TextEntry::make('address')->label('Indirizzo')
+                        ->columnSpan(2),
                     TextEntry::make('city')->label('Città'),
                     TextEntry::make('province')->label('Provincia'),
                     TextEntry::make('cap')->label('CAP'),

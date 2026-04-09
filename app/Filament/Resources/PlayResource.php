@@ -70,6 +70,21 @@ class PlayResource extends Resource
                     ->modalContent(fn (Play $record) => view('filament.modals.receipt-preview', ['record' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Chiudi'),
+                Action::make('notes')
+                    ->label('Note')
+                    ->icon('heroicon-o-chat-bubble-left-ellipsis')
+                    ->color(fn (Play $record): string => filled($record->notes) ? 'warning' : 'gray')
+                    ->modalHeading('Note')
+                    ->modalWidth('md')
+                    ->form([
+                        \Filament\Forms\Components\Textarea::make('notes')
+                            ->label('Note')
+                            ->rows(4)
+                            ->default(fn (Play $record): ?string => $record->notes),
+                    ])
+                    ->action(fn (Play $record, array $data) => $record->update(['notes' => $data['notes']]))
+                    ->modalSubmitActionLabel('Salva')
+                    ->modalCancelActionLabel('Chiudi'),
                 ViewAction::make(),
                 Action::make('ban')
                     ->label('Banna')
@@ -121,6 +136,9 @@ class PlayResource extends Resource
                         ->badge()
                         ->formatStateUsing(fn (bool $state): string => $state ? 'Vincente' : 'Non vincente')
                         ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
+                    TextEntry::make('notes')->label('Note')
+                        ->visible(fn (Play $record): bool => filled($record->notes))
+                        ->columnSpanFull(),
                 ])->columns(4),
                 Section::make('Scontrino')->schema([
                     \Filament\Infolists\Components\ViewEntry::make('receipt_image')

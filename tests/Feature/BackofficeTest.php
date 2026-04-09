@@ -223,6 +223,71 @@ class BackofficeTest extends TestCase
         $this->assertNull($user->ban_reason);
     }
 
+    // --- PlayResource notes ---
+
+    public function test_admin_can_add_notes_to_play(): void
+    {
+        $this->actingAs($this->admin, 'admin');
+
+        $user = User::factory()->create();
+        $play = Play::create([
+            'user_id' => $user->id,
+            'store_code' => 'STORE01',
+            'receipt_image' => 'receipts/test.jpg',
+            'played_at' => now(),
+        ]);
+
+        Livewire::test(ListPlays::class)
+            ->callAction(TestAction::make('notes')->table($play), [
+                'notes' => 'Nota di test',
+            ])
+            ->assertSuccessful();
+
+        $play->refresh();
+        $this->assertEquals('Nota di test', $play->notes);
+    }
+
+    public function test_admin_can_update_existing_notes(): void
+    {
+        $this->actingAs($this->admin, 'admin');
+
+        $user = User::factory()->create();
+        $play = Play::create([
+            'user_id' => $user->id,
+            'store_code' => 'STORE01',
+            'receipt_image' => 'receipts/test.jpg',
+            'played_at' => now(),
+            'notes' => 'Nota originale',
+        ]);
+
+        Livewire::test(ListPlays::class)
+            ->callAction(TestAction::make('notes')->table($play), [
+                'notes' => 'Nota aggiornata',
+            ])
+            ->assertSuccessful();
+
+        $play->refresh();
+        $this->assertEquals('Nota aggiornata', $play->notes);
+    }
+
+    public function test_play_view_shows_notes_when_populated(): void
+    {
+        $this->actingAs($this->admin, 'admin');
+
+        $user = User::factory()->create();
+        $play = Play::create([
+            'user_id' => $user->id,
+            'store_code' => 'STORE01',
+            'receipt_image' => 'receipts/test.jpg',
+            'played_at' => now(),
+            'notes' => 'Una nota importante',
+        ]);
+
+        Livewire::test(ViewPlay::class, ['record' => $play->id])
+            ->assertSuccessful()
+            ->assertSee('Una nota importante');
+    }
+
     // --- View pages ---
 
     public function test_user_view_page_renders(): void

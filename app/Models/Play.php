@@ -20,6 +20,7 @@ class Play extends Model
         'is_banned',
         'ban_reason',
         'banned_at',
+        'notes',
     ];
 
     protected $attributes = [

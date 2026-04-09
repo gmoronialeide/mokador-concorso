@@ -26,12 +26,14 @@ class GenerateWinningSlots extends Command
 
         if ($days !== 28) {
             $this->error("Il concorso deve durare esattamente 28 giorni (trovati: {$days})");
+
             return self::FAILURE;
         }
 
         $prizes = Prize::all()->keyBy('code');
         if ($prizes->count() !== 5) {
             $this->error('Devono esistere esattamente 5 premi (A-E). Verifica la migrazione seed_production_data.');
+
             return self::FAILURE;
         }
 
@@ -43,6 +45,7 @@ class GenerateWinningSlots extends Command
 
         if (empty($schedule)) {
             $this->error('Griglia premi vuota. Verifica la migrazione create_prize_schedule_table.');
+
             return self::FAILURE;
         }
 
@@ -53,6 +56,7 @@ class GenerateWinningSlots extends Command
             $assignedCount = WinningSlot::where('is_assigned', true)->count();
             if ($assignedCount > 0) {
                 $this->error("Impossibile resettare: {$assignedCount} slot già assegnati. Il concorso è in corso.");
+
                 return self::FAILURE;
             }
             WinningSlot::query()->delete();
@@ -61,6 +65,7 @@ class GenerateWinningSlots extends Command
 
         if (! $isDryRun && ! $isReset && WinningSlot::count() > 0) {
             $this->error('Esistono già degli slot. Usa --reset per rigenerare.');
+
             return self::FAILURE;
         }
 
@@ -129,18 +134,21 @@ class GenerateWinningSlots extends Command
 
         if ($totalSlots !== 104) {
             $this->error("Totale slot errato: {$totalSlots} (attesi 104)");
+
             return self::FAILURE;
         }
 
         foreach ($summary as $code => $count) {
             if ($count !== $prizes[$code]->total_quantity) {
                 $this->error("Premio {$code}: {$count} slot generati, attesi {$prizes[$code]->total_quantity}");
+
                 return self::FAILURE;
             }
         }
 
         if ($isDryRun) {
             $this->warn('Dry run: nessun record inserito.');
+
             return self::SUCCESS;
         }
 
@@ -156,6 +164,7 @@ class GenerateWinningSlots extends Command
         ]);
 
         $this->info('Slot vincenti inseriti con successo.');
+
         return self::SUCCESS;
     }
 
@@ -181,7 +190,7 @@ class GenerateWinningSlots extends Command
             // Check distanza minima
             $valid = true;
             for ($i = 1; $i < $count; $i++) {
-                if ($times[$i] - $times[$i - 1] < $gap) {
+                if ($gap > $times[$i] - $times[$i - 1]) {
                     $valid = false;
                     break;
                 }

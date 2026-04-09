@@ -28,7 +28,7 @@ class PasswordResetController extends Controller
 
         $request->validate([
             'email' => ['required', 'email'],
-            'cf-turnstile-response' => ['required', new TurnstileCheck()],
+            'cf-turnstile-response' => ['required', new TurnstileCheck],
         ], [
             'email.required' => 'Inserisci la tua email.',
             'email.email' => 'Inserisci un indirizzo email valido.',
@@ -63,7 +63,7 @@ class PasswordResetController extends Controller
             'token' => ['required'],
             'email' => ['required', 'email'],
             'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->mixedCase()->numbers()],
-            'cf-turnstile-response' => ['required', new TurnstileCheck()],
+            'cf-turnstile-response' => ['required', new TurnstileCheck],
         ], [
             'password.confirmed' => 'Le password non corrispondono.',
         ]);

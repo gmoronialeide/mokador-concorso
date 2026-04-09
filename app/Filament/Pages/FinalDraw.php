@@ -12,14 +12,15 @@ use App\Services\FinalDrawService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FinalDraw extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-gift';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-gift';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Concorso';
+    protected static string|\UnitEnum|null $navigationGroup = 'Concorso';
 
     protected static ?string $navigationLabel = 'Estrazione Finale';
 
@@ -31,7 +32,7 @@ class FinalDraw extends Page
 
     public function getEligibleUsersCount(): int
     {
-        return app(FinalDrawService::class)->getEligibleUsers()->count();
+        return app(FinalDrawService::class)->getEligiblePlays()->unique('user_id')->count();
     }
 
     public function getValidUsersCount(): int
@@ -55,9 +56,9 @@ class FinalDraw extends Page
             ->count();
     }
 
-    public function getPrizes(): \Illuminate\Database\Eloquent\Collection
+    public function getPrizes(): Collection
     {
-        return FinalPrize::with(['winner.user', 'substitutes.user', 'admin'])
+        return FinalPrize::with(['winner.user', 'winner.play.store', 'substitutes.user', 'substitutes.play.store', 'admin'])
             ->orderBy('position')
             ->get();
     }
@@ -99,7 +100,7 @@ class FinalDraw extends Page
             ->size('lg')
             ->requiresConfirmation()
             ->modalHeading('Conferma estrazione vincitori')
-            ->modalDescription(fn () => "Verranno estratti i 3 vincitori dei premi finali tra {$this->getEligibleUsersCount()} utenti eleggibili con {$this->getEligiblePlaysCount()} giocate valide totali. L'estrazione è pesata: chi ha giocato di più ha più probabilità.")
+            ->modalDescription(fn () => "Verranno estratti i 3 vincitori dei premi finali tra {$this->getEligiblePlaysCount()} giocate valide di {$this->getEligibleUsersCount()} utenti eleggibili. Ogni giocata è un biglietto con pari probabilità.")
             ->modalSubmitActionLabel('Estrai')
             ->visible(fn () => $this->isContestEnded() && ! $this->hasAllWinners() && $this->getTotalPrizesCount() > 0)
             ->action(function () {
@@ -204,7 +205,7 @@ class FinalDraw extends Page
             ->color('info')
             ->visible(fn () => $this->hasAllWinners() && $this->hasSubstitutes())
             ->action(function (): StreamedResponse {
-                $prizes = FinalPrize::with(['winner.user', 'substitutes.user', 'admin'])
+                $prizes = FinalPrize::with(['winner.user', 'winner.play', 'substitutes.user', 'substitutes.play', 'admin'])
                     ->orderBy('position')
                     ->get();
 
@@ -212,7 +213,7 @@ class FinalDraw extends Page
                     + FinalDrawResult::count(); // Include drawn users in total
                 $playsCount = $this->getEligiblePlaysCount();
 
-                $filename = 'verbale_estrazione_finale_' . now()->format('Y-m-d_His') . '.csv';
+                $filename = 'verbale_estrazione_finale_'.now()->format('Y-m-d_His').'.csv';
 
                 return response()->streamDownload(function () use ($prizes, $eligibleCount, $playsCount) {
                     $handle = fopen('php://output', 'w');
@@ -236,11 +237,12 @@ class FinalDraw extends Page
                         fputcsv($handle, [''], ';');
 
                         // Header risultati
-                        fputcsv($handle, ['Ruolo', 'Posizione', 'Nome', 'Cognome', 'Email', 'Telefono', 'Data nascita', 'Indirizzo', 'Città', 'Provincia', 'CAP', 'Giocate valide', 'Data estrazione'], ';');
+                        fputcsv($handle, ['Ruolo', 'Posizione', 'Nome', 'Cognome', 'Email', 'Telefono', 'Data nascita', 'Indirizzo', 'Città', 'Provincia', 'CAP', 'ID Giocata', 'Data/ora Giocata', 'Giocate valide', 'Data estrazione'], ';');
 
                         // Vincitore
                         if ($prize->winner) {
                             $u = $prize->winner->user;
+                            $p = $prize->winner->play;
                             fputcsv($handle, [
                                 'VINCITORE',
                                 '',
@@ -253,6 +255,8 @@ class FinalDraw extends Page
                                 $u->city ?? '',
                                 $u->province ?? '',
                                 $u->cap ?? '',
+                                $p?->id ?? '',
+                                $p?->played_at?->format('d/m/Y H:i:s') ?? '',
                                 $prize->winner->total_plays,
                                 $prize->winner->drawn_at->format('d/m/Y H:i:s'),
                             ], ';');
@@ -261,9 +265,10 @@ class FinalDraw extends Page
                         // Sostituti
                         foreach ($prize->substitutes as $sub) {
                             $u = $sub->user;
+                            $p = $sub->play;
                             fputcsv($handle, [
                                 'SOSTITUTO',
-                                $sub->substitute_position . '°',
+                                $sub->substitute_position.'°',
                                 $u->name,
                                 $u->surname,
                                 $u->email,
@@ -273,6 +278,8 @@ class FinalDraw extends Page
                                 $u->city ?? '',
                                 $u->province ?? '',
                                 $u->cap ?? '',
+                                $p?->id ?? '',
+                                $p?->played_at?->format('d/m/Y H:i:s') ?? '',
                                 $sub->total_plays,
                                 $sub->drawn_at->format('d/m/Y H:i:s'),
                             ], ';');

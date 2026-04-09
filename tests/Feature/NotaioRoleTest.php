@@ -15,10 +15,8 @@ use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Filament\Resources\WinningSlotResource\Pages\ListWinningSlots;
 use App\Models\Admin;
 use App\Models\Play;
-use App\Models\Prize;
 use App\Models\Store;
 use App\Models\User;
-use App\Models\WinningSlot;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -52,10 +50,10 @@ class NotaioRoleTest extends TestCase
 
     public function test_notaio_cannot_access_winning_slots(): void
     {
-        $response = $this->actingAs($this->notaio, 'admin')
-            ->get('/admin/winning-slots');
+        $this->actingAs($this->notaio, 'admin');
 
-        $response->assertForbidden();
+        Livewire::test(ListWinningSlots::class)
+            ->assertForbidden();
     }
 
     // -------------------------------------------------------
@@ -188,10 +186,10 @@ class NotaioRoleTest extends TestCase
 
     public function test_notaio_cannot_create_store(): void
     {
-        $response = $this->actingAs($this->notaio, 'admin')
-            ->get('/admin/stores/create');
+        $this->actingAs($this->notaio, 'admin');
 
-        $response->assertForbidden();
+        Livewire::test(CreateStore::class)
+            ->assertForbidden();
     }
 
     // -------------------------------------------------------
@@ -200,6 +198,8 @@ class NotaioRoleTest extends TestCase
 
     public function test_notaio_cannot_edit_store(): void
     {
+        $this->actingAs($this->notaio, 'admin');
+
         $store = Store::create([
             'code' => 'EDIT01',
             'name' => 'Test Store',
@@ -211,10 +211,8 @@ class NotaioRoleTest extends TestCase
             'cap' => '40100',
         ]);
 
-        $response = $this->actingAs($this->notaio, 'admin')
-            ->get("/admin/stores/{$store->id}/edit");
-
-        $response->assertForbidden();
+        Livewire::test(EditStore::class, ['record' => $store->id])
+            ->assertForbidden();
     }
 
     // -------------------------------------------------------

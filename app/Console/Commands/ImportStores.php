@@ -28,7 +28,7 @@ class ImportStores extends Command
 
         // Remove header row
         $header = array_shift($rows);
-        $this->info('Columns found: ' . implode(', ', array_filter($header)));
+        $this->info('Columns found: '.implode(', ', array_filter($header)));
 
         $created = 0;
         $skipped = 0;

@@ -4,26 +4,27 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\StoreResource\Pages;
 use App\Models\Store;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Schema;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class StoreResource extends Resource
 {
     protected static ?string $model = Store::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map-pin';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-map-pin';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Anagrafiche';
+    protected static string|\UnitEnum|null $navigationGroup = 'Anagrafiche';
 
     protected static ?string $modelLabel = 'Punto Vendita';
 
@@ -36,12 +37,12 @@ class StoreResource extends Resource
         return ! auth('admin')->user()->isNotaio();
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return ! auth('admin')->user()->isNotaio();
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return ! auth('admin')->user()->isNotaio();
     }

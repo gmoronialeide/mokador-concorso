@@ -6,6 +6,7 @@ use App\Enums\PlayStatus;
 use App\Models\Play;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Actions\Action;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -33,10 +34,11 @@ class PlaysRelationManager extends RelationManager
             ])
             ->defaultSort('played_at', 'desc')
             ->actions([
-                Tables\Actions\Action::make('notes')
-                    ->label('Note')
+                Action::make('notes')
+                    ->label('')
                     ->icon('heroicon-o-chat-bubble-left-ellipsis')
                     ->color(fn (Play $record): string => filled($record->notes) ? 'warning' : 'gray')
+                    ->tooltip('Note')
                     ->modalHeading('Note')
                     ->modalWidth('md')
                     ->form([

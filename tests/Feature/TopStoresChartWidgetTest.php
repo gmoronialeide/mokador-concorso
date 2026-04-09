@@ -21,7 +21,7 @@ class TopStoresChartWidgetTest extends TestCase
             'code' => $code,
             'name' => $name,
             'sign_name' => $signName ?? $name,
-            'vat_number' => 'IT' . str_pad($code, 9, '0'),
+            'vat_number' => 'IT'.str_pad($code, 9, '0'),
             'address' => 'Via Test 1',
             'city' => 'Bologna',
             'province' => 'BO',

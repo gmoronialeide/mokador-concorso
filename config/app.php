@@ -142,4 +142,8 @@ return [
     'admin_email' => env('ADMIN_EMAIL', 'admin@mokador.it'),
     'admin_password' => env('ADMIN_PASSWORD', 'changeme123'),
 
+    'notaio_name' => env('NOTAIO_NAME', 'Notaio'),
+    'notaio_email' => env('NOTAIO_EMAIL', 'notaio@mokador.it'),
+    'notaio_password' => env('NOTAIO_PASSWORD', 'changeme123'),
+
 ];

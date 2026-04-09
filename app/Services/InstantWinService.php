@@ -34,6 +34,7 @@ class InstantWinService
                 'store_code' => $play->store_code,
                 'user_id' => $play->user_id,
             ]);
+
             return null;
         }
 

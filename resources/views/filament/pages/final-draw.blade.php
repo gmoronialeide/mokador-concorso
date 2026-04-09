@@ -95,7 +95,12 @@
                             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
                                 <div>
                                     <span style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af;">Email</span>
-                                    <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 500; color: #374151; white-space: nowrap; overflow-x: auto;">{{ $prize->winner->user->email }}</p>
+                                    <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 500; color: #374151; white-space: nowrap; overflow-x: auto; display: flex; align-items: center; gap: 6px;">
+                                        {{ $prize->winner->user->email }}
+                                        <button type="button" onclick="navigator.clipboard.writeText('{{ $prize->winner->user->email }}')" title="Copia email" style="background: none; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; color: #9ca3af; transition: color 0.15s;" onmouseover="this.style.color='#4F3328'" onmouseout="this.style.color='#9ca3af'">
+                                            <x-filament::icon icon="heroicon-o-envelope" style="width: 16px; height: 16px;" />
+                                        </button>
+                                    </p>
                                 </div>
                                 <div>
                                     <span style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af;">Telefono</span>
@@ -110,6 +115,46 @@
                                     <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 500; color: #374151;">{{ $prize->winner->drawn_at->format('d/m/Y H:i:s') }}</p>
                                 </div>
                             </div>
+
+                            {{-- Giocata vincente e punto vendita --}}
+                            @if ($prize->winner->play)
+                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e5e7eb; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                                    <div>
+                                        <span style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af;">Giocata #</span>
+                                        <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 500; color: #374151; display: flex; align-items: center; gap: 6px;">
+                                            {{ $prize->winner->play->id }}
+                                            @if ($prize->winner->play->receipt_image)
+                                                <button type="button" onclick="document.getElementById('receipt-modal-winner-{{ $prize->id }}').showModal()" title="Visualizza scontrino" style="background: none; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; color: #9ca3af; transition: color 0.15s;" onmouseover="this.style.color='#4F3328'" onmouseout="this.style.color='#9ca3af'">
+                                                    <x-filament::icon icon="heroicon-o-document-text" style="width: 16px; height: 16px;" />
+                                                </button>
+                                                <dialog id="receipt-modal-winner-{{ $prize->id }}" style="border: none; border-radius: 12px; padding: 0; max-width: 600px; width: 90vw; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0;" onclick="if(event.target===this)this.close()">
+                                                    <div style="padding: 16px;">
+                                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                                            <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Scontrino — Giocata #{{ $prize->winner->play->id }}</h3>
+                                                            <button type="button" onclick="this.closest('dialog').close()" style="background: none; border: none; cursor: pointer; padding: 4px; color: #6b7280;">
+                                                                <x-filament::icon icon="heroicon-o-x-mark" style="width: 20px; height: 20px;" />
+                                                            </button>
+                                                        </div>
+                                                        <img src="{{ route('admin.receipt', ['path' => str_replace('receipts/', '', $prize->winner->play->receipt_image)]) }}" alt="Scontrino" style="width: 100%; border-radius: 8px;" />
+                                                    </div>
+                                                </dialog>
+                                            @endif
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af;">Data/ora giocata</span>
+                                        <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 500; color: #374151;">{{ $prize->winner->play->played_at->format('d/m/Y H:i') }}</p>
+                                    </div>
+                                    <div>
+                                        <span style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af;">Punto vendita</span>
+                                        <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 500; color: #374151;">{{ $prize->winner->play->store?->displayName ?? $prize->winner->play->store_code }}</p>
+                                    </div>
+                                    <div>
+                                        <span style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af;">Località</span>
+                                        <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 500; color: #374151;">{{ $prize->winner->play->store?->city ?? '—' }} ({{ $prize->winner->play->store?->province ?? '—' }})</p>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -129,6 +174,8 @@
                                         <th style="padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Nome</th>
                                         <th style="padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Email</th>
                                         <th style="padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Telefono</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Giocata</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Punto vendita</th>
                                         <th style="padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Giocate</th>
                                         <th style="padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Estratto il</th>
                                     </tr>
@@ -146,8 +193,37 @@
                                                     {{ $substitute->user->name }} {{ $substitute->user->surname }}
                                                 </a>
                                             </td>
-                                            <td style="padding: 10px 12px; color: #4b5563; white-space: nowrap; overflow-x: auto;">{{ $substitute->user->email }}</td>
+                                            <td style="padding: 10px 12px; color: #4b5563; white-space: nowrap; overflow-x: auto;">
+                                                <span style="display: flex; align-items: center; gap: 4px;">
+                                                    {{ $substitute->user->email }}
+                                                    <button type="button" onclick="navigator.clipboard.writeText('{{ $substitute->user->email }}')" title="Copia email" style="background: none; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; color: #9ca3af; transition: color 0.15s;" onmouseover="this.style.color='#4F3328'" onmouseout="this.style.color='#9ca3af'">
+                                                        <x-filament::icon icon="heroicon-o-envelope" style="width: 14px; height: 14px;" />
+                                                    </button>
+                                                </span>
+                                            </td>
                                             <td style="padding: 10px 12px; color: #4b5563;">{{ $substitute->user->phone ?? '—' }}</td>
+                                            <td style="padding: 10px 12px; color: #4b5563; white-space: nowrap;">
+                                                <span style="display: flex; align-items: center; gap: 4px;">
+                                                    #{{ $substitute->play->id }} — {{ $substitute->play->played_at->format('d/m/Y H:i') }}
+                                                    @if ($substitute->play->receipt_image)
+                                                        <button type="button" onclick="document.getElementById('receipt-modal-sub-{{ $substitute->id }}').showModal()" title="Visualizza scontrino" style="background: none; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; color: #9ca3af; transition: color 0.15s;" onmouseover="this.style.color='#4F3328'" onmouseout="this.style.color='#9ca3af'">
+                                                            <x-filament::icon icon="heroicon-o-document-text" style="width: 14px; height: 14px;" />
+                                                        </button>
+                                                        <dialog id="receipt-modal-sub-{{ $substitute->id }}" style="border: none; border-radius: 12px; padding: 0; max-width: 600px; width: 90vw; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0;" onclick="if(event.target===this)this.close()">
+                                                            <div style="padding: 16px;">
+                                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                                                    <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Scontrino — Giocata #{{ $substitute->play->id }}</h3>
+                                                                    <button type="button" onclick="this.closest('dialog').close()" style="background: none; border: none; cursor: pointer; padding: 4px; color: #6b7280;">
+                                                                        <x-filament::icon icon="heroicon-o-x-mark" style="width: 20px; height: 20px;" />
+                                                                    </button>
+                                                                </div>
+                                                                <img src="{{ route('admin.receipt', ['path' => str_replace('receipts/', '', $substitute->play->receipt_image)]) }}" alt="Scontrino" style="width: 100%; border-radius: 8px;" />
+                                                            </div>
+                                                        </dialog>
+                                                    @endif
+                                                </span>
+                                            </td>
+                                            <td style="padding: 10px 12px; color: #4b5563;">{{ $substitute->play->store?->displayName ?? $substitute->play->store_code }} ({{ $substitute->play->store?->city ?? '—' }})</td>
                                             <td style="padding: 10px 12px; color: #4b5563;">{{ $substitute->total_plays }}</td>
                                             <td style="padding: 10px 12px; color: #4b5563;">{{ $substitute->drawn_at->format('d/m/Y H:i:s') }}</td>
                                         </tr>

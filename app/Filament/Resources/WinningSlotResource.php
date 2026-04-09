@@ -10,15 +10,16 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class WinningSlotResource extends Resource
 {
     protected static ?string $model = WinningSlot::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-gift';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-gift';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Concorso';
+    protected static string|\UnitEnum|null $navigationGroup = 'Concorso';
 
     protected static ?string $modelLabel = 'Slot Vincente';
 
@@ -36,12 +37,12 @@ class WinningSlotResource extends Resource
         return false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return false;
     }

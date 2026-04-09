@@ -7,7 +7,6 @@ use App\Models\Prize;
 use App\Models\Store;
 use App\Models\User;
 use App\Models\WinningSlot;
-use App\Services\InstantWinService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
@@ -23,6 +22,9 @@ class GameControllerTest extends TestCase
         parent::setUp();
 
         Storage::fake();
+
+        // La migrazione seed_winning_slots pre-genera slot; li eliminiamo per controllare lo scenario
+        WinningSlot::query()->delete();
     }
 
     private function createVerifiedUser(array $overrides = []): User

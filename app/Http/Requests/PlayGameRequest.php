@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Store;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PlayGameRequest extends FormRequest
@@ -12,7 +13,7 @@ class PlayGameRequest extends FormRequest
         return true;
     }
 
-    /** @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string> */
+    /** @return array<string, ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
         return [

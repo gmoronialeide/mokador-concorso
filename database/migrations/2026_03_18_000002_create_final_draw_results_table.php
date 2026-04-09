@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('final_prize_id')->constrained('final_prizes')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('play_id')->constrained('plays')->cascadeOnDelete();
             $table->enum('role', ['winner', 'substitute']);
             $table->unsignedTinyInteger('substitute_position')->nullable();
             $table->unsignedInteger('total_plays');

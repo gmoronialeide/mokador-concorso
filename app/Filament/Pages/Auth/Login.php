@@ -16,7 +16,7 @@ class Login extends \Filament\Auth\Pages\Login
     {
         $validator = validator(
             ['cf-turnstile-response' => $this->turnstileToken],
-            ['cf-turnstile-response' => ['required', new TurnstileCheck()]],
+            ['cf-turnstile-response' => ['required', new TurnstileCheck]],
             ['cf-turnstile-response.required' => 'Completa la verifica captcha.']
         );
 

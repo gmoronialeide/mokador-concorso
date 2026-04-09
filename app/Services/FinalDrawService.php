@@ -7,7 +7,6 @@ use App\Models\Admin;
 use App\Models\FinalDrawResult;
 use App\Models\FinalPrize;
 use App\Models\Play;
-use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -16,27 +15,22 @@ use Illuminate\Support\Facades\Log;
 class FinalDrawService
 {
     /**
-     * Recupera gli utenti eleggibili con il conteggio giocate valide (peso).
+     * Recupera le giocate eleggibili per l'estrazione finale.
      *
-     * Eleggibili: utenti non bannati, con almeno 1 giocata non bannata,
-     * non già estratti. Anche vincitori instant win sono inclusi.
+     * Eleggibili: giocate non bannate, di utenti non bannati,
+     * il cui utente non è già stato estratto. Ogni giocata = 1 biglietto equiprobabile.
      *
-     * @return Collection<int, object{user_id: int, eligible_plays_count: int}>
+     * @return Collection<int, Play>
      */
-    public function getEligibleUsers(): Collection
+    public function getEligiblePlays(): Collection
     {
         $alreadyDrawnUserIds = FinalDrawResult::pluck('user_id');
 
-        return User::query()
-            ->where('is_banned', false)
-            ->whereNotIn('id', $alreadyDrawnUserIds)
-            ->whereHas('plays', fn ($q) => $q->whereNot('status', PlayStatus::Banned))
-            ->withCount(['plays as eligible_plays_count' => fn ($q) => $q->whereNot('status', PlayStatus::Banned)])
-            ->get()
-            ->map(fn (User $user) => (object) [
-                'user_id' => $user->id,
-                'eligible_plays_count' => (int) $user->eligible_plays_count,
-            ]);
+        return Play::query()
+            ->whereNot('status', PlayStatus::Banned)
+            ->whereHas('user', fn ($q) => $q->where('is_banned', false))
+            ->whereNotIn('user_id', $alreadyDrawnUserIds)
+            ->get();
     }
 
     /**
@@ -57,29 +51,34 @@ class FinalDrawService
                 throw new \RuntimeException('I vincitori sono già stati estratti.');
             }
 
-            $eligible = $this->getEligibleUsers();
+            $pool = $this->getEligiblePlays();
+            $uniqueUsers = $pool->unique('user_id')->count();
             $requiredCount = $prizes->count() + ($prizes->count() * 3);
 
-            if ($eligible->count() < $requiredCount) {
+            if ($uniqueUsers < $requiredCount) {
                 throw new \RuntimeException(
-                    "Servono almeno {$requiredCount} utenti eleggibili, ne sono disponibili {$eligible->count()}."
+                    "Servono almeno {$requiredCount} utenti eleggibili, ne sono disponibili {$uniqueUsers}."
                 );
             }
 
-            $pool = $eligible->keyBy('user_id');
             $now = Carbon::now();
             $results = [];
 
             foreach ($prizes as $prize) {
-                $drawn = $this->weightedRandom($pool);
-                $pool->forget($drawn->user_id);
+                $drawn = $pool->random();
+                $userId = $drawn->user_id;
+
+                $totalPlays = $pool->where('user_id', $userId)->count();
+
+                $pool = $pool->where('user_id', '!=', $userId)->values();
 
                 $result = FinalDrawResult::create([
                     'final_prize_id' => $prize->id,
-                    'user_id' => $drawn->user_id,
+                    'user_id' => $userId,
+                    'play_id' => $drawn->id,
                     'role' => 'winner',
                     'substitute_position' => null,
-                    'total_plays' => $drawn->eligible_plays_count,
+                    'total_plays' => $totalPlays,
                     'drawn_at' => $now,
                 ]);
 
@@ -94,8 +93,9 @@ class FinalDrawService
                     'prize_id' => $prize->id,
                     'prize_name' => $prize->name,
                     'prize_position' => $prize->position,
-                    'user_id' => $drawn->user_id,
-                    'total_plays' => $drawn->eligible_plays_count,
+                    'user_id' => $userId,
+                    'play_id' => $drawn->id,
+                    'total_plays' => $totalPlays,
                     'admin_id' => $admin->id,
                 ]);
             }
@@ -123,30 +123,35 @@ class FinalDrawService
                 throw new \RuntimeException('I sostituti sono già stati estratti.');
             }
 
-            $eligible = $this->getEligibleUsers();
+            $pool = $this->getEligiblePlays();
+            $uniqueUsers = $pool->unique('user_id')->count();
             $requiredSubstitutes = $prizes->count() * 3;
 
-            if ($eligible->count() < $requiredSubstitutes) {
+            if ($uniqueUsers < $requiredSubstitutes) {
                 throw new \RuntimeException(
-                    "Servono almeno {$requiredSubstitutes} utenti eleggibili per i sostituti, ne sono disponibili {$eligible->count()}."
+                    "Servono almeno {$requiredSubstitutes} utenti eleggibili per i sostituti, ne sono disponibili {$uniqueUsers}."
                 );
             }
 
-            $pool = $eligible->keyBy('user_id');
             $now = Carbon::now();
             $results = [];
 
             foreach ($prizes as $prize) {
                 for ($pos = 1; $pos <= 3; $pos++) {
-                    $drawn = $this->weightedRandom($pool);
-                    $pool->forget($drawn->user_id);
+                    $drawn = $pool->random();
+                    $userId = $drawn->user_id;
+
+                    $totalPlays = $pool->where('user_id', $userId)->count();
+
+                    $pool = $pool->where('user_id', '!=', $userId)->values();
 
                     $result = FinalDrawResult::create([
                         'final_prize_id' => $prize->id,
-                        'user_id' => $drawn->user_id,
+                        'user_id' => $userId,
+                        'play_id' => $drawn->id,
                         'role' => 'substitute',
                         'substitute_position' => $pos,
-                        'total_plays' => $drawn->eligible_plays_count,
+                        'total_plays' => $totalPlays,
                         'drawn_at' => $now,
                     ]);
 
@@ -157,8 +162,9 @@ class FinalDrawService
                         'prize_name' => $prize->name,
                         'prize_position' => $prize->position,
                         'substitute_position' => $pos,
-                        'user_id' => $drawn->user_id,
-                        'total_plays' => $drawn->eligible_plays_count,
+                        'user_id' => $userId,
+                        'play_id' => $drawn->id,
+                        'total_plays' => $totalPlays,
                         'admin_id' => $admin->id,
                     ]);
                 }
@@ -195,33 +201,5 @@ class FinalDrawService
 
             Log::channel('daily')->info('Estrazione finale: TUTTO annullato');
         });
-    }
-
-    /**
-     * Estrazione pesata: seleziona un utente casualmente con probabilità
-     * proporzionale al numero di giocate valide.
-     *
-     * Usa random_int() (CSPRNG) per garanzia crittografica.
-     *
-     * @param Collection<int, object{user_id: int, eligible_plays_count: int}> $pool
-     */
-    private function weightedRandom(Collection $pool): object
-    {
-        if ($pool->isEmpty()) {
-            throw new \RuntimeException('Pool di estrazione vuoto.');
-        }
-
-        $totalWeight = $pool->sum('eligible_plays_count');
-        $random = random_int(1, $totalWeight);
-
-        $cumulative = 0;
-        foreach ($pool as $entry) {
-            $cumulative += $entry->eligible_plays_count;
-            if ($cumulative >= $random) {
-                return $entry;
-            }
-        }
-
-        return $pool->last();
     }
 }

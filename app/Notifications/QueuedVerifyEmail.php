@@ -4,9 +4,6 @@ namespace App\Notifications;
 
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\URL;
 
 class QueuedVerifyEmail extends VerifyEmail
 {
@@ -14,7 +11,7 @@ class QueuedVerifyEmail extends VerifyEmail
     {
         $verificationUrl = $this->verificationUrl($notifiable);
 
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject('Conferma la tua registrazione - Mokador ti porta in vacanza')
             ->view('emails.verify-email', [
                 'user' => $notifiable,

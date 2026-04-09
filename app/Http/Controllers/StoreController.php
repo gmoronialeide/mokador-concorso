@@ -27,7 +27,7 @@ class StoreController extends Controller
             }
 
             if ($request->filled('city')) {
-                $query->where('city', 'LIKE', '%' . $request->input('city') . '%');
+                $query->where('city', 'LIKE', '%'.$request->input('city').'%');
             }
 
             $stores = $query->orderBy('sign_name')->get();
@@ -45,7 +45,7 @@ class StoreController extends Controller
         }
 
         if ($request->filled('city')) {
-            $query->where('city', 'LIKE', '%' . $request->input('city') . '%');
+            $query->where('city', 'LIKE', '%'.$request->input('city').'%');
         }
 
         return response()->json($query->orderBy('name')->get());

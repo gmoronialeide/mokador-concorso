@@ -22,6 +22,9 @@ class InstantWinServiceTest extends TestCase
     {
         parent::setUp();
 
+        // La migrazione seed_winning_slots pre-genera slot; li eliminiamo per controllare lo scenario
+        WinningSlot::query()->delete();
+
         $this->service = new InstantWinService;
     }
 

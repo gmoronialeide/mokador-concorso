@@ -10,6 +10,7 @@ class FinalDrawResult extends Model
     protected $fillable = [
         'final_prize_id',
         'user_id',
+        'play_id',
         'role',
         'substitute_position',
         'total_plays',
@@ -33,5 +34,10 @@ class FinalDrawResult extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function play(): BelongsTo
+    {
+        return $this->belongsTo(Play::class);
     }
 }

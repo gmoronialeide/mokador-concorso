@@ -30,7 +30,7 @@ class LatestWinsWidget extends BaseWidget
             ->columns([
                 TextColumn::make('played_at')->label('Data')->dateTime('d/m/Y H:i'),
                 TextColumn::make('user.surname')->label('Utente')
-                    ->formatStateUsing(fn (Play $record): string => $record->user->surname . ' ' . $record->user->name),
+                    ->formatStateUsing(fn (Play $record): string => $record->user->surname.' '.$record->user->name),
                 TextColumn::make('user.email')->label('Email'),
                 TextColumn::make('store_code')->label('Punto Vendita'),
                 TextColumn::make('prize.code')->label('Premio')

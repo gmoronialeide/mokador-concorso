@@ -7,7 +7,6 @@ use App\Models\Store;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Database\Eloquent\Builder;
 
 class TopStoresChartWidget extends BaseWidget
 {

@@ -5,13 +5,14 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers\PlaysRelationManager;
 use App\Models\User;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -23,9 +24,9 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Anagrafiche';
+    protected static string|\UnitEnum|null $navigationGroup = 'Anagrafiche';
 
     protected static ?string $modelLabel = 'Utente';
 
@@ -70,7 +71,7 @@ class UserResource extends Resource
                     ->color('danger')
                     ->requiresConfirmation()
                     ->form([
-                        \Filament\Forms\Components\Textarea::make('ban_reason')
+                        Textarea::make('ban_reason')
                             ->label('Motivazione')
                             ->required(),
                     ])
@@ -103,7 +104,7 @@ class UserResource extends Resource
                     ->color('danger')
                     ->requiresConfirmation()
                     ->form([
-                        \Filament\Forms\Components\Textarea::make('ban_reason')
+                        Textarea::make('ban_reason')
                             ->label('Motivazione')
                             ->required(),
                     ])

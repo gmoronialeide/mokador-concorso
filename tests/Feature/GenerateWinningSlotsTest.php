@@ -15,6 +15,8 @@ class GenerateWinningSlotsTest extends TestCase
     {
         parent::setUp();
 
+        // La migrazione seed_winning_slots pre-genera 104 slot; li eliminiamo per testare il comando da zero
+        WinningSlot::query()->delete();
     }
 
     public function test_generates_exactly_104_slots(): void

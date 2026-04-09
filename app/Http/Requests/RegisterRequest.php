@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Coderflex\LaravelTurnstile\Rules\TurnstileCheck;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -22,7 +23,7 @@ class RegisterRequest extends FormRequest
         }
     }
 
-    /** @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string> */
+    /** @return array<string, ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
         return [
@@ -38,7 +39,7 @@ class RegisterRequest extends FormRequest
             'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()],
             'privacy_consent' => ['accepted'],
             'marketing_consent' => ['nullable', 'boolean'],
-            'cf-turnstile-response' => ['required', new TurnstileCheck()],
+            'cf-turnstile-response' => ['required', new TurnstileCheck],
         ];
     }
 

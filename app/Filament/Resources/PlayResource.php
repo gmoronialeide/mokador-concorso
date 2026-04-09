@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Js;
 
 class PlayResource extends Resource
 {
@@ -46,11 +47,7 @@ class PlayResource extends Resource
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('user.surname')->label('Utente')
                     ->formatStateUsing(fn (Play $record): string => $record->user->surname.' '.$record->user->name)
-                    ->searchable(['users.surname', 'users.name']),
-                TextColumn::make('user.email')->label('Email')
-                    ->copyable()
-                    ->copyMessage('Email copiata!')
-                    ->searchable(),
+                    ->searchable(['user.surname', 'user.name']),
                 TextColumn::make('store_code')->label('Punto Vendita')->searchable(),
                 TextColumn::make('played_at')->label('Data giocata')->dateTime('d/m/Y H:i')->sortable(),
                 IconColumn::make('is_winner')->label('Vincente')->boolean(),
@@ -70,19 +67,50 @@ class PlayResource extends Resource
                     ->options(Prize::pluck('name', 'id')),
             ])
             ->actions([
+                Action::make('copy_email')
+                    ->label('')
+                    ->icon('heroicon-o-envelope')
+                    ->color('gray')
+                    ->tooltip(fn (Play $record): string => $record->user->email)
+                    ->alpineClickHandler(function (Play $record): string {
+                        $emailJs = Js::from($record->user->email);
+                        $messageJs = Js::from('Email copiata!');
+
+                        return <<<JS
+                            const text = {$emailJs};
+                            if (navigator.clipboard && window.isSecureContext) {
+                                await navigator.clipboard.writeText(text);
+                            } else {
+                                const ta = document.createElement('textarea');
+                                ta.value = text;
+                                ta.style.position = 'fixed';
+                                ta.style.opacity = '0';
+                                document.body.appendChild(ta);
+                                ta.select();
+                                document.execCommand('copy');
+                                document.body.removeChild(ta);
+                            }
+                            \$tooltip({$messageJs}, {
+                                theme: \$store.theme,
+                                timeout: 2000,
+                            })
+                            JS;
+                    }),
                 Action::make('receipt')
-                    ->label('Scontrino')
+                    ->label('')
                     ->icon('heroicon-o-camera')
                     ->color('gray')
+                    ->tooltip('Scontrino')
                     ->modalHeading('Scontrino')
                     ->modalWidth('md')
                     ->modalContent(fn (Play $record) => view('filament.modals.receipt-preview', ['record' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Chiudi'),
                 Action::make('notes')
-                    ->label('Note')
+                    ->label('')
                     ->icon('heroicon-o-chat-bubble-left-ellipsis')
                     ->color(fn (Play $record): string => filled($record->notes) ? 'warning' : 'gray')
+                    ->tooltip('Note')
                     ->modalHeading('Note')
                     ->modalWidth('md')
                     ->form([
@@ -98,21 +126,25 @@ class PlayResource extends Resource
                     ->visible(fn (): bool => ! auth('admin')->user()->isNotaio())
                     ->modalSubmitActionLabel('Salva')
                     ->modalCancelActionLabel('Chiudi'),
-                ViewAction::make(),
+                ViewAction::make()->label('')->tooltip('Dettaglio'),
                 Action::make('validate')
-                    ->label('Valida')
+                    ->label('')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
+                    ->tooltip('Valida')
                     ->requiresConfirmation()
+                    ->modalHeading('Validare questa giocata?')
+                    ->modalDescription('Confermi che lo scontrino è valido e la giocata può essere approvata?')
                     ->action(function (Play $record): void {
                         abort_if(auth('admin')->user()->isNotaio(), 403);
                         $record->update(['status' => PlayStatus::Validated]);
                     })
                     ->visible(fn (Play $record): bool => $record->isPending() && ! auth('admin')->user()->isNotaio()),
                 Action::make('ban')
-                    ->label('Banna')
+                    ->label('')
                     ->icon('heroicon-o-no-symbol')
                     ->color('danger')
+                    ->tooltip('Banna')
                     ->requiresConfirmation()
                     ->form([
                         Textarea::make('ban_reason')
@@ -129,11 +161,13 @@ class PlayResource extends Resource
                     })
                     ->visible(fn (Play $record): bool => ! $record->isBanned() && ! auth('admin')->user()->isNotaio()),
                 Action::make('unban')
-                    ->label('Sbanna')
+                    ->label('')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
+                    ->tooltip('Sbanna')
                     ->requiresConfirmation()
-                    ->modalDescription('La giocata verrà sbannata ma il premio NON verrà riassegnato.')
+                    ->modalHeading('Validare questa giocata?')
+                    ->modalDescription('Confermi che lo scontrino è valido e la giocata può essere approvata? Il premio NON verrà riassegnato.')
                     ->action(function (Play $record): void {
                         abort_if(auth('admin')->user()->isNotaio(), 403);
                         $record->update([

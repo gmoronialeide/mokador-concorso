@@ -7,14 +7,15 @@ use App\Models\FinalPrize;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class FinalPrizeResource extends Resource
 {
     protected static ?string $model = FinalPrize::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-trophy';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-trophy';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Concorso';
+    protected static string|\UnitEnum|null $navigationGroup = 'Concorso';
 
     protected static ?string $modelLabel = 'Premio Finale';
 
@@ -27,12 +28,12 @@ class FinalPrizeResource extends Resource
         return false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return false;
     }
@@ -43,7 +44,7 @@ class FinalPrizeResource extends Resource
             ->columns([
                 TextColumn::make('position')->label('Posizione')
                     ->sortable()
-                    ->formatStateUsing(fn (int $state): string => $state . '°'),
+                    ->formatStateUsing(fn (int $state): string => $state.'°'),
                 TextColumn::make('name')->label('Nome'),
                 TextColumn::make('value')->label('Valore')
                     ->money('EUR')

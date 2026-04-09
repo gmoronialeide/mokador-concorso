@@ -2,12 +2,10 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Prize;
 use App\Models\WinningSlot;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 class UnassignedPrizesWidget extends BaseWidget

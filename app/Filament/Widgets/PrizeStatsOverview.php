@@ -20,10 +20,10 @@ class PrizeStatsOverview extends BaseWidget
 
         return [
             Stat::make('Utenti registrati', User::count())
-                ->description('Oggi: ' . User::whereDate('created_at', $today)->count()),
+                ->description('Oggi: '.User::whereDate('created_at', $today)->count()),
             Stat::make('Giocate totali', Play::count())
-                ->description('Oggi: ' . Play::whereDate('played_at', $today)->count()),
-            Stat::make('Premi assegnati', WinningSlot::where('is_assigned', true)->count() . ' / ' . WinningSlot::count())
+                ->description('Oggi: '.Play::whereDate('played_at', $today)->count()),
+            Stat::make('Premi assegnati', WinningSlot::where('is_assigned', true)->count().' / '.WinningSlot::count())
                 ->color('success'),
             Stat::make('Non assegnati (scaduti)', WinningSlot::where('is_assigned', false)->whereDate('scheduled_date', '<', $today)->count())
                 ->color(WinningSlot::where('is_assigned', false)->whereDate('scheduled_date', '<', $today)->count() > 0 ? 'danger' : 'success'),

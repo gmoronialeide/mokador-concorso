@@ -11,9 +11,9 @@ use Illuminate\Support\Collection;
 
 class PrizeSummary extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-trophy';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-trophy';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Concorso';
+    protected static string|\UnitEnum|null $navigationGroup = 'Concorso';
 
     protected static ?string $navigationLabel = 'Riepilogo Premi';
 
@@ -77,8 +77,8 @@ class PrizeSummary extends Page
 
             $weeks[] = [
                 'number' => $w + 1,
-                'label' => 'Settimana ' . ($w + 1),
-                'range' => $weekStart->format('d/m') . ' – ' . $weekEnd->format('d/m/Y'),
+                'label' => 'Settimana '.($w + 1),
+                'range' => $weekStart->format('d/m').' – '.$weekEnd->format('d/m/Y'),
                 'days' => $days,
             ];
         }

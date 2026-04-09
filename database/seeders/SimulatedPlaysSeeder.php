@@ -46,7 +46,7 @@ class SimulatedPlaysSeeder extends Seeder
             do {
                 $user = $users->random();
                 $day = $contestDays[array_rand($contestDays)];
-                $dayKey = $user->id . '-' . $day->format('Y-m-d');
+                $dayKey = $user->id.'-'.$day->format('Y-m-d');
                 $attempts++;
 
                 if ($attempts > 100) {
@@ -68,7 +68,7 @@ class SimulatedPlaysSeeder extends Seeder
             $plays[] = [
                 'user_id' => $user->id,
                 'store_code' => $storeCodes[array_rand($storeCodes)],
-                'receipt_image' => 'receipts/simulated_' . fake()->uuid() . '.jpg',
+                'receipt_image' => 'receipts/simulated_'.fake()->uuid().'.jpg',
                 'played_at' => $playedAt,
                 'is_winner' => false,
                 'prize_id' => null,

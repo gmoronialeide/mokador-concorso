@@ -44,6 +44,10 @@ class PlayResource extends Resource
                 TextColumn::make('user.surname')->label('Utente')
                     ->formatStateUsing(fn (Play $record): string => $record->user->surname . ' ' . $record->user->name)
                     ->searchable(['users.surname', 'users.name']),
+                TextColumn::make('user.email')->label('Email')
+                    ->copyable()
+                    ->copyMessage('Email copiata!')
+                    ->searchable(),
                 TextColumn::make('store_code')->label('Punto Vendita')->searchable(),
                 TextColumn::make('played_at')->label('Data giocata')->dateTime('d/m/Y H:i')->sortable(),
                 IconColumn::make('is_winner')->label('Vincente')->boolean(),

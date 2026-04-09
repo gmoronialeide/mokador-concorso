@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
+use App\Enums\PlayStatus;
 use App\Models\Play;
-use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
@@ -24,10 +25,11 @@ class PlaysRelationManager extends RelationManager
                 TextColumn::make('store_code')->label('Punto Vendita'),
                 IconColumn::make('is_winner')->label('Vincente')->boolean(),
                 TextColumn::make('prize.name')->label('Premio')->placeholder('-'),
-                IconColumn::make('is_banned')->label('Valida')
-                    ->icon(fn (bool $state): string => $state ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn (bool $state): string => $state ? 'danger' : 'success')
-                    ->tooltip(fn (bool $state): string => $state ? 'Bannata' : 'Valida'),
+                TextColumn::make('status')->label('Stato')
+                    ->badge()
+                    ->formatStateUsing(fn (PlayStatus $state): string => $state->label())
+                    ->color(fn (PlayStatus $state): string => $state->color())
+                    ->icon(fn (PlayStatus $state): string => $state->icon()),
             ])
             ->defaultSort('played_at', 'desc')
             ->actions([
@@ -38,7 +40,7 @@ class PlaysRelationManager extends RelationManager
                     ->modalHeading('Note')
                     ->modalWidth('md')
                     ->form([
-                        \Filament\Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->label('Note')
                             ->rows(4)
                             ->default(fn (Play $record): ?string => $record->notes),

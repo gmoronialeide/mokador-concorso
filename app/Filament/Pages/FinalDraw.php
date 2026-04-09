@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\PlayStatus;
 use App\Filament\Resources\UserResource;
 use App\Models\FinalDrawResult;
 use App\Models\FinalPrize;
@@ -37,7 +38,7 @@ class FinalDraw extends Page
     {
         return User::query()
             ->where('is_banned', false)
-            ->whereHas('plays', fn ($q) => $q->where('is_banned', false))
+            ->whereHas('plays', fn ($q) => $q->whereNot('status', PlayStatus::Banned))
             ->count();
     }
 
@@ -49,7 +50,7 @@ class FinalDraw extends Page
     public function getEligiblePlaysCount(): int
     {
         return Play::query()
-            ->where('is_banned', false)
+            ->whereNot('status', PlayStatus::Banned)
             ->whereHas('user', fn ($q) => $q->where('is_banned', false))
             ->count();
     }

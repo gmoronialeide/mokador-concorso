@@ -227,7 +227,7 @@
                                     @endphp
                                     <td style="padding: 8px; text-align: center; vertical-align: middle; background: {{ $cellBg }};">
                                         @if ($slot)
-                                            @if ($slot->is_assigned && $slot->play?->is_banned)
+                                            @if ($slot->is_assigned && $slot->play?->isBanned())
                                                 {{-- VIOLA: assegnato ma giocata bannata — link alla giocata --}}
                                                 <a href="/admin/plays/{{ $slot->play_id }}" target="_blank" title="BANNATA — {{ $slot->play?->user?->surname }} {{ $slot->play?->user?->name }} — PV {{ $slot->play?->store_code }}" style="text-decoration: none;">
                                                     <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #f3e8ff; color: #6b21a8; font-size: 11px; font-weight: 700; cursor: pointer; border: 2px solid #c084fc; transition: transform 0.1s;"

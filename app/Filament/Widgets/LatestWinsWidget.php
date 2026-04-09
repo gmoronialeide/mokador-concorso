@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\PlayStatus;
 use App\Models\Play;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -21,7 +22,7 @@ class LatestWinsWidget extends BaseWidget
             ->query(
                 Play::query()
                     ->where('is_winner', true)
-                    ->where('is_banned', false)
+                    ->whereNot('status', PlayStatus::Banned)
                     ->with(['user', 'prize'])
                     ->latest('played_at')
                     ->limit(10)

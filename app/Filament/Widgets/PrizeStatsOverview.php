@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\PlayStatus;
 use App\Models\Play;
 use App\Models\User;
 use App\Models\WinningSlot;
@@ -26,8 +27,10 @@ class PrizeStatsOverview extends BaseWidget
                 ->color('success'),
             Stat::make('Non assegnati (scaduti)', WinningSlot::where('is_assigned', false)->whereDate('scheduled_date', '<', $today)->count())
                 ->color(WinningSlot::where('is_assigned', false)->whereDate('scheduled_date', '<', $today)->count() > 0 ? 'danger' : 'success'),
-            Stat::make('Giocate bannate', Play::where('is_banned', true)->count())
+            Stat::make('Giocate bannate', Play::where('status', PlayStatus::Banned)->count())
                 ->color('danger'),
+            Stat::make('In verifica', Play::where('status', PlayStatus::Pending)->count())
+                ->color('warning'),
         ];
     }
 }

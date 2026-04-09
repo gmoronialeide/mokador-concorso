@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\PlayStatus;
 use App\Models\Admin;
 use App\Models\FinalDrawResult;
 use App\Models\FinalPrize;
@@ -29,8 +30,8 @@ class FinalDrawService
         return User::query()
             ->where('is_banned', false)
             ->whereNotIn('id', $alreadyDrawnUserIds)
-            ->whereHas('plays', fn ($q) => $q->where('is_banned', false))
-            ->withCount(['plays as eligible_plays_count' => fn ($q) => $q->where('is_banned', false)])
+            ->whereHas('plays', fn ($q) => $q->whereNot('status', PlayStatus::Banned))
+            ->withCount(['plays as eligible_plays_count' => fn ($q) => $q->whereNot('status', PlayStatus::Banned)])
             ->get()
             ->map(fn (User $user) => (object) [
                 'user_id' => $user->id,

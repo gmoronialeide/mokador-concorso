@@ -7,6 +7,7 @@ use App\Models\Store;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
 class SimulatedPlaysSeeder extends Seeder
@@ -22,13 +23,15 @@ class SimulatedPlaysSeeder extends Seeder
 
         $storeCodes = Store::query()->pluck('code')->toArray();
 
+        $faker = Faker::create('it_IT');
+
         if (empty($storeCodes)) {
             $this->command->error('No stores found. Run store seeder first.');
 
             return;
         }
 
-        $userCount = fake()->numberBetween(800, 900);
+        $userCount = $faker->numberBetween(800, 900);
         $this->command->info("Creating {$userCount} users...");
 
         $users = User::factory()->count($userCount)->create();
@@ -61,14 +64,14 @@ class SimulatedPlaysSeeder extends Seeder
             $userDayTracker[$dayKey] = true;
 
             $playedAt = $day->copy()
-                ->setHour(fake()->numberBetween(8, 20))
-                ->setMinute(fake()->numberBetween(0, 59))
-                ->setSecond(fake()->numberBetween(0, 59));
+                ->setHour($faker->numberBetween(8, 20))
+                ->setMinute($faker->numberBetween(0, 59))
+                ->setSecond($faker->numberBetween(0, 59));
 
             $plays[] = [
                 'user_id' => $user->id,
                 'store_code' => $storeCodes[array_rand($storeCodes)],
-                'receipt_image' => 'receipts/simulated_'.fake()->uuid().'.jpg',
+                'receipt_image' => 'receipts/simulated_'.$faker->uuid().'.jpg',
                 'played_at' => $playedAt,
                 'is_winner' => false,
                 'prize_id' => null,

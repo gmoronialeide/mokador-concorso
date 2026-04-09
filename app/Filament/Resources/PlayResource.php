@@ -2,15 +2,18 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\PlayStatus;
 use App\Filament\Resources\PlayResource\Pages;
 use App\Models\Play;
 use App\Models\Prize;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -21,9 +24,9 @@ class PlayResource extends Resource
 {
     protected static ?string $model = Play::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-play';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-play';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Concorso';
+    protected static string|\UnitEnum|null $navigationGroup = 'Concorso';
 
     protected static ?string $modelLabel = 'Giocata';
 
@@ -42,7 +45,7 @@ class PlayResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('user.surname')->label('Utente')
-                    ->formatStateUsing(fn (Play $record): string => $record->user->surname . ' ' . $record->user->name)
+                    ->formatStateUsing(fn (Play $record): string => $record->user->surname.' '.$record->user->name)
                     ->searchable(['users.surname', 'users.name']),
                 TextColumn::make('user.email')->label('Email')
                     ->copyable()
@@ -52,15 +55,17 @@ class PlayResource extends Resource
                 TextColumn::make('played_at')->label('Data giocata')->dateTime('d/m/Y H:i')->sortable(),
                 IconColumn::make('is_winner')->label('Vincente')->boolean(),
                 TextColumn::make('prize.name')->label('Premio')->placeholder('-'),
-                IconColumn::make('is_banned')->label('Valida')
-                    ->icon(fn (bool $state): string => $state ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn (bool $state): string => $state ? 'danger' : 'success')
-                    ->tooltip(fn (bool $state): string => $state ? 'Bannata' : 'Valida'),
+                TextColumn::make('status')->label('Stato')
+                    ->badge()
+                    ->formatStateUsing(fn (PlayStatus $state): string => $state->label())
+                    ->color(fn (PlayStatus $state): string => $state->color())
+                    ->icon(fn (PlayStatus $state): string => $state->icon()),
             ])
             ->defaultSort('played_at', 'desc')
             ->filters([
                 TernaryFilter::make('is_winner')->label('Vincente'),
-                TernaryFilter::make('is_banned')->label('Bannata'),
+                SelectFilter::make('status')->label('Stato')
+                    ->options(collect(PlayStatus::cases())->mapWithKeys(fn (PlayStatus $s) => [$s->value => $s->label()])),
                 SelectFilter::make('prize_id')->label('Premio')
                     ->options(Prize::pluck('name', 'id')),
             ])
@@ -81,7 +86,7 @@ class PlayResource extends Resource
                     ->modalHeading('Note')
                     ->modalWidth('md')
                     ->form([
-                        \Filament\Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->label('Note')
                             ->rows(4)
                             ->default(fn (Play $record): ?string => $record->notes),
@@ -90,27 +95,31 @@ class PlayResource extends Resource
                     ->modalSubmitActionLabel('Salva')
                     ->modalCancelActionLabel('Chiudi'),
                 ViewAction::make(),
+                Action::make('validate')
+                    ->label('Valida')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->action(fn (Play $record) => $record->update(['status' => PlayStatus::Validated]))
+                    ->visible(fn (Play $record): bool => $record->isPending()),
                 Action::make('ban')
                     ->label('Banna')
                     ->icon('heroicon-o-no-symbol')
                     ->color('danger')
                     ->requiresConfirmation()
                     ->form([
-                        \Filament\Forms\Components\Textarea::make('ban_reason')
+                        Textarea::make('ban_reason')
                             ->label('Motivazione')
                             ->required(),
                     ])
                     ->action(function (Play $record, array $data): void {
-                        // Il premio e lo slot NON vengono liberati:
-                        // - Il PV resta "ha già vinto" per la settimana
-                        // - Il premio resta assegnato (non torna in gioco)
                         $record->update([
-                            'is_banned' => true,
+                            'status' => PlayStatus::Banned,
                             'ban_reason' => $data['ban_reason'],
                             'banned_at' => now(),
                         ]);
                     })
-                    ->visible(fn (Play $record): bool => ! $record->is_banned),
+                    ->visible(fn (Play $record): bool => ! $record->isBanned()),
                 Action::make('unban')
                     ->label('Sbanna')
                     ->icon('heroicon-o-check-circle')
@@ -119,12 +128,12 @@ class PlayResource extends Resource
                     ->modalDescription('La giocata verrà sbannata ma il premio NON verrà riassegnato.')
                     ->action(function (Play $record): void {
                         $record->update([
-                            'is_banned' => false,
+                            'status' => PlayStatus::Validated,
                             'ban_reason' => null,
                             'banned_at' => null,
                         ]);
                     })
-                    ->visible(fn (Play $record): bool => $record->is_banned),
+                    ->visible(fn (Play $record): bool => $record->isBanned()),
             ]);
     }
 
@@ -145,7 +154,7 @@ class PlayResource extends Resource
                         ->columnSpanFull(),
                 ])->columns(4),
                 Section::make('Scontrino')->schema([
-                    \Filament\Infolists\Components\ViewEntry::make('receipt_image')
+                    ViewEntry::make('receipt_image')
                         ->label('')
                         ->view('filament.infolists.receipt-image'),
                 ]),
@@ -163,13 +172,13 @@ class PlayResource extends Resource
                     TextEntry::make('winningSlot.scheduled_time')->label('Ora slot'),
                 ])->columns(4)->visible(fn (Play $record): bool => $record->is_winner),
                 Section::make('Ban')->schema([
-                    TextEntry::make('is_banned')->label('Bannata')
+                    TextEntry::make('status')->label('Stato')
                         ->badge()
-                        ->formatStateUsing(fn (bool $state): string => $state ? 'Bannata' : 'Attiva')
-                        ->color(fn (bool $state): string => $state ? 'danger' : 'success'),
+                        ->formatStateUsing(fn (PlayStatus $state): string => $state->label())
+                        ->color(fn (PlayStatus $state): string => $state->color()),
                     TextEntry::make('ban_reason')->label('Motivazione'),
                     TextEntry::make('banned_at')->label('Data ban')->dateTime('d/m/Y H:i'),
-                ])->columns(3)->visible(fn (Play $record): bool => $record->is_banned),
+                ])->columns(3)->visible(fn (Play $record): bool => $record->isBanned()),
             ]);
     }
 

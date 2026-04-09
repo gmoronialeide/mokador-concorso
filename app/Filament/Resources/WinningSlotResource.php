@@ -26,6 +26,11 @@ class WinningSlotResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    public static function canAccess(): bool
+    {
+        return ! auth('admin')->user()->isNotaio();
+    }
+
     public static function canCreate(): bool
     {
         return false;

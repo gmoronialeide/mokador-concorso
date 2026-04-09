@@ -91,7 +91,11 @@ class PlayResource extends Resource
                             ->rows(4)
                             ->default(fn (Play $record): ?string => $record->notes),
                     ])
-                    ->action(fn (Play $record, array $data) => $record->update(['notes' => $data['notes']]))
+                    ->action(function (Play $record, array $data): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
+                        $record->update(['notes' => $data['notes']]);
+                    })
+                    ->visible(fn (): bool => ! auth('admin')->user()->isNotaio())
                     ->modalSubmitActionLabel('Salva')
                     ->modalCancelActionLabel('Chiudi'),
                 ViewAction::make(),
@@ -100,8 +104,11 @@ class PlayResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->action(fn (Play $record) => $record->update(['status' => PlayStatus::Validated]))
-                    ->visible(fn (Play $record): bool => $record->isPending()),
+                    ->action(function (Play $record): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
+                        $record->update(['status' => PlayStatus::Validated]);
+                    })
+                    ->visible(fn (Play $record): bool => $record->isPending() && ! auth('admin')->user()->isNotaio()),
                 Action::make('ban')
                     ->label('Banna')
                     ->icon('heroicon-o-no-symbol')
@@ -113,13 +120,14 @@ class PlayResource extends Resource
                             ->required(),
                     ])
                     ->action(function (Play $record, array $data): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
                         $record->update([
                             'status' => PlayStatus::Banned,
                             'ban_reason' => $data['ban_reason'],
                             'banned_at' => now(),
                         ]);
                     })
-                    ->visible(fn (Play $record): bool => ! $record->isBanned()),
+                    ->visible(fn (Play $record): bool => ! $record->isBanned() && ! auth('admin')->user()->isNotaio()),
                 Action::make('unban')
                     ->label('Sbanna')
                     ->icon('heroicon-o-check-circle')
@@ -127,13 +135,14 @@ class PlayResource extends Resource
                     ->requiresConfirmation()
                     ->modalDescription('La giocata verrà sbannata ma il premio NON verrà riassegnato.')
                     ->action(function (Play $record): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
                         $record->update([
                             'status' => PlayStatus::Validated,
                             'ban_reason' => null,
                             'banned_at' => null,
                         ]);
                     })
-                    ->visible(fn (Play $record): bool => $record->isBanned()),
+                    ->visible(fn (Play $record): bool => $record->isBanned() && ! auth('admin')->user()->isNotaio()),
             ]);
     }
 

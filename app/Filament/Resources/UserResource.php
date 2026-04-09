@@ -75,24 +75,26 @@ class UserResource extends Resource
                             ->required(),
                     ])
                     ->action(function (User $record, array $data): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
                         $record->update([
                             'is_banned' => true,
                             'ban_reason' => $data['ban_reason'],
                         ]);
                     })
-                    ->visible(fn (User $record): bool => ! $record->is_banned),
+                    ->visible(fn (User $record): bool => ! $record->is_banned && ! auth('admin')->user()->isNotaio()),
                 Action::make('unban')
                     ->label('Sbanna')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (User $record): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
                         $record->update([
                             'is_banned' => false,
                             'ban_reason' => null,
                         ]);
                     })
-                    ->visible(fn (User $record): bool => $record->is_banned),
+                    ->visible(fn (User $record): bool => $record->is_banned && ! auth('admin')->user()->isNotaio()),
             ])
             ->bulkActions([
                 BulkAction::make('ban_selected')
@@ -106,11 +108,13 @@ class UserResource extends Resource
                             ->required(),
                     ])
                     ->action(function (Collection $records, array $data): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
                         $records->each(fn (User $user) => $user->update([
                             'is_banned' => true,
                             'ban_reason' => $data['ban_reason'],
                         ]));
-                    }),
+                    })
+                    ->visible(fn (): bool => ! auth('admin')->user()->isNotaio()),
             ]);
     }
 

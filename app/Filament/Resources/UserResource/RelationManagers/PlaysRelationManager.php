@@ -45,7 +45,11 @@ class PlaysRelationManager extends RelationManager
                             ->rows(4)
                             ->default(fn (Play $record): ?string => $record->notes),
                     ])
-                    ->action(fn (Play $record, array $data) => $record->update(['notes' => $data['notes']]))
+                    ->action(function (Play $record, array $data): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
+                        $record->update(['notes' => $data['notes']]);
+                    })
+                    ->visible(fn (): bool => ! auth('admin')->user()->isNotaio())
                     ->modalSubmitActionLabel('Salva')
                     ->modalCancelActionLabel('Chiudi'),
             ]);

@@ -163,8 +163,9 @@ class FinalDraw extends Page
             ->requiresConfirmation()
             ->modalHeading('Annulla estrazione sostituti')
             ->modalDescription('Verranno eliminati tutti i sostituti estratti. I vincitori resteranno invariati.')
-            ->visible(fn () => $this->hasSubstitutes())
+            ->visible(fn () => $this->hasSubstitutes() && ! auth('admin')->user()->isNotaio())
             ->action(function () {
+                abort_if(auth('admin')->user()->isNotaio(), 403);
                 app(FinalDrawService::class)->resetSubstitutes();
 
                 Notification::make()
@@ -183,8 +184,9 @@ class FinalDraw extends Page
             ->requiresConfirmation()
             ->modalHeading('Annulla intera estrazione')
             ->modalDescription('Verranno eliminati TUTTI i risultati (vincitori e sostituti). Questa azione non è reversibile.')
-            ->visible(fn () => $this->hasAllWinners())
+            ->visible(fn () => $this->hasAllWinners() && ! auth('admin')->user()->isNotaio())
             ->action(function () {
+                abort_if(auth('admin')->user()->isNotaio(), 403);
                 app(FinalDrawService::class)->resetAll();
 
                 Notification::make()

@@ -31,6 +31,21 @@ class StoreResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    public static function canCreate(): bool
+    {
+        return ! auth('admin')->user()->isNotaio();
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return ! auth('admin')->user()->isNotaio();
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return ! auth('admin')->user()->isNotaio();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -91,10 +106,12 @@ class StoreResource extends Resource
                     ->options(fn () => Store::whereNotNull('agent')->distinct()->pluck('agent', 'agent')->filter()->sort()->toArray()),
             ])
             ->actions([
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn (): bool => ! auth('admin')->user()->isNotaio()),
             ])
             ->bulkActions([
-                DeleteBulkAction::make(),
+                DeleteBulkAction::make()
+                    ->visible(fn (): bool => ! auth('admin')->user()->isNotaio()),
             ]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\PlayStatus;
 use App\Filament\Pages\FinalDraw;
 use App\Models\Admin;
 use App\Models\FinalDrawResult;
@@ -37,7 +38,7 @@ class FinalDrawPageTest extends TestCase
                 'receipt_image' => 'receipts/test.jpg',
                 'played_at' => now()->subDays($i),
                 'is_winner' => false,
-                'is_banned' => false,
+                'status' => PlayStatus::Validated,
             ]);
         }
 

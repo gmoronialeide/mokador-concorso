@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\PlayStatus;
 use App\Models\Admin;
 use App\Models\FinalDrawResult;
 use App\Models\FinalPrize;
@@ -20,7 +21,7 @@ class FinalDrawServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new FinalDrawService();
+        $this->service = new FinalDrawService;
     }
 
     private function createAdmin(): Admin
@@ -41,7 +42,7 @@ class FinalDrawServiceTest extends TestCase
                 'receipt_image' => 'receipts/test.jpg',
                 'played_at' => now()->subDays($i),
                 'is_winner' => false,
-                'is_banned' => false,
+                'status' => PlayStatus::Validated,
             ]);
         }
 
@@ -78,7 +79,7 @@ class FinalDrawServiceTest extends TestCase
             'receipt_image' => 'receipts/test.jpg',
             'played_at' => now(),
             'is_winner' => false,
-            'is_banned' => true,
+            'status' => PlayStatus::Banned,
         ]);
 
         $eligible = $this->service->getEligibleUsers();
@@ -106,7 +107,7 @@ class FinalDrawServiceTest extends TestCase
             'receipt_image' => 'receipts/test.jpg',
             'played_at' => now(),
             'is_winner' => true,
-            'is_banned' => false,
+            'status' => PlayStatus::Validated,
         ]);
 
         $eligible = $this->service->getEligibleUsers();
@@ -161,7 +162,7 @@ class FinalDrawServiceTest extends TestCase
                 'receipt_image' => 'receipts/test.jpg',
                 'played_at' => now()->subDays($i),
                 'is_winner' => false,
-                'is_banned' => false,
+                'status' => PlayStatus::Validated,
             ]);
         }
 
@@ -171,7 +172,7 @@ class FinalDrawServiceTest extends TestCase
             'receipt_image' => 'receipts/test.jpg',
             'played_at' => now()->subDays(6),
             'is_winner' => false,
-            'is_banned' => true,
+            'status' => PlayStatus::Banned,
         ]);
 
         $eligible = $this->service->getEligibleUsers();
@@ -440,7 +441,7 @@ class FinalDrawServiceTest extends TestCase
 
         foreach (FinalDrawResult::all() as $result) {
             $expectedCount = Play::where('user_id', $result->user_id)
-                ->where('is_banned', false)
+                ->whereNot('status', PlayStatus::Banned)
                 ->count();
             $this->assertEquals($expectedCount, $result->total_plays);
         }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\PlayStatus;
 use App\Filament\Pages\PrizeSummary;
 use App\Filament\Resources\PlayResource\Pages\ListPlays;
 use App\Filament\Resources\PlayResource\Pages\ViewPlay;
@@ -153,7 +154,7 @@ class BackofficeTest extends TestCase
         $slot->refresh();
 
         // Giocata bannata ma premio e slot restano assegnati
-        $this->assertTrue($play->is_banned);
+        $this->assertEquals(PlayStatus::Banned, $play->status);
         $this->assertTrue($play->is_winner);
         $this->assertEquals($prize->id, $play->prize_id);
         $this->assertTrue($slot->is_assigned);
@@ -173,7 +174,7 @@ class BackofficeTest extends TestCase
             'played_at' => '2026-04-20 15:00:00',
             'is_winner' => true,
             'prize_id' => $prize->id,
-            'is_banned' => true,
+            'status' => PlayStatus::Banned,
             'ban_reason' => 'Test ban',
             'banned_at' => now(),
         ]);
@@ -183,7 +184,7 @@ class BackofficeTest extends TestCase
             ->assertSuccessful();
 
         $play->refresh();
-        $this->assertFalse($play->is_banned);
+        $this->assertEquals(PlayStatus::Validated, $play->status);
         // Il premio resta assegnato dopo lo sban
         $this->assertTrue($play->is_winner);
         $this->assertEquals($prize->id, $play->prize_id);

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\PlayStatus;
 use App\Models\Play;
 use App\Models\Prize;
 use App\Models\User;
@@ -21,7 +22,7 @@ class InstantWinServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->service = new InstantWinService();
+        $this->service = new InstantWinService;
     }
 
     private function createUser(array $overrides = []): User
@@ -30,8 +31,8 @@ class InstantWinServiceTest extends TestCase
             'name' => 'Mario',
             'surname' => 'Rossi',
             'birth_date' => '1990-01-01',
-            'email' => 'mario' . uniqid() . '@test.it',
-            'phone' => '3' . substr(uniqid(), -9),
+            'email' => 'mario'.uniqid().'@test.it',
+            'phone' => '3'.substr(uniqid(), -9),
             'address' => 'Via Roma 1',
             'city' => 'Bologna',
             'province' => 'BO',
@@ -242,7 +243,7 @@ class InstantWinServiceTest extends TestCase
         $this->assertNotNull($prize1);
 
         // La giocata viene bannata (ma is_winner resta true, premio resta assegnato)
-        $play1->update(['is_banned' => true, 'ban_reason' => 'Scontrino falso', 'banned_at' => now()]);
+        $play1->update(['status' => PlayStatus::Banned, 'ban_reason' => 'Scontrino falso', 'banned_at' => now()]);
 
         // STORE01 tenta di nuovo — deve essere ancora bloccato
         $user2 = $this->createUser();
@@ -357,7 +358,7 @@ class InstantWinServiceTest extends TestCase
         $winners = 0;
         for ($i = 0; $i < 10; $i++) {
             $user = $this->createUser();
-            $play = $this->createPlay($user, 'STORE' . str_pad($i, 2, '0', STR_PAD_LEFT));
+            $play = $this->createPlay($user, 'STORE'.str_pad($i, 2, '0', STR_PAD_LEFT));
             if ($this->service->attempt($play)) {
                 $winners++;
             }

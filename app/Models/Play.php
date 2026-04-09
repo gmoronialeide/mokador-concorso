@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PlayStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +18,7 @@ class Play extends Model
         'is_winner',
         'prize_id',
         'winning_slot_id',
-        'is_banned',
+        'status',
         'ban_reason',
         'banned_at',
         'notes',
@@ -25,7 +26,7 @@ class Play extends Model
 
     protected $attributes = [
         'is_winner' => false,
-        'is_banned' => false,
+        'status' => PlayStatus::Pending,
     ];
 
     protected function casts(): array
@@ -33,7 +34,7 @@ class Play extends Model
         return [
             'played_at' => 'datetime',
             'is_winner' => 'boolean',
-            'is_banned' => 'boolean',
+            'status' => PlayStatus::class,
             'banned_at' => 'datetime',
         ];
     }
@@ -70,11 +71,36 @@ class Play extends Model
 
     public function scopeBanned(Builder $query): Builder
     {
-        return $query->where('is_banned', true);
+        return $query->where('status', PlayStatus::Banned);
+    }
+
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', PlayStatus::Pending);
+    }
+
+    public function scopeValidated(Builder $query): Builder
+    {
+        return $query->where('status', PlayStatus::Validated);
     }
 
     public function scopeForDate(Builder $query, Carbon|string $date): Builder
     {
         return $query->whereDate('played_at', $date);
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === PlayStatus::Pending;
+    }
+
+    public function isValidated(): bool
+    {
+        return $this->status === PlayStatus::Validated;
+    }
+
+    public function isBanned(): bool
+    {
+        return $this->status === PlayStatus::Banned;
     }
 }

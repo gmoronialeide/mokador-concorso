@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Js;
 
 class PlayResource extends Resource
@@ -47,7 +48,22 @@ class PlayResource extends Resource
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('user.surname')->label('Utente')
                     ->formatStateUsing(fn (Play $record): string => $record->user->surname.' '.$record->user->name)
-                    ->searchable(['user.surname', 'user.name']),
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        $terms = array_filter(preg_split('/\s+/', trim($search)) ?: []);
+
+                        if ($terms === []) {
+                            return $query;
+                        }
+
+                        return $query->whereHas('user', function (Builder $q) use ($terms): void {
+                            foreach ($terms as $term) {
+                                $q->where(function (Builder $sub) use ($term): void {
+                                    $sub->where('surname', 'like', "%{$term}%")
+                                        ->orWhere('name', 'like', "%{$term}%");
+                                });
+                            }
+                        });
+                    }),
                 TextColumn::make('store_code')->label('Punto Vendita')->searchable(),
                 TextColumn::make('played_at')->label('Data giocata')->dateTime('d/m/Y H:i')->sortable(),
                 IconColumn::make('is_winner')->label('Vincente')->boolean(),

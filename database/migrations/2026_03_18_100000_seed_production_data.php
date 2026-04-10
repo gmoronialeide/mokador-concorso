@@ -76,9 +76,9 @@ return new class extends Migration
         // --- Premi finali (estrazione finale) ---
         DB::table('final_prizes')->insert([
             [
-                'name' => 'Premio Finale 1° — Soggiorno Vacanza',
-                'description' => 'Soggiorno vacanza per due persone (da definire)',
-                'value' => 0.00,
+                'name' => 'Soggiorno per 2 persone al Family Hotel Gran Baita',
+                'description' => "Soggiorno di una settimana per 2 persone al Family Hotel Gran Baita in Val di Fassa, dall'11 al 18 luglio 2026. Spese di viaggio escluse.",
+                'value' => 2074.55,
                 'position' => 1,
                 'drawn_at' => null,
                 'drawn_by' => null,
@@ -86,9 +86,9 @@ return new class extends Migration
                 'updated_at' => $now,
             ],
             [
-                'name' => 'Premio Finale 2° — Weekend Benessere',
-                'description' => 'Weekend benessere per due persone (da definire)',
-                'value' => 0.00,
+                'name' => 'Macchina caffè Mokador Diva E1 + 100 capsule',
+                'description' => 'Macchina caffè Mokador Diva E1 con 100 capsule omaggio.',
+                'value' => 99.90,
                 'position' => 2,
                 'drawn_at' => null,
                 'drawn_by' => null,
@@ -96,9 +96,9 @@ return new class extends Migration
                 'updated_at' => $now,
             ],
             [
-                'name' => 'Premio Finale 3° — Cesto Mokador Premium',
-                'description' => 'Cesto regalo Mokador Premium (da definire)',
-                'value' => 0.00,
+                'name' => 'Montalatte',
+                'description' => 'Montalatte elettrico per cappuccini cremosi come al bar.',
+                'value' => 60.00,
                 'position' => 3,
                 'drawn_at' => null,
                 'drawn_by' => null,

@@ -62,7 +62,6 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'permission' => 0664,
             'replace_placeholders' => true,
         ],
 
@@ -71,7 +70,6 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
-            'permission' => 0664,
             'replace_placeholders' => true,
         ],
 
@@ -125,7 +123,6 @@ return [
             'path' => storage_path('logs/concorso.log'),
             'level' => 'info',
             'days' => 90,
-            'permission' => 0664,
             'replace_placeholders' => true,
         ],
 

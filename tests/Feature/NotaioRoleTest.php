@@ -44,6 +44,51 @@ class NotaioRoleTest extends TestCase
         ]);
     }
 
+    private function setupFullyDrawnState(): void
+    {
+        $users = User::factory()->count(12)->create();
+
+        $plays = [];
+        foreach ($users as $u) {
+            $plays[$u->id] = Play::create([
+                'user_id' => $u->id,
+                'store_code' => 'STORE01',
+                'receipt_image' => 'receipts/test.jpg',
+                'played_at' => now(),
+            ]);
+        }
+
+        $prizes = \App\Models\FinalPrize::orderBy('position')->get();
+        $ui = 0;
+        foreach ($prizes as $prize) {
+            $winnerUser = $users[$ui++];
+            \App\Models\FinalDrawResult::create([
+                'final_prize_id' => $prize->id,
+                'user_id' => $winnerUser->id,
+                'play_id' => $plays[$winnerUser->id]->id,
+                'role' => 'winner',
+                'total_plays' => 1,
+                'drawn_at' => now(),
+                'drawn_by_admin_id' => $this->admin->id,
+            ]);
+            $prize->update(['drawn_at' => now()]);
+
+            for ($k = 1; $k <= 3; $k++) {
+                $subUser = $users[$ui++];
+                \App\Models\FinalDrawResult::create([
+                    'final_prize_id' => $prize->id,
+                    'user_id' => $subUser->id,
+                    'play_id' => $plays[$subUser->id]->id,
+                    'role' => 'substitute',
+                    'substitute_position' => $k,
+                    'total_plays' => 1,
+                    'drawn_at' => now(),
+                    'drawn_by_admin_id' => $this->admin->id,
+                ]);
+            }
+        }
+    }
+
     // -------------------------------------------------------
     // Notaio CANNOT access WinningSlotResource
     // -------------------------------------------------------
@@ -216,15 +261,15 @@ class NotaioRoleTest extends TestCase
     }
 
     // -------------------------------------------------------
-    // Notaio CAN access the admin panel
+    // Notaio: hitting /admin redirects to Estrazione Finale
     // -------------------------------------------------------
 
-    public function test_notaio_can_access_admin_panel(): void
+    public function test_notaio_admin_root_redirects_to_final_draw(): void
     {
         $response = $this->actingAs($this->notaio, 'admin')
             ->get('/admin');
 
-        $response->assertStatus(200);
+        $response->assertRedirect(\App\Filament\Pages\FinalDraw::getUrl(panel: 'admin'));
     }
 
     // -------------------------------------------------------
@@ -319,6 +364,70 @@ class NotaioRoleTest extends TestCase
 
         Livewire::test(PrizeSummary::class)
             ->assertSuccessful();
+    }
+
+    // -------------------------------------------------------
+    // Notaio CANNOT access the Dashboard
+    // -------------------------------------------------------
+
+    public function test_notaio_cannot_access_dashboard(): void
+    {
+        $this->actingAs($this->notaio, 'admin');
+
+        Livewire::test(\App\Filament\Pages\Dashboard::class)
+            ->assertForbidden();
+    }
+
+    public function test_notaio_dashboard_is_hidden_from_navigation(): void
+    {
+        $this->actingAs($this->notaio, 'admin');
+
+        $this->assertFalse(\App\Filament\Pages\Dashboard::canAccess());
+    }
+
+    public function test_admin_can_still_access_dashboard(): void
+    {
+        $this->actingAs($this->admin, 'admin');
+
+        Livewire::test(\App\Filament\Pages\Dashboard::class)
+            ->assertSuccessful();
+    }
+
+    public function test_admin_dashboard_is_visible_in_navigation(): void
+    {
+        $this->actingAs($this->admin, 'admin');
+
+        $this->assertTrue(\App\Filament\Pages\Dashboard::canAccess());
+    }
+
+    // -------------------------------------------------------
+    // Notaio CANNOT see reset action buttons on FinalDraw page
+    // -------------------------------------------------------
+
+    public function test_notaio_cannot_see_reset_actions_on_final_draw(): void
+    {
+        $this->setupFullyDrawnState();
+
+        config(['app.concorso_end_date' => '2020-01-01']);
+        $this->actingAs($this->notaio, 'admin');
+
+        $html = Livewire::test(FinalDraw::class)->html();
+
+        $this->assertStringNotContainsString("'resetAll'", $html);
+        $this->assertStringNotContainsString("'resetSubstitutes'", $html);
+    }
+
+    public function test_admin_can_still_see_reset_actions_on_final_draw(): void
+    {
+        $this->setupFullyDrawnState();
+
+        config(['app.concorso_end_date' => '2020-01-01']);
+        $this->actingAs($this->admin, 'admin');
+
+        $html = Livewire::test(FinalDraw::class)->html();
+
+        $this->assertStringContainsString("'resetAll'", $html);
+        $this->assertStringContainsString("'resetSubstitutes'", $html);
     }
 
     // -------------------------------------------------------

@@ -54,8 +54,10 @@
             {{ $this->drawWinnersAction }}
             {{ $this->drawSubstitutesAction }}
             {{ $this->exportVerbaleAction }}
-            {{ $this->resetSubstitutesAction }}
-            {{ $this->resetAllAction }}
+            @if (! auth('admin')->user()->isNotaio())
+                {{ $this->resetSubstitutesAction }}
+                {{ $this->resetAllAction }}
+            @endif
         </div>
     @endif
 

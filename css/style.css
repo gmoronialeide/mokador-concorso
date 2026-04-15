@@ -1158,8 +1158,20 @@ select {
 }
 
 @media (min-width: 768px) {
+    .punti-vendita-results {
+        max-width: 1240px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
     .punti-vendita-results li {
-        justify-content: center;
+        justify-content: flex-start;
+    }
+}
+
+@media (min-width: 991px) {
+    .punti-vendita-results li {
+        padding-left: 33%;
     }
 }
 

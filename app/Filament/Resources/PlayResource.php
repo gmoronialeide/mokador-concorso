@@ -41,6 +41,11 @@ class PlayResource extends Resource
         return false;
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['user', 'store', 'prize', 'winningSlot']);
+    }
+
     public static function table(Table $table): Table
     {
         return $table

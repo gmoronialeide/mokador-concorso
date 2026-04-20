@@ -157,10 +157,12 @@ class PlayResourceSearchTest extends TestCase
             ->assertCanNotSeeTableRecords([$this->marioPlay]);
     }
 
-    public function test_list_column_renders_combined_store_display(): void
+    public function test_list_column_renders_store_code_with_tooltip_data(): void
     {
         Livewire::test(ListPlays::class)
-            ->assertSee('STORE01 — Bar Roma (Milano, MI)')
-            ->assertSee('STORE02 — Da Dante (Torino, TO)');
+            ->assertSee('STORE01')
+            ->assertSee('STORE02')
+            ->assertSee('Bar Roma (Milano, MI)')
+            ->assertSee('Da Dante (Torino, TO)');
     }
 }

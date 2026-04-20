@@ -69,22 +69,8 @@ class PlayResource extends Resource
                             }
                         });
                     }),
-                TextColumn::make('store_display')
+                TextColumn::make('store_code')
                     ->label('Punto Vendita')
-                    ->state(function (Play $record): string {
-                        if ($record->store === null) {
-                            return $record->store_code;
-                        }
-
-                        $store = $record->store;
-
-                        return sprintf('%s — %s (%s, %s)',
-                            $record->store_code,
-                            $store->display_name,
-                            $store->city,
-                            $store->province,
-                        );
-                    })
                     ->tooltip(function (Play $record): ?string {
                         if ($record->store === null) {
                             return null;
@@ -92,9 +78,8 @@ class PlayResource extends Resource
 
                         $store = $record->store;
 
-                        return sprintf('%s, %s %s (%s)',
-                            $store->address,
-                            $store->cap,
+                        return sprintf('%s (%s, %s)',
+                            $store->display_name,
                             $store->city,
                             $store->province,
                         );

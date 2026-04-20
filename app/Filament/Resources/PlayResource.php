@@ -71,7 +71,7 @@ class PlayResource extends Resource
                     }),
                 TextColumn::make('store_display')
                     ->label('Punto Vendita')
-                    ->formatStateUsing(function (Play $record): string {
+                    ->state(function (Play $record): string {
                         if ($record->store === null) {
                             return $record->store_code;
                         }

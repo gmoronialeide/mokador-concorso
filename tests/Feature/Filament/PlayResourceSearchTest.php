@@ -5,6 +5,7 @@ namespace Tests\Feature\Filament;
 use App\Filament\Resources\PlayResource\Pages\ListPlays;
 use App\Models\Admin;
 use App\Models\Play;
+use App\Models\Store;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -38,6 +39,26 @@ class PlayResourceSearchTest extends TestCase
         $this->luca = User::factory()->create([
             'name' => 'Luca',
             'surname' => 'Bianchi',
+        ]);
+
+        Store::factory()->create([
+            'code' => 'STORE01',
+            'name' => 'Bar Roma',
+            'sign_name' => '',
+            'city' => 'Milano',
+            'province' => 'MI',
+            'address' => 'Via Roma 12',
+            'cap' => '20121',
+        ]);
+
+        Store::factory()->create([
+            'code' => 'STORE02',
+            'name' => 'Caffetteria Dante',
+            'sign_name' => 'Da Dante',
+            'city' => 'Torino',
+            'province' => 'TO',
+            'address' => 'Via Dante 5',
+            'cap' => '10121',
         ]);
 
         $this->marioPlay = Play::create([
@@ -102,5 +123,37 @@ class PlayResourceSearchTest extends TestCase
             ->set('tableSearch', 'STORE01')
             ->assertCanSeeTableRecords([$this->marioPlay])
             ->assertCanNotSeeTableRecords([$this->lucaPlay]);
+    }
+
+    public function test_search_by_store_name_finds_play(): void
+    {
+        Livewire::test(ListPlays::class)
+            ->set('tableSearch', 'Bar Roma')
+            ->assertCanSeeTableRecords([$this->marioPlay])
+            ->assertCanNotSeeTableRecords([$this->lucaPlay]);
+    }
+
+    public function test_search_by_store_sign_name_finds_play(): void
+    {
+        Livewire::test(ListPlays::class)
+            ->set('tableSearch', 'Da Dante')
+            ->assertCanSeeTableRecords([$this->lucaPlay])
+            ->assertCanNotSeeTableRecords([$this->marioPlay]);
+    }
+
+    public function test_search_by_store_city_finds_play(): void
+    {
+        Livewire::test(ListPlays::class)
+            ->set('tableSearch', 'Milano')
+            ->assertCanSeeTableRecords([$this->marioPlay])
+            ->assertCanNotSeeTableRecords([$this->lucaPlay]);
+    }
+
+    public function test_search_by_store_province_finds_play(): void
+    {
+        Livewire::test(ListPlays::class)
+            ->set('tableSearch', 'Torino')
+            ->assertCanSeeTableRecords([$this->lucaPlay])
+            ->assertCanNotSeeTableRecords([$this->marioPlay]);
     }
 }

@@ -54,7 +54,7 @@ class StoreResource extends Resource
                 Section::make('Anagrafica')
                     ->schema([
                         TextInput::make('code')->label('Codice')
-                            ->required()->unique(ignoreRecord: true)->maxLength(50),
+                            ->required()->maxLength(50),
                         TextInput::make('name')->label('Ragione sociale')
                             ->required()->maxLength(255),
                         TextInput::make('sign_name')->label('Insegna locale')

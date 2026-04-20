@@ -69,7 +69,57 @@ class PlayResource extends Resource
                             }
                         });
                     }),
-                TextColumn::make('store_code')->label('Punto Vendita')->searchable(),
+                TextColumn::make('store_display')
+                    ->label('Punto Vendita')
+                    ->formatStateUsing(function (Play $record): string {
+                        if ($record->store === null) {
+                            return $record->store_code;
+                        }
+
+                        $store = $record->store;
+
+                        return sprintf('%s — %s (%s, %s)',
+                            $record->store_code,
+                            $store->display_name,
+                            $store->city,
+                            $store->province,
+                        );
+                    })
+                    ->tooltip(function (Play $record): ?string {
+                        if ($record->store === null) {
+                            return null;
+                        }
+
+                        $store = $record->store;
+
+                        return sprintf('%s, %s %s (%s)',
+                            $store->address,
+                            $store->cap,
+                            $store->city,
+                            $store->province,
+                        );
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        $terms = array_filter(preg_split('/\s+/', trim($search)) ?: []);
+
+                        if ($terms === []) {
+                            return $query;
+                        }
+
+                        return $query->where(function (Builder $outer) use ($terms): void {
+                            foreach ($terms as $term) {
+                                $outer->where(function (Builder $sub) use ($term): void {
+                                    $sub->where('store_code', 'like', "%{$term}%")
+                                        ->orWhereHas('store', function (Builder $q) use ($term): void {
+                                            $q->where('name', 'like', "%{$term}%")
+                                                ->orWhere('sign_name', 'like', "%{$term}%")
+                                                ->orWhere('city', 'like', "%{$term}%")
+                                                ->orWhere('province', 'like', "%{$term}%");
+                                        });
+                                });
+                            }
+                        });
+                    }),
                 TextColumn::make('played_at')->label('Data giocata')->dateTime('d/m/Y H:i')->sortable(),
                 IconColumn::make('is_winner')->label('Vincente')->boolean(),
                 TextColumn::make('prize.name')->label('Premio')->placeholder('-'),

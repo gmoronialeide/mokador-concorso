@@ -258,7 +258,6 @@ class PlayResource extends Resource
                 Section::make('Giocata')->schema([
                     TextEntry::make('id')->label('ID'),
                     TextEntry::make('played_at')->label('Data giocata')->dateTime('d/m/Y H:i'),
-                    TextEntry::make('store_code')->label('Punto Vendita'),
                     TextEntry::make('is_winner')->label('Vincente')
                         ->badge()
                         ->formatStateUsing(fn (bool $state): string => $state ? 'Vincente' : 'Non vincente')
@@ -266,7 +265,15 @@ class PlayResource extends Resource
                     TextEntry::make('notes')->label('Note')
                         ->visible(fn (Play $record): bool => filled($record->notes))
                         ->columnSpanFull(),
-                ])->columns(4),
+                ])->columns(3),
+                Section::make('Punto Vendita')->schema([
+                    TextEntry::make('store_code')->label('Codice'),
+                    TextEntry::make('store.display_name')->label('Nome')->placeholder('—'),
+                    TextEntry::make('store.address')->label('Indirizzo')->placeholder('—'),
+                    TextEntry::make('store.cap')->label('CAP')->placeholder('—'),
+                    TextEntry::make('store.city')->label('Città')->placeholder('—'),
+                    TextEntry::make('store.province')->label('Provincia')->placeholder('—'),
+                ])->columns(3),
                 Section::make('Scontrino')->schema([
                     ViewEntry::make('receipt_image')
                         ->label('')

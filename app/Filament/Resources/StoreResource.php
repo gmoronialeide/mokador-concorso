@@ -44,7 +44,11 @@ class StoreResource extends Resource
 
     public static function canDelete(Model $record): bool
     {
-        return ! auth('admin')->user()->isNotaio();
+        if (auth('admin')->user()->isNotaio()) {
+            return false;
+        }
+
+        return ! $record->plays()->exists();
     }
 
     public static function form(Schema $schema): Schema

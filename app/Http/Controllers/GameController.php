@@ -43,6 +43,7 @@ class GameController extends Controller
 
         $play = Play::create([
             'user_id' => $user->id,
+            'store_id' => $store->id,
             'store_code' => $store->code,
             'receipt_image' => $receiptPath,
             'played_at' => Carbon::now(),

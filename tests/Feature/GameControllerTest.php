@@ -84,6 +84,20 @@ class GameControllerTest extends TestCase
         ]);
     }
 
+    public function test_play_persists_store_id_and_store_code(): void
+    {
+        Carbon::setTestNow('2026-04-25 10:00:00');
+        $user = $this->createVerifiedUser();
+        $store = $this->createActiveStore();
+
+        $this->actingAs($user)->post(route('game.play'), $this->validPlayData());
+
+        $play = Play::where('user_id', $user->id)->first();
+        $this->assertNotNull($play);
+        $this->assertSame($store->id, $play->store_id);
+        $this->assertSame($store->code, $play->store_code);
+    }
+
     public function test_play_with_valid_png(): void
     {
         Carbon::setTestNow('2026-04-25 10:00:00');

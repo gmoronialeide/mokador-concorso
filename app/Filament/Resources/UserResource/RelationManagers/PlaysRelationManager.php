@@ -23,7 +23,21 @@ class PlaysRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('played_at')->label('Data')->dateTime('d/m/Y H:i')->sortable(),
-                TextColumn::make('store_code')->label('Punto Vendita'),
+                TextColumn::make('store_code')
+                    ->label('Punto Vendita')
+                    ->tooltip(function (Play $record): ?string {
+                        if ($record->store === null) {
+                            return null;
+                        }
+
+                        $store = $record->store;
+
+                        return sprintf('%s (%s, %s)',
+                            $store->display_name,
+                            $store->city,
+                            $store->province,
+                        );
+                    }),
                 IconColumn::make('is_winner')->label('Vincente')->boolean(),
                 TextColumn::make('prize.name')->label('Premio')->placeholder('-'),
                 TextColumn::make('status')->label('Stato')

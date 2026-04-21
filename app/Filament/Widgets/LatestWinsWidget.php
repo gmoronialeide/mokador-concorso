@@ -23,7 +23,7 @@ class LatestWinsWidget extends BaseWidget
                 Play::query()
                     ->where('is_winner', true)
                     ->whereNot('status', PlayStatus::Banned)
-                    ->with(['user', 'prize'])
+                    ->with(['user', 'prize', 'store'])
                     ->latest('played_at')
                     ->limit(10)
             )
@@ -32,7 +32,21 @@ class LatestWinsWidget extends BaseWidget
                 TextColumn::make('user.surname')->label('Utente')
                     ->formatStateUsing(fn (Play $record): string => $record->user->surname.' '.$record->user->name),
                 TextColumn::make('user.email')->label('Email'),
-                TextColumn::make('store_code')->label('Punto Vendita'),
+                TextColumn::make('store_code')
+                    ->label('Punto Vendita')
+                    ->tooltip(function (Play $record): ?string {
+                        if ($record->store === null) {
+                            return null;
+                        }
+
+                        $store = $record->store;
+
+                        return sprintf('%s (%s, %s)',
+                            $store->display_name,
+                            $store->city,
+                            $store->province,
+                        );
+                    }),
                 TextColumn::make('prize.code')->label('Premio')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {

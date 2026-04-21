@@ -22,11 +22,7 @@ class BackfillPlayStoreId extends Command
 
         foreach ($codes as $code) {
             $stores = Store::where('code', $code)->orderBy('id')->get();
-            $storeId = match (true) {
-                $stores->count() === 0 => null,
-                $stores->count() === 1 => $stores->first()->id,
-                default => $stores->firstWhere('is_active', true)?->id,
-            };
+            $storeId = $stores->count() === 1 ? $stores->first()->id : null;
 
             if ($storeId === null) {
                 $this->line("[skip] {$code}: nessun store risolvibile");

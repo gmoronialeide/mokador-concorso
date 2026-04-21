@@ -40,32 +40,14 @@ class BackfillPlayStoreIdCommandTest extends TestCase
         $this->assertSame($store->id, $play->fresh()->store_id);
     }
 
-    public function test_multiple_stores_with_active_picks_oldest_active(): void
+    public function test_multiple_stores_always_leave_null(): void
     {
-        $inactiveOlder = Store::factory()->create(['code' => 'PV003', 'is_active' => false]);
-        $activeMiddle = Store::factory()->create(['code' => 'PV003', 'is_active' => true]);
-        $activeNewer = Store::factory()->create(['code' => 'PV003', 'is_active' => true]);
+        Store::factory()->create(['code' => 'PV003', 'is_active' => false]);
+        Store::factory()->create(['code' => 'PV003', 'is_active' => true]);
+        Store::factory()->create(['code' => 'PV003', 'is_active' => true]);
         $play = Play::factory()->create([
             'user_id' => User::factory(),
             'store_code' => 'PV003',
-            'store_id' => null,
-        ]);
-
-        $this->artisan('plays:backfill-store-id')->assertSuccessful();
-
-        $fresh = $play->fresh();
-        $this->assertSame($activeMiddle->id, $fresh->store_id);
-        $this->assertNotSame($inactiveOlder->id, $fresh->store_id);
-        $this->assertNotSame($activeNewer->id, $fresh->store_id);
-    }
-
-    public function test_multiple_stores_without_active_leaves_null(): void
-    {
-        Store::factory()->create(['code' => 'PV004', 'is_active' => false]);
-        Store::factory()->create(['code' => 'PV004', 'is_active' => false]);
-        $play = Play::factory()->create([
-            'user_id' => User::factory(),
-            'store_code' => 'PV004',
             'store_id' => null,
         ]);
 

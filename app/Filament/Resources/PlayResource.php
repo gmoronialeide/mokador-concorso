@@ -6,8 +6,10 @@ use App\Enums\PlayStatus;
 use App\Filament\Resources\PlayResource\Pages;
 use App\Models\Play;
 use App\Models\Prize;
+use App\Models\Store;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
@@ -183,6 +185,41 @@ class PlayResource extends Resource
                     ->modalSubmitActionLabel('Salva')
                     ->modalCancelActionLabel('Chiudi'),
                 ViewAction::make()->label('')->tooltip('Dettaglio'),
+                Action::make('assign_store')
+                    ->label('')
+                    ->icon('heroicon-o-building-storefront')
+                    ->color(fn (Play $record): string => $record->store_id === null ? 'warning' : 'gray')
+                    ->tooltip('Assegna Punto Vendita')
+                    ->modalHeading('Assegna Punto Vendita')
+                    ->modalWidth('md')
+                    ->form([
+                        Select::make('store_id')
+                            ->label('Punto Vendita')
+                            ->options(fn (Play $record): array => Store::where('code', $record->store_code)
+                                ->orderBy('id')
+                                ->get()
+                                ->mapWithKeys(fn (Store $store): array => [
+                                    $store->id => sprintf('%s — %s (%s, %s)%s',
+                                        $store->code,
+                                        $store->display_name,
+                                        $store->city,
+                                        $store->province,
+                                        $store->is_active ? '' : ' [disattivato]',
+                                    ),
+                                ])
+                                ->all())
+                            ->default(fn (Play $record): ?int => $record->store_id)
+                            ->required()
+                            ->native(false)
+                            ->helperText(fn (Play $record): string => "Store code giocata: {$record->store_code}"),
+                    ])
+                    ->action(function (Play $record, array $data): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
+                        $record->update(['store_id' => (int) $data['store_id']]);
+                    })
+                    ->visible(fn (): bool => ! auth('admin')->user()->isNotaio())
+                    ->modalSubmitActionLabel('Salva')
+                    ->modalCancelActionLabel('Annulla'),
                 Action::make('validate')
                     ->label('')
                     ->icon('heroicon-o-check-circle')

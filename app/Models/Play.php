@@ -4,14 +4,18 @@ namespace App\Models;
 
 use App\Enums\PlayStatus;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 class Play extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
+        'store_id',
         'store_code',
         'receipt_image',
         'played_at',

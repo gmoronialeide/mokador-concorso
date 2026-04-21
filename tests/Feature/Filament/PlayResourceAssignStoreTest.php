@@ -60,4 +60,33 @@ class PlayResourceAssignStoreTest extends TestCase
 
         $this->assertNull($play->fresh()->store_id);
     }
+
+    public function test_assign_store_action_hidden_when_already_assigned(): void
+    {
+        $store = Store::factory()->create(['code' => 'SET']);
+        $play = Play::factory()->forStore($store)->create([
+            'user_id' => User::factory(),
+        ]);
+
+        Livewire::test(ListPlays::class)
+            ->assertTableActionHidden('assign_store', $play);
+    }
+
+    public function test_filter_without_store_shows_only_null_plays(): void
+    {
+        $store = Store::factory()->create(['code' => 'HAS']);
+        $withStore = Play::factory()->forStore($store)->create([
+            'user_id' => User::factory(),
+        ]);
+        $withoutStore = Play::factory()->create([
+            'user_id' => User::factory(),
+            'store_code' => 'ORPHAN',
+            'store_id' => null,
+        ]);
+
+        Livewire::test(ListPlays::class)
+            ->filterTable('without_store')
+            ->assertCanSeeTableRecords([$withoutStore])
+            ->assertCanNotSeeTableRecords([$withStore]);
+    }
 }

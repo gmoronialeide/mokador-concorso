@@ -18,6 +18,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -123,6 +124,10 @@ class PlayResource extends Resource
                     ->options(collect(PlayStatus::cases())->mapWithKeys(fn (PlayStatus $s) => [$s->value => $s->label()])),
                 SelectFilter::make('prize_id')->label('Premio')
                     ->options(Prize::pluck('name', 'id')),
+                Filter::make('without_store')
+                    ->label('Senza punto vendita')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->whereNull('store_id')),
             ])
             ->actions([
                 Action::make('copy_email')
@@ -188,7 +193,7 @@ class PlayResource extends Resource
                 Action::make('assign_store')
                     ->label('')
                     ->icon('heroicon-o-building-storefront')
-                    ->color(fn (Play $record): string => $record->store_id === null ? 'warning' : 'gray')
+                    ->color('warning')
                     ->tooltip('Assegna Punto Vendita')
                     ->modalHeading('Assegna Punto Vendita')
                     ->modalWidth('md')
@@ -215,9 +220,10 @@ class PlayResource extends Resource
                     ])
                     ->action(function (Play $record, array $data): void {
                         abort_if(auth('admin')->user()->isNotaio(), 403);
+                        abort_if($record->store_id !== null, 422, 'Punto vendita già assegnato.');
                         $record->update(['store_id' => (int) $data['store_id']]);
                     })
-                    ->visible(fn (): bool => ! auth('admin')->user()->isNotaio())
+                    ->visible(fn (Play $record): bool => $record->store_id === null && ! auth('admin')->user()->isNotaio())
                     ->modalSubmitActionLabel('Salva')
                     ->modalCancelActionLabel('Annulla'),
                 Action::make('validate')

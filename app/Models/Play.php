@@ -55,7 +55,7 @@ class Play extends Model
 
     public function store(): BelongsTo
     {
-        return $this->belongsTo(Store::class, 'store_code', 'code');
+        return $this->belongsTo(Store::class);
     }
 
     public function winningSlot(): BelongsTo

@@ -37,9 +37,8 @@ class PlayResourceStoreDisplayTest extends TestCase
         ]);
 
         $user = User::factory()->create();
-        $play = Play::create([
+        $play = Play::factory()->forStore($store)->create([
             'user_id' => $user->id,
-            'store_code' => $store->code,
             'receipt_image' => 'receipts/x.jpg',
             'played_at' => now(),
         ]);
@@ -56,8 +55,9 @@ class PlayResourceStoreDisplayTest extends TestCase
     public function test_view_page_handles_orphan_store_code(): void
     {
         $user = User::factory()->create();
-        $play = Play::create([
+        $play = Play::factory()->create([
             'user_id' => $user->id,
+            'store_id' => null,
             'store_code' => 'ORPHAN999',
             'receipt_image' => 'receipts/o.jpg',
             'played_at' => now(),

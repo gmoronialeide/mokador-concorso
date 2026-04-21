@@ -41,7 +41,7 @@ class PlayResourceSearchTest extends TestCase
             'surname' => 'Bianchi',
         ]);
 
-        Store::factory()->create([
+        $store1 = Store::factory()->create([
             'code' => 'STORE01',
             'name' => 'Bar Roma',
             'sign_name' => '',
@@ -51,7 +51,7 @@ class PlayResourceSearchTest extends TestCase
             'cap' => '20121',
         ]);
 
-        Store::factory()->create([
+        $store2 = Store::factory()->create([
             'code' => 'STORE02',
             'name' => 'Caffetteria Dante',
             'sign_name' => 'Da Dante',
@@ -61,16 +61,14 @@ class PlayResourceSearchTest extends TestCase
             'cap' => '10121',
         ]);
 
-        $this->marioPlay = Play::create([
+        $this->marioPlay = Play::factory()->forStore($store1)->create([
             'user_id' => $this->mario->id,
-            'store_code' => 'STORE01',
             'receipt_image' => 'receipts/mario.jpg',
             'played_at' => now(),
         ]);
 
-        $this->lucaPlay = Play::create([
+        $this->lucaPlay = Play::factory()->forStore($store2)->create([
             'user_id' => $this->luca->id,
-            'store_code' => 'STORE02',
             'receipt_image' => 'receipts/luca.jpg',
             'played_at' => now(),
         ]);

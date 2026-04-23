@@ -97,10 +97,10 @@
                         <div class="form-register-col">
                             <label for="scontrino">Carica lo scontrino</label>
                             <input type="file" id="scontrino" name="receipt" accept="image/jpeg,image/png" required>
-                            <p class="small-caption mt-2 mb-0">Si prega di fotografare lo scontrino nella sua interezza, senza nascondere il nome del punto vendita e la data.</p>
                         </div>
                         <button type="submit" class="btn-mokador mt-auto">Gioca</button>
                     </form>
+                    <p class="small-caption text-center mt-3">Si prega di fotografare lo scontrino nella sua interezza, senza nascondere il nome del punto vendita e la data.</p>
                 @endif
             </div>
         </div>

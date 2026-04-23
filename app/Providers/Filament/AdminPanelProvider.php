@@ -10,7 +10,9 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
+use Illuminate\Support\Facades\View;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -62,6 +64,10 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 RedirectNotaioFromDashboard::class,
-            ]);
+            ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => View::make('filament.admin.assets')->render(),
+            );
     }
 }

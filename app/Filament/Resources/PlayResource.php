@@ -73,7 +73,7 @@ class PlayResource extends Resource
                         });
                     }),
                 TextColumn::make('store_code')
-                    ->label('Punto Vendita')
+                    ->label('P.V.')
                     ->tooltip(function (Play $record): ?string {
                         if ($record->store === null) {
                             return null;
@@ -109,13 +109,14 @@ class PlayResource extends Resource
                         });
                     }),
                 TextColumn::make('played_at')->label('Data giocata')->dateTime('d/m/Y H:i')->sortable(),
-                IconColumn::make('is_winner')->label('Vincente')->boolean(),
-                TextColumn::make('prize.name')->label('Premio')->placeholder('-'),
-                TextColumn::make('status')->label('Stato')
-                    ->badge()
-                    ->formatStateUsing(fn (PlayStatus $state): string => $state->label())
+                IconColumn::make('is_winner')->label('Win')->boolean()
+                    ->alignCenter()
+                    ->tooltip(fn (Play $record): ?string => $record->is_winner ? $record->prize?->name : null),
+                IconColumn::make('status')->label('Stato')
+                    ->alignCenter()
+                    ->icon(fn (PlayStatus $state): string => $state->icon())
                     ->color(fn (PlayStatus $state): string => $state->color())
-                    ->icon(fn (PlayStatus $state): string => $state->icon()),
+                    ->tooltip(fn (PlayStatus $state): string => $state->label()),
             ])
             ->defaultSort('played_at', 'desc')
             ->filters([
@@ -128,6 +129,16 @@ class PlayResource extends Resource
                     ->label('Senza punto vendita')
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->whereNull('store_id')),
+                TernaryFilter::make('notes')
+                    ->label('Note')
+                    ->placeholder('Tutte')
+                    ->trueLabel('Con note')
+                    ->falseLabel('Senza note')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereNotNull('notes')->where('notes', '!=', ''),
+                        false: fn (Builder $query): Builder => $query->where(fn (Builder $q): Builder => $q->whereNull('notes')->orWhere('notes', '=', '')),
+                        blank: fn (Builder $query): Builder => $query,
+                    ),
             ])
             ->actions([
                 Action::make('copy_email')
@@ -165,7 +176,7 @@ class PlayResource extends Resource
                     ->color('gray')
                     ->tooltip('Scontrino')
                     ->modalHeading('Scontrino')
-                    ->modalWidth('md')
+                    ->modalWidth('7xl')
                     ->modalContent(fn (Play $record) => view('filament.modals.receipt-preview', ['record' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Chiudi'),
@@ -231,9 +242,6 @@ class PlayResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->tooltip('Valida')
-                    ->requiresConfirmation()
-                    ->modalHeading('Validare questa giocata?')
-                    ->modalDescription('Confermi che lo scontrino è valido e la giocata può essere approvata?')
                     ->action(function (Play $record): void {
                         abort_if(auth('admin')->user()->isNotaio(), 403);
                         $record->update(['status' => PlayStatus::Validated]);

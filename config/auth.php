@@ -120,4 +120,17 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Email Verification
+    |--------------------------------------------------------------------------
+    |
+    | Minutes before a signed email-verification URL expires. 30 days = 43200.
+    |
+    */
+
+    'verification' => [
+        'expire' => 43200,
+    ],
+
 ];

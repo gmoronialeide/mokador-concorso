@@ -10,6 +10,7 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -51,6 +52,10 @@ class UserResource extends Resource
                 TextColumn::make('city')->label('Città'),
                 TextColumn::make('created_at')->label('Registrato il')->dateTime('d/m/Y H:i')->sortable(),
                 TextColumn::make('plays_count')->label('Giocate')->counts('plays'),
+                IconColumn::make('email_verified_at')->label('Email verificata')
+                    ->boolean()
+                    ->getStateUsing(fn (User $record): bool => $record->hasVerifiedEmail())
+                    ->sortable(),
                 IconColumn::make('marketing_consent')->label('Marketing')->boolean(),
                 IconColumn::make('is_banned')->label('Valido')
                     ->icon(fn (bool $state): string => $state ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
@@ -59,12 +64,35 @@ class UserResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
+                TernaryFilter::make('email_verified')
+                    ->label('Email verificata')
+                    ->queries(
+                        true: fn ($query) => $query->whereNotNull('email_verified_at'),
+                        false: fn ($query) => $query->whereNull('email_verified_at'),
+                    ),
                 TernaryFilter::make('is_banned')->label('Bannato'),
                 SelectFilter::make('province')->label('Provincia')
                     ->options(fn () => User::distinct()->pluck('province', 'province')->filter()->toArray()),
             ])
             ->actions([
                 ViewAction::make(),
+                Action::make('verify_email')
+                    ->label('Verifica e attiva')
+                    ->icon('heroicon-o-envelope-open')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Verifica email e attiva utente')
+                    ->modalDescription('Marca l\'email come verificata e, se l\'utente risulta bannato, ne rimuove il ban così da consentirgli l\'accesso.')
+                    ->action(function (User $record): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
+                        self::activateUser($record);
+                        Notification::make()
+                            ->title('Utente attivato')
+                            ->body("Email verificata per {$record->email}.")
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(fn (User $record): bool => ! $record->hasVerifiedEmail() && ! auth('admin')->user()->isNotaio()),
                 Action::make('ban')
                     ->label('Banna')
                     ->icon('heroicon-o-no-symbol')
@@ -98,6 +126,26 @@ class UserResource extends Resource
                     ->visible(fn (User $record): bool => $record->is_banned && ! auth('admin')->user()->isNotaio()),
             ])
             ->bulkActions([
+                BulkAction::make('verify_email_selected')
+                    ->label('Verifica e attiva selezionati')
+                    ->icon('heroicon-o-envelope-open')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->action(function (Collection $records): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
+                        $activated = 0;
+                        $records->each(function (User $user) use (&$activated): void {
+                            if (self::activateUser($user)) {
+                                $activated++;
+                            }
+                        });
+                        Notification::make()
+                            ->title('Utenti attivati')
+                            ->body("{$activated} utenti verificati e attivati.")
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(fn (): bool => ! auth('admin')->user()->isNotaio()),
                 BulkAction::make('ban_selected')
                     ->label('Banna selezionati')
                     ->icon('heroicon-o-no-symbol')
@@ -167,5 +215,29 @@ class UserResource extends Resource
             'index' => Pages\ListUsers::route('/'),
             'view' => Pages\ViewUser::route('/{record}'),
         ];
+    }
+
+    /**
+     * Verify email and remove ban (if present) so the user can access the contest.
+     * Returns true if any state changed.
+     */
+    public static function activateUser(User $user): bool
+    {
+        $changed = false;
+
+        if (! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            $changed = true;
+        }
+
+        if ($user->is_banned) {
+            $user->update([
+                'is_banned' => false,
+                'ban_reason' => null,
+            ]);
+            $changed = true;
+        }
+
+        return $changed;
     }
 }

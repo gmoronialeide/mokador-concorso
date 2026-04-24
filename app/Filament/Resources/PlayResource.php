@@ -187,7 +187,9 @@ class PlayResource extends Resource
                             ->orWhere('verification_type', VerificationType::Manual->value))),
             ])
             ->filtersApplyAction(fn (Action $action): Action => $action
-                ->extraAttributes(['x-on:click' => 'close()'], merge: true))
+                ->extraAttributes([
+                    'x-on:click' => "Alpine.\$data(\$el.closest('.fi-dropdown'))?.close?.()",
+                ], merge: true))
             ->actions([
                 Action::make('copy_email')
                     ->label('')

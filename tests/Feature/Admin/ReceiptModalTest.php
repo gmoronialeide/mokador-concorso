@@ -69,7 +69,7 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("mountTableAction('validate', '{$play->id}')", $html);
+        $this->assertStringContainsString("await \$wire.unmountAction(); \$wire.mountTableAction('validate', '{$play->id}')", $html);
         $this->assertStringNotContainsString('@js(', $html);
     }
 
@@ -82,7 +82,7 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("mountTableAction('ban', '{$play->id}')", $html);
+        $this->assertStringContainsString("await \$wire.unmountAction(); \$wire.mountTableAction('ban', '{$play->id}')", $html);
         $this->assertStringNotContainsString('@js(', $html);
     }
 
@@ -99,7 +99,7 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("mountTableAction('unban', '{$play->id}')", $html);
+        $this->assertStringContainsString("await \$wire.unmountAction(); \$wire.mountTableAction('unban', '{$play->id}')", $html);
         $this->assertStringNotContainsString("mountTableAction('ban'", $html);
         $this->assertStringNotContainsString("mountTableAction('validate'", $html);
         $this->assertStringNotContainsString('@js(', $html);

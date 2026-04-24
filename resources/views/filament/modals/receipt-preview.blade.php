@@ -23,7 +23,7 @@
                         color="success"
                         icon="heroicon-o-check-circle"
                         size="sm"
-                        x-on:click="$wire.mountTableAction('validate', '{{ $record->id }}')"
+                        x-on:click="await $wire.unmountAction(); $wire.mountTableAction('validate', '{{ $record->id }}')"
                     >
                         Valida
                     </x-filament::button>
@@ -34,7 +34,7 @@
                         color="danger"
                         icon="heroicon-o-no-symbol"
                         size="sm"
-                        x-on:click="$wire.mountTableAction('ban', '{{ $record->id }}')"
+                        x-on:click="await $wire.unmountAction(); $wire.mountTableAction('ban', '{{ $record->id }}')"
                     >
                         Banna
                     </x-filament::button>
@@ -45,7 +45,7 @@
                         color="success"
                         icon="heroicon-o-check-circle"
                         size="sm"
-                        x-on:click="$wire.mountTableAction('unban', '{{ $record->id }}')"
+                        x-on:click="await $wire.unmountAction(); $wire.mountTableAction('unban', '{{ $record->id }}')"
                     >
                         Sbanna
                     </x-filament::button>

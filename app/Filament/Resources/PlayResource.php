@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\PlayStatus;
+use App\Enums\VerificationType;
 use App\Filament\Resources\PlayResource\Pages;
 use App\Models\Play;
 use App\Models\Prize;
@@ -117,6 +118,13 @@ class PlayResource extends Resource
                     ->icon(fn (PlayStatus $state): string => $state->icon())
                     ->color(fn (PlayStatus $state): string => $state->color())
                     ->tooltip(fn (PlayStatus $state): string => $state->label()),
+                TextColumn::make('verification_type')
+                    ->label('Verifica')
+                    ->badge()
+                    ->formatStateUsing(fn (?VerificationType $state): string => $state?->label() ?? '—')
+                    ->color(fn (?VerificationType $state): string => $state?->color() ?? 'gray')
+                    ->icon(fn (?VerificationType $state): ?string => $state?->icon())
+                    ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->defaultSort('played_at', 'desc')
             ->filters([
@@ -139,6 +147,16 @@ class PlayResource extends Resource
                         false: fn (Builder $query): Builder => $query->where(fn (Builder $q): Builder => $q->whereNull('notes')->orWhere('notes', '=', '')),
                         blank: fn (Builder $query): Builder => $query,
                     ),
+                Filter::make('to_verify_manually')
+                    ->label('Da verificare a mano')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query
+                        ->where('status', PlayStatus::Pending)
+                        ->whereNotNull('notes')
+                        ->where('notes', '!=', '')
+                        ->where(fn (Builder $sub): Builder => $sub
+                            ->whereNull('verification_type')
+                            ->orWhere('verification_type', VerificationType::Manual->value))),
             ])
             ->actions([
                 Action::make('copy_email')
@@ -200,6 +218,19 @@ class PlayResource extends Resource
                     ->visible(fn (): bool => ! auth('admin')->user()->isNotaio())
                     ->modalSubmitActionLabel('Salva')
                     ->modalCancelActionLabel('Chiudi'),
+                Action::make('mark_manual_verification')
+                    ->label('')
+                    ->icon('heroicon-o-user')
+                    ->color('info')
+                    ->tooltip('Segna verifica manuale')
+                    ->requiresConfirmation()
+                    ->modalHeading('Segnare questa giocata come verificata a mano?')
+                    ->action(function (Play $record): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
+                        $record->update(['verification_type' => VerificationType::Manual]);
+                    })
+                    ->visible(fn (Play $record): bool => $record->verification_type !== VerificationType::Manual
+                        && ! auth('admin')->user()->isNotaio()),
                 ViewAction::make()->label('')->tooltip('Dettaglio'),
                 Action::make('assign_store')
                     ->label('')
@@ -244,7 +275,10 @@ class PlayResource extends Resource
                     ->tooltip('Valida')
                     ->action(function (Play $record): void {
                         abort_if(auth('admin')->user()->isNotaio(), 403);
-                        $record->update(['status' => PlayStatus::Validated]);
+                        $record->update([
+                            'status' => PlayStatus::Validated,
+                            'verification_type' => VerificationType::Manual,
+                        ]);
                     })
                     ->visible(fn (Play $record): bool => $record->isPending() && ! auth('admin')->user()->isNotaio()),
                 Action::make('ban')
@@ -264,6 +298,7 @@ class PlayResource extends Resource
                             'status' => PlayStatus::Banned,
                             'ban_reason' => $data['ban_reason'],
                             'banned_at' => now(),
+                            'verification_type' => VerificationType::Manual,
                         ]);
                     })
                     ->visible(fn (Play $record): bool => ! $record->isBanned() && ! auth('admin')->user()->isNotaio()),
@@ -281,6 +316,7 @@ class PlayResource extends Resource
                             'status' => PlayStatus::Validated,
                             'ban_reason' => null,
                             'banned_at' => null,
+                            'verification_type' => VerificationType::Manual,
                         ]);
                     })
                     ->visible(fn (Play $record): bool => $record->isBanned() && ! auth('admin')->user()->isNotaio()),
@@ -302,6 +338,15 @@ class PlayResource extends Resource
                         ->visible(fn (Play $record): bool => filled($record->notes))
                         ->columnSpanFull(),
                 ])->columns(3),
+                Section::make('Verifica')->schema([
+                    TextEntry::make('verification_type')
+                        ->label('Tipo verifica')
+                        ->badge()
+                        ->formatStateUsing(fn (?VerificationType $state): string => $state?->label() ?? '—')
+                        ->color(fn (?VerificationType $state): string => $state?->color() ?? 'gray')
+                        ->icon(fn (?VerificationType $state): ?string => $state?->icon())
+                        ->placeholder('—'),
+                ]),
                 Section::make('Punto Vendita')->schema([
                     TextEntry::make('store_code')->label('Codice'),
                     TextEntry::make('store.display_name')->label('Nome')->placeholder('—'),

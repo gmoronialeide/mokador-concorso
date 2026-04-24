@@ -188,7 +188,7 @@ class PlayResource extends Resource
             ])
             ->filtersApplyAction(fn (Action $action): Action => $action
                 ->extraAttributes([
-                    'x-on:click' => "Alpine.\$data(\$el.closest('.fi-dropdown'))?.close?.()",
+                    'x-on:click' => "\$el.closest('.fi-dropdown')?.querySelector('.fi-dropdown-trigger')?.dispatchEvent(new MouseEvent('mousedown', { button: 0, bubbles: true }))",
                 ], merge: true))
             ->actions([
                 Action::make('copy_email')

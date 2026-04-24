@@ -133,6 +133,25 @@ class PlayResource extends Resource
                     ->options(collect(PlayStatus::cases())->mapWithKeys(fn (PlayStatus $s) => [$s->value => $s->label()])),
                 SelectFilter::make('prize_id')->label('Premio')
                     ->options(Prize::pluck('name', 'id')),
+                SelectFilter::make('verification_type')->label('Verifica')
+                    ->placeholder('Tutte')
+                    ->options(collect(VerificationType::cases())
+                        ->mapWithKeys(fn (VerificationType $v) => [$v->value => $v->label()])
+                        ->put('null', 'Non verificata')
+                        ->all())
+                    ->query(function (Builder $query, array $data): Builder {
+                        $value = $data['value'] ?? null;
+
+                        if ($value === 'null') {
+                            return $query->whereNull('verification_type');
+                        }
+
+                        if (in_array($value, [VerificationType::Auto->value, VerificationType::Manual->value], true)) {
+                            return $query->where('verification_type', $value);
+                        }
+
+                        return $query;
+                    }),
                 Filter::make('without_store')
                     ->label('Senza punto vendita')
                     ->toggle()

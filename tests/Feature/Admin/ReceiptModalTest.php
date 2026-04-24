@@ -49,4 +49,14 @@ class ReceiptModalTest extends TestCase
         $this->assertStringContainsString('Faenza', $html);
         $this->assertStringContainsString('RA', $html);
     }
+
+    public function test_modal_header_shows_store_code_when_store_missing(): void
+    {
+        $play = $this->makePlay(['store_code' => 'ORPHAN99'], null);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString('ORPHAN99', $html);
+        $this->assertStringContainsString('non assegnato', $html);
+    }
 }

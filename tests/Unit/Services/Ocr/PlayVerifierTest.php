@@ -75,12 +75,12 @@ class PlayVerifierTest extends TestCase
         $this->assertSame([], $result->notes);
     }
 
-    public function test_happy_path_cap_city_fuzzy_validates(): void
+    public function test_happy_path_name_fuzzy_validates(): void
     {
         $store = $this->sampleStore([
             'vat_number' => null,
-            'cap' => '48015',
-            'city' => 'CERVIA',
+            'cap' => null,
+            'city' => null,
             'sign_name' => 'MOKADOR CAFFE',
             'name' => 'Mokador Caffe SRL',
         ]);
@@ -131,18 +131,18 @@ class PlayVerifierTest extends TestCase
         $this->assertContains('non torna importo (0,50€)', $result->notes);
     }
 
-    public function test_cap_mismatch_adds_merchant_note(): void
+    public function test_name_and_city_mismatch_adds_merchant_note(): void
     {
         $store = $this->sampleStore([
             'vat_number' => null,
-            'cap' => '48015',
             'city' => 'CERVIA',
             'sign_name' => 'MOKADOR CAFFE',
+            'name' => 'Mokador Caffe SRL',
         ]);
         $play = $this->samplePlay($store);
 
         $doc = $this->sampleDoc([
-            'merchantName' => 'MOKADOR CAFFE',
+            'merchantName' => 'BAR PINCO PALLINO',
             'merchantAddress' => 'VIA ALTROVE 99 00100 ROMA RM',
             'merchantConfidence' => 0.95,
         ]);
@@ -150,6 +150,28 @@ class PlayVerifierTest extends TestCase
         $result = $this->verifier->verify($play, $doc);
 
         $this->assertContains('non torna punto vendita', $result->notes);
+    }
+
+    public function test_city_match_validates_when_name_fails(): void
+    {
+        $store = $this->sampleStore([
+            'vat_number' => null,
+            'city' => 'CERVIA',
+            'sign_name' => 'MOKADOR CAFFE',
+            'name' => 'Mokador Caffe SRL',
+        ]);
+        $play = $this->samplePlay($store);
+
+        $doc = $this->sampleDoc([
+            'merchantName' => 'BAR PINCO PALLINO',
+            'merchantAddress' => 'VIA ROMA 12 48015 CERVIA RA',
+            'merchantConfidence' => 0.95,
+        ]);
+
+        $result = $this->verifier->verify($play, $doc);
+
+        $this->assertSame(PlayStatus::Validated, $result->status);
+        $this->assertSame([], $result->notes);
     }
 
     public function test_low_confidence_adds_confidence_note(): void

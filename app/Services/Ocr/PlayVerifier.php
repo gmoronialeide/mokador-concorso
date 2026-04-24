@@ -80,14 +80,6 @@ class PlayVerifier
             return;
         }
 
-        $address = (string) $doc->merchantAddress;
-        $capMatch = preg_match('/\b\d{5}\b/', $address, $m);
-        $capOk = $capMatch && $m[0] === (string) $store->cap;
-
-        $cityOk = $store->city !== null
-            && $store->city !== ''
-            && stripos($address, (string) $store->city) !== false;
-
         $storeName = (string) ($store->sign_name ?: $store->name);
         $nameOk = false;
         if ($doc->merchantName !== null && $storeName !== '') {
@@ -99,7 +91,12 @@ class PlayVerifier
             $nameOk = $percent >= 80.0;
         }
 
-        if (! ($capOk && $cityOk && $nameOk)) {
+        $address = (string) $doc->merchantAddress;
+        $cityOk = $store->city !== null
+            && $store->city !== ''
+            && stripos($address, (string) $store->city) !== false;
+
+        if (! ($nameOk || $cityOk)) {
             $notes[] = 'non torna punto vendita';
         }
     }

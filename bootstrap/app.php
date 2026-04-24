@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
     })
     ->withSchedule(function (Schedule $schedule): void {
+        $schedule->command('queue:work --stop-when-empty --tries=3 --timeout=90')
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->runInBackground();
+
         $schedule->command('plays:verify-auto')
             ->everyFifteenMinutes()
             ->timezone('Europe/Rome')

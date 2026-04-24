@@ -32,8 +32,21 @@ class ReceiptModalTest extends TestCase
         return view('filament.modals.receipt-preview', ['record' => $play])->render();
     }
 
-    public function test_placeholder_will_be_replaced(): void
+    public function test_modal_header_shows_store_display_name_when_store_assigned(): void
     {
-        $this->assertTrue(true);
+        $store = Store::factory()->create([
+            'code' => 'MK001',
+            'name' => 'Mokador Centro',
+            'sign_name' => 'Mokador',
+            'city' => 'Faenza',
+            'province' => 'RA',
+        ]);
+        $play = $this->makePlay(['store_code' => 'MK001'], $store);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString($store->display_name, $html);
+        $this->assertStringContainsString('Faenza', $html);
+        $this->assertStringContainsString('RA', $html);
     }
 }

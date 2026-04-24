@@ -128,4 +128,19 @@ class ReceiptModalTest extends TestCase
         $this->assertStringNotContainsString("mountTableAction('validate'", $html);
         $this->assertStringNotContainsString("mountTableAction('ban'", $html);
     }
+
+    public function test_modal_header_shows_play_id_and_user_name(): void
+    {
+        $user = User::factory()->create(['name' => 'Mario', 'surname' => 'Rossi']);
+        $play = Play::factory()->create([
+            'user_id' => $user->id,
+            'store_code' => 'TEST01',
+            'status' => PlayStatus::Pending,
+        ]);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString('ID '.$play->id, $html);
+        $this->assertStringContainsString('Mario Rossi', $html);
+    }
 }

@@ -54,6 +54,12 @@
         @endif
     </div>
 
+    @if ($record->notes)
+        <div style="padding: 0.75rem 1rem; background: #fef3c7; border: 1px solid #fde68a; border-radius: 0.5rem; font-size: 0.875rem; color: #78350f;">
+            <strong>Note:</strong> {{ $record->notes }}
+        </div>
+    @endif
+
     <div style="display: flex; justify-content: center; align-items: center; overflow: hidden; max-height: 75vh;">
         @if ($record->receipt_image)
             <img

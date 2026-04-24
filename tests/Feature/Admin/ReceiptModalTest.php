@@ -154,4 +154,23 @@ class ReceiptModalTest extends TestCase
         $this->assertStringContainsString('ID '.$play->id, $html);
         $this->assertStringNotContainsString(' - - ', $html);
     }
+
+    public function test_modal_shows_notes_when_present(): void
+    {
+        $play = $this->makePlay(['notes' => 'Scontrino sbiadito, parziale lettura']);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString('Scontrino sbiadito, parziale lettura', $html);
+        $this->assertStringContainsString('Note', $html);
+    }
+
+    public function test_modal_omits_notes_block_when_notes_null(): void
+    {
+        $play = $this->makePlay(['notes' => null]);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringNotContainsString('<strong>Note', $html);
+    }
 }

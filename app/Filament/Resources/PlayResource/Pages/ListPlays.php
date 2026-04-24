@@ -12,26 +12,26 @@ class ListPlays extends ListRecords
 {
     protected static string $resource = PlayResource::class;
 
-    public ?string $listSnapshotAt = null;
+    public int $listSnapshotMaxId = 0;
 
     public function mount(): void
     {
         parent::mount();
 
-        $this->listSnapshotAt = now()->format('Y-m-d H:i:s');
+        $this->listSnapshotMaxId = (int) (Play::max('id') ?? 0);
     }
 
     protected function getTableQuery(): ?Builder
     {
         $query = parent::getTableQuery() ?? static::getResource()::getEloquentQuery();
 
-        return $query->where('plays.created_at', '<=', $this->listSnapshotAt);
+        return $query->where('plays.id', '<=', $this->listSnapshotMaxId);
     }
 
     public function getSubheading(): ?string
     {
         $newCount = Play::query()
-            ->where('created_at', '>', $this->listSnapshotAt)
+            ->where('id', '>', $this->listSnapshotMaxId)
             ->count();
 
         if ($newCount === 0) {

@@ -7,7 +7,6 @@ use App\Models\Admin;
 use App\Models\Play;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -30,14 +29,7 @@ class PlayResourceSnapshotTest extends TestCase
 
     public function test_plays_created_before_mount_are_visible(): void
     {
-        Carbon::setTestNow('2026-04-23 10:00:00');
-
-        $existingPlay = Play::factory()->create([
-            'user_id' => $this->user->id,
-            'played_at' => now(),
-        ]);
-
-        Carbon::setTestNow('2026-04-23 10:05:00');
+        $existingPlay = Play::factory()->create(['user_id' => $this->user->id]);
 
         Livewire::test(ListPlays::class)
             ->assertCanSeeTableRecords([$existingPlay]);
@@ -45,23 +37,11 @@ class PlayResourceSnapshotTest extends TestCase
 
     public function test_plays_created_after_mount_are_hidden(): void
     {
-        Carbon::setTestNow('2026-04-23 10:00:00');
-
-        $existingPlay = Play::factory()->create([
-            'user_id' => $this->user->id,
-            'played_at' => now(),
-        ]);
-
-        Carbon::setTestNow('2026-04-23 10:05:00');
+        $existingPlay = Play::factory()->create(['user_id' => $this->user->id]);
 
         $component = Livewire::test(ListPlays::class);
 
-        Carbon::setTestNow('2026-04-23 10:10:00');
-
-        $newPlay = Play::factory()->create([
-            'user_id' => $this->user->id,
-            'played_at' => now(),
-        ]);
+        $newPlay = Play::factory()->create(['user_id' => $this->user->id]);
 
         $component
             ->call('$refresh')
@@ -71,23 +51,15 @@ class PlayResourceSnapshotTest extends TestCase
 
     public function test_filtering_does_not_reveal_new_plays(): void
     {
-        Carbon::setTestNow('2026-04-23 10:00:00');
-
         $existingPlay = Play::factory()->create([
             'user_id' => $this->user->id,
-            'played_at' => now(),
             'is_winner' => true,
         ]);
 
-        Carbon::setTestNow('2026-04-23 10:05:00');
-
         $component = Livewire::test(ListPlays::class);
-
-        Carbon::setTestNow('2026-04-23 10:10:00');
 
         $newWinningPlay = Play::factory()->create([
             'user_id' => $this->user->id,
-            'played_at' => now(),
             'is_winner' => true,
         ]);
 
@@ -97,22 +69,44 @@ class PlayResourceSnapshotTest extends TestCase
             ->assertCanNotSeeTableRecords([$newWinningPlay]);
     }
 
-    public function test_subheading_reports_new_plays_count(): void
+    public function test_search_does_not_reveal_new_plays(): void
     {
-        Carbon::setTestNow('2026-04-23 10:00:00');
+        $existingUser = User::factory()->create(['surname' => 'Rossi', 'name' => 'Mario']);
+        $newUser = User::factory()->create(['surname' => 'Rossi', 'name' => 'Luigi']);
 
-        Livewire::test(ListPlays::class)
-            ->assertSet('listSnapshotAt', '2026-04-23 10:00:00');
-
-        Carbon::setTestNow('2026-04-23 10:10:00');
-
-        Play::factory()->count(3)->create([
-            'user_id' => $this->user->id,
-            'played_at' => now(),
-        ]);
+        $existingPlay = Play::factory()->create(['user_id' => $existingUser->id]);
 
         $component = Livewire::test(ListPlays::class);
-        $component->set('listSnapshotAt', '2026-04-23 10:00:00');
+
+        $newPlay = Play::factory()->create(['user_id' => $newUser->id]);
+
+        $component
+            ->searchTable('Rossi')
+            ->assertCanSeeTableRecords([$existingPlay])
+            ->assertCanNotSeeTableRecords([$newPlay]);
+    }
+
+    public function test_snapshot_max_id_set_at_mount(): void
+    {
+        $play = Play::factory()->create(['user_id' => $this->user->id]);
+
+        Livewire::test(ListPlays::class)
+            ->assertSet('listSnapshotMaxId', $play->id);
+    }
+
+    public function test_snapshot_max_id_is_zero_when_no_plays(): void
+    {
+        Livewire::test(ListPlays::class)
+            ->assertSet('listSnapshotMaxId', 0);
+    }
+
+    public function test_subheading_reports_new_plays_count(): void
+    {
+        Play::factory()->create(['user_id' => $this->user->id]);
+
+        $component = Livewire::test(ListPlays::class);
+
+        Play::factory()->count(3)->create(['user_id' => $this->user->id]);
 
         $this->assertSame(
             '3 nuove giocate dal caricamento. Ricarica per visualizzarle.',
@@ -120,14 +114,23 @@ class PlayResourceSnapshotTest extends TestCase
         );
     }
 
+    public function test_subheading_singular_when_one_new_play(): void
+    {
+        Play::factory()->create(['user_id' => $this->user->id]);
+
+        $component = Livewire::test(ListPlays::class);
+
+        Play::factory()->create(['user_id' => $this->user->id]);
+
+        $this->assertSame(
+            '1 nuova giocata dal caricamento. Ricarica per visualizzarla.',
+            $component->instance()->getSubheading(),
+        );
+    }
+
     public function test_subheading_is_null_when_no_new_plays(): void
     {
-        Carbon::setTestNow('2026-04-23 10:00:00');
-
-        Play::factory()->create([
-            'user_id' => $this->user->id,
-            'played_at' => now(),
-        ]);
+        Play::factory()->create(['user_id' => $this->user->id]);
 
         $component = Livewire::test(ListPlays::class);
 
@@ -136,8 +139,6 @@ class PlayResourceSnapshotTest extends TestCase
 
     public function test_reload_action_emits_reload_js(): void
     {
-        Carbon::setTestNow('2026-04-23 10:00:00');
-
         $component = Livewire::test(ListPlays::class)->callAction('reload');
 
         $xjs = $component->effects['xjs'] ?? [];

@@ -143,4 +143,15 @@ class ReceiptModalTest extends TestCase
         $this->assertStringContainsString('ID '.$play->id, $html);
         $this->assertStringContainsString('Mario Rossi', $html);
     }
+
+    public function test_modal_header_omits_user_name_when_user_missing(): void
+    {
+        $play = $this->makePlay(['store_code' => 'TEST01']);
+        $play->setRelation('user', null);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString('ID '.$play->id, $html);
+        $this->assertStringNotContainsString(' - - ', $html);
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +16,20 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+    })
+    ->withSchedule(function (Schedule $schedule): void {
+        $schedule->command('plays:verify-auto')
+            ->everyFifteenMinutes()
+            ->timezone('Europe/Rome')
+            ->withoutOverlapping();
+
+        $schedule->command('plays:alert-pending')
+            ->dailyAt('10:00')
+            ->timezone('Europe/Rome');
+
+        $schedule->command('plays:alert-pending')
+            ->dailyAt('17:00')
+            ->timezone('Europe/Rome');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

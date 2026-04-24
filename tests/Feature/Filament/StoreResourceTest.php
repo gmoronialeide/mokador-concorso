@@ -63,9 +63,8 @@ class StoreResourceTest extends TestCase
     {
         $store = Store::factory()->create(['code' => 'LINKED01']);
         $user = User::factory()->create();
-        Play::create([
+        Play::factory()->forStore($store)->create([
             'user_id' => $user->id,
-            'store_code' => $store->code,
             'receipt_image' => 'receipts/x.jpg',
             'played_at' => now(),
         ]);

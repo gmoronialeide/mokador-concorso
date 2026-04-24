@@ -1,0 +1,67 @@
+{
+  "status": "succeeded",
+  "createdDateTime": "2026-04-15T10:00:00Z",
+  "lastUpdatedDateTime": "2026-04-15T10:00:04Z",
+  "analyzeResult": {
+    "apiVersion": "2024-11-30",
+    "modelId": "prebuilt-invoice",
+    "stringIndexType": "textElements",
+    "content": "FATTURA MOKADOR SRL P.IVA 01234567890 VIA ROMA 12 48015 CERVIA RA TOTALE 12,50",
+    "pages": [
+      {
+        "pageNumber": 1,
+        "angle": 0,
+        "width": 1080,
+        "height": 1920,
+        "unit": "pixel"
+      }
+    ],
+    "documents": [
+      {
+        "docType": "invoice",
+        "confidence": 0.91,
+        "fields": {
+          "VendorName": {
+            "type": "string",
+            "valueString": "MOKADOR SRL",
+            "content": "MOKADOR SRL",
+            "confidence": 0.94
+          },
+          "VendorAddress": {
+            "type": "address",
+            "valueAddress": {
+              "streetAddress": "VIA ROMA 12",
+              "postalCode": "48015",
+              "city": "CERVIA",
+              "state": "RA"
+            },
+            "content": "VIA ROMA 12 48015 CERVIA RA",
+            "confidence": 0.9
+          },
+          "VendorTaxId": {
+            "type": "string",
+            "valueString": "01234567890",
+            "content": "01234567890",
+            "confidence": 0.97
+          },
+          "InvoiceDate": {
+            "type": "date",
+            "valueDate": "2026-04-15",
+            "content": "15/04/2026",
+            "confidence": 0.96
+          },
+          "InvoiceTotal": {
+            "type": "currency",
+            "valueCurrency": {
+              "amount": 12.50,
+              "currencySymbol": "€",
+              "currencyCode": "EUR"
+            },
+            "content": "12,50",
+            "confidence": 0.96
+          }
+        }
+      }
+    ]
+  }
+}

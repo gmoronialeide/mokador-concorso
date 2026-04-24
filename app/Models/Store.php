@@ -34,7 +34,7 @@ class Store extends Model
 
     public function plays(): HasMany
     {
-        return $this->hasMany(Play::class, 'store_code', 'code');
+        return $this->hasMany(Play::class);
     }
 
     /**

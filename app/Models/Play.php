@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PlayStatus;
+use App\Enums\VerificationType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,6 +27,8 @@ class Play extends Model
         'ban_reason',
         'banned_at',
         'notes',
+        'verification_type',
+        'ocr_raw',
     ];
 
     protected $attributes = [
@@ -40,6 +43,8 @@ class Play extends Model
             'is_winner' => 'boolean',
             'status' => PlayStatus::class,
             'banned_at' => 'datetime',
+            'verification_type' => VerificationType::class,
+            'ocr_raw' => 'array',
         ];
     }
 

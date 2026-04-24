@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'azure_docintel' => [
+        'endpoint' => env('AZURE_DOCINTEL_ENDPOINT'),
+        'key' => env('AZURE_DOCINTEL_KEY'),
+        'api_version' => env('AZURE_DOCINTEL_API_VERSION', '2024-11-30'),
+    ],
+
+    'concorso_alerts' => [
+        'recipients' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('CONCORSO_ALERT_RECIPIENTS', '')),
+        ))),
+    ],
+
 ];

@@ -1,0 +1,142 @@
+{
+  "status": "succeeded",
+  "createdDateTime": "2026-04-15T10:00:00Z",
+  "lastUpdatedDateTime": "2026-04-15T10:00:03Z",
+  "analyzeResult": {
+    "apiVersion": "2024-11-30",
+    "modelId": "prebuilt-receipt",
+    "stringIndexType": "textElements",
+    "content": "MOKADOR CAFFE VIA ROMA 12 48015 CERVIA RA TOTALE 5,40",
+    "pages": [
+      {
+        "pageNumber": 1,
+        "angle": 0,
+        "width": 1080,
+        "height": 1920,
+        "unit": "pixel"
+      }
+    ],
+    "documents": [
+      {
+        "docType": "receipt.retailMeal",
+        "confidence": 0.92,
+        "fields": {
+          "MerchantName": {
+            "type": "string",
+            "valueString": "MOKADOR CAFFE",
+            "content": "MOKADOR CAFFE",
+            "confidence": 0.95
+          },
+          "MerchantAddress": {
+            "type": "address",
+            "valueAddress": {
+              "streetAddress": "VIA ROMA 12",
+              "postalCode": "48015",
+              "city": "CERVIA",
+              "state": "RA"
+            },
+            "content": "VIA ROMA 12 48015 CERVIA RA",
+            "confidence": 0.89
+          },
+          "MerchantPhoneNumber": {
+            "type": "phoneNumber",
+            "valuePhoneNumber": "+390544123456",
+            "content": "0544 123456",
+            "confidence": 0.88
+          },
+          "TransactionDate": {
+            "type": "date",
+            "valueDate": "2026-04-15",
+            "content": "15/04/2026",
+            "confidence": 0.97
+          },
+          "TransactionTime": {
+            "type": "time",
+            "valueTime": "10:12:00",
+            "content": "10:12",
+            "confidence": 0.94
+          },
+          "Total": {
+            "type": "currency",
+            "valueCurrency": {
+              "amount": 5.40,
+              "currencySymbol": "€",
+              "currencyCode": "EUR"
+            },
+            "content": "5,40",
+            "confidence": 0.96
+          },
+          "Subtotal": {
+            "type": "currency",
+            "valueCurrency": {
+              "amount": 5.40,
+              "currencySymbol": "€",
+              "currencyCode": "EUR"
+            },
+            "content": "5,40",
+            "confidence": 0.95
+          },
+          "Items": {
+            "type": "array",
+            "valueArray": [
+              {
+                "type": "object",
+                "valueObject": {
+                  "Description": {
+                    "type": "string",
+                    "valueString": "CAFFE MOKADOR",
+                    "content": "CAFFE MOKADOR",
+                    "confidence": 0.93
+                  },
+                  "Quantity": {
+                    "type": "number",
+                    "valueNumber": 1,
+                    "content": "1",
+                    "confidence": 0.95
+                  },
+                  "TotalPrice": {
+                    "type": "currency",
+                    "valueCurrency": {
+                      "amount": 1.20,
+                      "currencySymbol": "€",
+                      "currencyCode": "EUR"
+                    },
+                    "content": "1,20",
+                    "confidence": 0.94
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "valueObject": {
+                  "Description": {
+                    "type": "string",
+                    "valueString": "BRIOCHE",
+                    "content": "BRIOCHE",
+                    "confidence": 0.91
+                  },
+                  "Quantity": {
+                    "type": "number",
+                    "valueNumber": 1,
+                    "content": "1",
+                    "confidence": 0.93
+                  },
+                  "TotalPrice": {
+                    "type": "currency",
+                    "valueCurrency": {
+                      "amount": 1.40,
+                      "currencySymbol": "€",
+                      "currencyCode": "EUR"
+                    },
+                    "content": "1,40",
+                    "confidence": 0.92
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

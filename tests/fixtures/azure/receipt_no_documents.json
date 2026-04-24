@@ -1,0 +1,13 @@
+{
+  "status": "succeeded",
+  "createdDateTime": "2026-04-15T10:00:00Z",
+  "lastUpdatedDateTime": "2026-04-15T10:00:02Z",
+  "analyzeResult": {
+    "apiVersion": "2024-11-30",
+    "modelId": "prebuilt-receipt",
+    "stringIndexType": "textElements",
+    "content": "",
+    "pages": [],
+    "documents": []
+  }
+}

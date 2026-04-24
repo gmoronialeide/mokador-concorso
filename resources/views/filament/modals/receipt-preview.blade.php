@@ -1,6 +1,6 @@
 @php
     $store = $record->store;
-    $isNotaio = auth('admin')->user()?->isNotaio() ?? false;
+    $canManage = auth('admin')->check() && ! auth('admin')->user()->isNotaio();
 @endphp
 
 <div style="display: flex; flex-direction: column; gap: 1rem;">
@@ -15,7 +15,7 @@
             @endif
         </div>
 
-        @unless ($isNotaio)
+        @if ($canManage)
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                 @if ($record->isPending())
                     <x-filament::button
@@ -50,7 +50,7 @@
                     </x-filament::button>
                 @endif
             </div>
-        @endunless
+        @endif
     </div>
 
     <div style="display: flex; justify-content: center; align-items: center; overflow: hidden; max-height: 75vh;">

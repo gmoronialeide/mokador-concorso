@@ -102,4 +102,28 @@ class ReceiptModalTest extends TestCase
         $this->assertStringNotContainsString("mountTableAction('ban'", $html);
         $this->assertStringNotContainsString("mountTableAction('validate'", $html);
     }
+
+    public function test_notaio_sees_no_action_buttons(): void
+    {
+        $notaio = Admin::factory()->create(['role' => AdminRole::Notaio]);
+        $this->actingAs($notaio, 'admin');
+
+        $play = $this->makePlay(['status' => PlayStatus::Pending]);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringNotContainsString("mountTableAction('validate'", $html);
+        $this->assertStringNotContainsString("mountTableAction('ban'", $html);
+        $this->assertStringNotContainsString("mountTableAction('unban'", $html);
+    }
+
+    public function test_guest_sees_no_action_buttons(): void
+    {
+        $play = $this->makePlay(['status' => PlayStatus::Pending]);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringNotContainsString("mountTableAction('validate'", $html);
+        $this->assertStringNotContainsString("mountTableAction('ban'", $html);
+    }
 }

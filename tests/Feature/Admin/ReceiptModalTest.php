@@ -69,8 +69,8 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("mountTableAction('validate'", $html);
-        $this->assertStringContainsString((string) $play->id, $html);
+        $this->assertStringContainsString("mountTableAction('validate', '{$play->id}')", $html);
+        $this->assertStringNotContainsString('@js(', $html);
     }
 
     public function test_ban_button_visible_when_play_not_banned(): void
@@ -82,7 +82,8 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("mountTableAction('ban'", $html);
+        $this->assertStringContainsString("mountTableAction('ban', '{$play->id}')", $html);
+        $this->assertStringNotContainsString('@js(', $html);
     }
 
     public function test_unban_button_visible_when_play_banned(): void
@@ -98,9 +99,10 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("mountTableAction('unban'", $html);
+        $this->assertStringContainsString("mountTableAction('unban', '{$play->id}')", $html);
         $this->assertStringNotContainsString("mountTableAction('ban'", $html);
         $this->assertStringNotContainsString("mountTableAction('validate'", $html);
+        $this->assertStringNotContainsString('@js(', $html);
     }
 
     public function test_notaio_sees_no_action_buttons(): void

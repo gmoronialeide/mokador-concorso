@@ -11,7 +11,7 @@ class PlaysVerifyAuto extends Command
 {
     protected $signature = 'plays:verify-auto {--limit=100}';
 
-    protected $description = 'Dispatch VerifyPlayAutomatically jobs for eligible Pending plays.';
+    protected $description = 'Run VerifyPlayAutomatically synchronously for eligible Pending plays.';
 
     public function handle(): int
     {
@@ -26,10 +26,10 @@ class PlaysVerifyAuto extends Command
             ->get();
 
         foreach ($plays as $play) {
-            VerifyPlayAutomatically::dispatch($play);
+            VerifyPlayAutomatically::dispatchSync($play);
         }
 
-        $this->info("Dispatched {$plays->count()} verification jobs.");
+        $this->info("Processed {$plays->count()} plays synchronously.");
 
         return self::SUCCESS;
     }

@@ -26,7 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('plays:verify-auto')
             ->everyFifteenMinutes()
             ->timezone('Europe/Rome')
-            ->withoutOverlapping();
+            ->withoutOverlapping()
+            ->runInBackground();
 
         $schedule->command('plays:alert-pending')
             ->dailyAt('10:00')

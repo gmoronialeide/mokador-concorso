@@ -186,7 +186,8 @@ class PlayResource extends Resource
                             ->whereNull('verification_type')
                             ->orWhere('verification_type', VerificationType::Manual->value))),
             ])
-            ->deferFilters(false)
+            ->filtersApplyAction(fn (Action $action): Action => $action
+                ->extraAttributes(['x-on:click' => 'close()'], merge: true))
             ->actions([
                 Action::make('copy_email')
                     ->label('')

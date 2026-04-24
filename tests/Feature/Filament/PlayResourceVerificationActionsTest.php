@@ -8,6 +8,7 @@ use App\Filament\Resources\PlayResource\Pages\ListPlays;
 use App\Models\Admin;
 use App\Models\Play;
 use App\Models\User;
+use Filament\Tables\Columns\IconColumn;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -107,5 +108,23 @@ class PlayResourceVerificationActionsTest extends TestCase
             ->assertOk()
             ->assertSee('Verifica')
             ->assertSee('Manuale');
+    }
+
+    public function test_list_page_verification_column_is_icon_with_tooltip(): void
+    {
+        Play::factory()->create([
+            'user_id' => User::factory(),
+            'verification_type' => VerificationType::Manual,
+        ]);
+
+        $component = Livewire::test(ListPlays::class);
+        $component->assertOk();
+
+        $column = $component->instance()->getTable()->getColumn('verification_type');
+
+        $this->assertInstanceOf(IconColumn::class, $column);
+        $this->assertSame('Manuale', $column->getTooltip(VerificationType::Manual));
+        $this->assertSame('Automatica', $column->getTooltip(VerificationType::Auto));
+        $this->assertSame('—', $column->getTooltip(null));
     }
 }

@@ -118,12 +118,12 @@ class PlayResource extends Resource
                     ->icon(fn (PlayStatus $state): string => $state->icon())
                     ->color(fn (PlayStatus $state): string => $state->color())
                     ->tooltip(fn (PlayStatus $state): string => $state->label()),
-                TextColumn::make('verification_type')
+                IconColumn::make('verification_type')
                     ->label('Verifica')
-                    ->badge()
-                    ->formatStateUsing(fn (?VerificationType $state): string => $state?->label() ?? '—')
+                    ->alignCenter()
+                    ->icon(fn (?VerificationType $state): string => $state?->icon() ?? 'heroicon-o-question-mark-circle')
                     ->color(fn (?VerificationType $state): string => $state?->color() ?? 'gray')
-                    ->icon(fn (?VerificationType $state): ?string => $state?->icon())
+                    ->tooltip(fn (?VerificationType $state): string => $state?->label() ?? '—')
                     ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->defaultSort('played_at', 'desc')

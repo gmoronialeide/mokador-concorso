@@ -54,7 +54,16 @@ class PlayResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')->sortable(),
+                TextColumn::make('id')->sortable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        $trimmed = trim($search);
+
+                        if ($trimmed === '' || ! ctype_digit($trimmed)) {
+                            return $query->whereRaw('0 = 1');
+                        }
+
+                        return $query->where('plays.id', (int) $trimmed);
+                    }),
                 TextColumn::make('user.surname')->label('Utente')
                     ->formatStateUsing(fn (Play $record): string => $record->user->surname.' '.$record->user->name)
                     ->searchable(query: function (Builder $query, string $search): Builder {
@@ -177,6 +186,7 @@ class PlayResource extends Resource
                             ->whereNull('verification_type')
                             ->orWhere('verification_type', VerificationType::Manual->value))),
             ])
+            ->deferFilters(false)
             ->actions([
                 Action::make('copy_email')
                     ->label('')

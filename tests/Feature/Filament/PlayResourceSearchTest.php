@@ -25,6 +25,8 @@ class PlayResourceSearchTest extends TestCase
 
     private Play $lucaPlay;
 
+    private int $isolatedIndex = 0;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -162,5 +164,77 @@ class PlayResourceSearchTest extends TestCase
             ->assertSee('STORE02')
             ->assertSee('Bar Roma (Milano, MI)')
             ->assertSee('Da Dante (Torino, TO)');
+    }
+
+    public function test_search_by_exact_id_finds_isolated_play(): void
+    {
+        $isolated = $this->makeIsolatedPlay();
+
+        Livewire::test(ListPlays::class)
+            ->set('tableSearch', (string) $isolated->id)
+            ->assertCanSeeTableRecords([$isolated])
+            ->assertCanNotSeeTableRecords([$this->marioPlay, $this->lucaPlay]);
+    }
+
+    public function test_search_by_non_numeric_does_not_match_id(): void
+    {
+        $isolated = $this->makeIsolatedPlay();
+
+        Livewire::test(ListPlays::class)
+            ->set('tableSearch', 'zzz-not-numeric')
+            ->assertCanNotSeeTableRecords([$isolated, $this->marioPlay, $this->lucaPlay]);
+    }
+
+    public function test_search_by_nonexistent_id_returns_nothing(): void
+    {
+        $isolated = $this->makeIsolatedPlay();
+        $maxId = Play::max('id');
+
+        Livewire::test(ListPlays::class)
+            ->set('tableSearch', (string) ($maxId + 9999))
+            ->assertCanNotSeeTableRecords([$isolated, $this->marioPlay, $this->lucaPlay]);
+    }
+
+    public function test_search_by_id_is_exact_not_prefix_match(): void
+    {
+        $playA = $this->makeIsolatedPlay();
+        $playB = $this->makeIsolatedPlay();
+
+        \DB::table('plays')->where('id', $playA->id)->update(['id' => 5]);
+        \DB::table('plays')->where('id', $playB->id)->update(['id' => 55]);
+        $playA = Play::find(5);
+        $playB = Play::find(55);
+
+        Livewire::test(ListPlays::class)
+            ->set('tableSearch', '5')
+            ->assertCanSeeTableRecords([$playA])
+            ->assertCanNotSeeTableRecords([$playB]);
+    }
+
+    private function makeIsolatedPlay(): Play
+    {
+        $this->isolatedIndex++;
+        $suffix = str_repeat('A', $this->isolatedIndex);
+
+        $store = Store::factory()->create([
+            'code' => 'ZETA'.$suffix,
+            'name' => 'Zeta'.$suffix,
+            'sign_name' => '',
+            'city' => 'Zerocity',
+            'province' => 'ZR',
+            'address' => 'Via Zeta',
+            'cap' => '20121',
+        ]);
+
+        $user = User::factory()->create([
+            'name' => 'Zed'.$suffix,
+            'surname' => 'Zulu'.$suffix,
+        ]);
+
+        return Play::factory()->forStore($store)->create([
+            'user_id' => $user->id,
+            'receipt_image' => 'receipts/zed.jpg',
+            'played_at' => now(),
+        ]);
     }
 }

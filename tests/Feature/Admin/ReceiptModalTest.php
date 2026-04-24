@@ -59,4 +59,17 @@ class ReceiptModalTest extends TestCase
         $this->assertStringContainsString('ORPHAN99', $html);
         $this->assertStringContainsString('non assegnato', $html);
     }
+
+    public function test_validate_button_visible_for_pending_play_as_admin(): void
+    {
+        $admin = Admin::factory()->create(['role' => AdminRole::Admin]);
+        $this->actingAs($admin, 'admin');
+
+        $play = $this->makePlay(['status' => PlayStatus::Pending]);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString("mountTableAction('validate'", $html);
+        $this->assertStringContainsString((string) $play->id, $html);
+    }
 }

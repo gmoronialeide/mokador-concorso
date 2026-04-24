@@ -14,6 +14,43 @@
                 <span style="font-size: 0.8rem; color: #6b7280;">— P.V. non assegnato</span>
             @endif
         </div>
+
+        @unless ($isNotaio)
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                @if ($record->isPending())
+                    <x-filament::button
+                        color="success"
+                        icon="heroicon-o-check-circle"
+                        size="sm"
+                        x-on:click="$wire.mountTableAction('validate', @js($record->id))"
+                    >
+                        Valida
+                    </x-filament::button>
+                @endif
+
+                @if (! $record->isBanned())
+                    <x-filament::button
+                        color="danger"
+                        icon="heroicon-o-no-symbol"
+                        size="sm"
+                        x-on:click="$wire.mountTableAction('ban', @js($record->id))"
+                    >
+                        Banna
+                    </x-filament::button>
+                @endif
+
+                @if ($record->isBanned())
+                    <x-filament::button
+                        color="success"
+                        icon="heroicon-o-check-circle"
+                        size="sm"
+                        x-on:click="$wire.mountTableAction('unban', @js($record->id))"
+                    >
+                        Sbanna
+                    </x-filament::button>
+                @endif
+            </div>
+        @endunless
     </div>
 
     <div style="display: flex; justify-content: center; align-items: center; overflow: hidden; max-height: 75vh;">

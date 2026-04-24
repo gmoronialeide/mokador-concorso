@@ -43,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('img/mokador-concorso-logo.svg'))
             ->brandLogoHeight('2.5rem')
             ->darkMode(false)
+            ->sidebarFullyCollapsibleOnDesktop()
             ->navigationGroups([
                 NavigationGroup::make('Concorso'),
                 NavigationGroup::make('Anagrafiche'),

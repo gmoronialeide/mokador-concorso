@@ -72,4 +72,34 @@ class ReceiptModalTest extends TestCase
         $this->assertStringContainsString("mountTableAction('validate'", $html);
         $this->assertStringContainsString((string) $play->id, $html);
     }
+
+    public function test_ban_button_visible_when_play_not_banned(): void
+    {
+        $admin = Admin::factory()->create(['role' => AdminRole::Admin]);
+        $this->actingAs($admin, 'admin');
+
+        $play = $this->makePlay(['status' => PlayStatus::Validated]);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString("mountTableAction('ban'", $html);
+    }
+
+    public function test_unban_button_visible_when_play_banned(): void
+    {
+        $admin = Admin::factory()->create(['role' => AdminRole::Admin]);
+        $this->actingAs($admin, 'admin');
+
+        $play = $this->makePlay([
+            'status' => PlayStatus::Banned,
+            'banned_at' => now(),
+            'ban_reason' => 'test',
+        ]);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString("mountTableAction('unban'", $html);
+        $this->assertStringNotContainsString("mountTableAction('ban'", $html);
+        $this->assertStringNotContainsString("mountTableAction('validate'", $html);
+    }
 }

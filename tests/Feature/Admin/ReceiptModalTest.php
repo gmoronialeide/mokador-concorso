@@ -69,7 +69,7 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("await \$wire.unmountAction(); \$wire.mountTableAction('validate', '{$play->id}')", $html);
+        $this->assertStringContainsString("\$wire.replaceMountedAction('validate', [], { table: true, recordKey: '{$play->id}' })", $html);
         $this->assertStringNotContainsString('@js(', $html);
     }
 
@@ -82,7 +82,7 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("await \$wire.unmountAction(); \$wire.mountTableAction('ban', '{$play->id}')", $html);
+        $this->assertStringContainsString("\$wire.replaceMountedAction('ban', [], { table: true, recordKey: '{$play->id}' })", $html);
         $this->assertStringNotContainsString('@js(', $html);
     }
 
@@ -99,9 +99,9 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("await \$wire.unmountAction(); \$wire.mountTableAction('unban', '{$play->id}')", $html);
-        $this->assertStringNotContainsString("mountTableAction('ban'", $html);
-        $this->assertStringNotContainsString("mountTableAction('validate'", $html);
+        $this->assertStringContainsString("\$wire.replaceMountedAction('unban', [], { table: true, recordKey: '{$play->id}' })", $html);
+        $this->assertStringNotContainsString("replaceMountedAction('ban'", $html);
+        $this->assertStringNotContainsString("replaceMountedAction('validate'", $html);
         $this->assertStringNotContainsString('@js(', $html);
     }
 
@@ -114,9 +114,9 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringNotContainsString("mountTableAction('validate'", $html);
-        $this->assertStringNotContainsString("mountTableAction('ban'", $html);
-        $this->assertStringNotContainsString("mountTableAction('unban'", $html);
+        $this->assertStringNotContainsString("replaceMountedAction('validate'", $html);
+        $this->assertStringNotContainsString("replaceMountedAction('ban'", $html);
+        $this->assertStringNotContainsString("replaceMountedAction('unban'", $html);
     }
 
     public function test_guest_sees_no_action_buttons(): void
@@ -125,8 +125,8 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringNotContainsString("mountTableAction('validate'", $html);
-        $this->assertStringNotContainsString("mountTableAction('ban'", $html);
+        $this->assertStringNotContainsString("replaceMountedAction('validate'", $html);
+        $this->assertStringNotContainsString("replaceMountedAction('ban'", $html);
     }
 
     public function test_modal_header_shows_play_id_and_user_name(): void

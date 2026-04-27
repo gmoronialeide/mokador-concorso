@@ -82,6 +82,88 @@ class PlayResourceVerificationActionsTest extends TestCase
         $this->assertSame(VerificationType::Manual, $fresh->verification_type);
     }
 
+    public function test_ban_with_next_id_mounts_receipt_on_next_record(): void
+    {
+        $play1 = Play::factory()->create([
+            'user_id' => User::factory(),
+            'status' => PlayStatus::Pending,
+        ]);
+        $play2 = Play::factory()->create([
+            'user_id' => User::factory(),
+            'status' => PlayStatus::Pending,
+        ]);
+
+        $component = Livewire::test(ListPlays::class)
+            ->callTableAction('ban', $play1, data: ['ban_reason' => 'fake'], arguments: ['nextId' => $play2->id]);
+
+        $this->assertSame(PlayStatus::Banned, $play1->fresh()->status);
+
+        $mountedActions = $component->instance()->mountedActions;
+        $this->assertNotEmpty($mountedActions);
+        $this->assertSame('receipt', $mountedActions[0]['name'] ?? null);
+        $this->assertSame((string) $play2->id, $mountedActions[0]['context']['recordKey'] ?? null);
+    }
+
+    public function test_unban_with_next_id_mounts_receipt_on_next_record(): void
+    {
+        $play1 = Play::factory()->create([
+            'user_id' => User::factory(),
+            'status' => PlayStatus::Banned,
+            'ban_reason' => 'x',
+            'banned_at' => now(),
+        ]);
+        $play2 = Play::factory()->create([
+            'user_id' => User::factory(),
+            'status' => PlayStatus::Pending,
+        ]);
+
+        $component = Livewire::test(ListPlays::class)
+            ->callTableAction('unban', $play1, arguments: ['nextId' => $play2->id]);
+
+        $this->assertSame(PlayStatus::Validated, $play1->fresh()->status);
+
+        $mountedActions = $component->instance()->mountedActions;
+        $this->assertNotEmpty($mountedActions);
+        $this->assertSame('receipt', $mountedActions[0]['name'] ?? null);
+        $this->assertSame((string) $play2->id, $mountedActions[0]['context']['recordKey'] ?? null);
+    }
+
+    public function test_validate_with_next_id_mounts_receipt_on_next_record(): void
+    {
+        $play1 = Play::factory()->create([
+            'user_id' => User::factory(),
+            'status' => PlayStatus::Pending,
+        ]);
+        $play2 = Play::factory()->create([
+            'user_id' => User::factory(),
+            'status' => PlayStatus::Pending,
+        ]);
+
+        $component = Livewire::test(ListPlays::class)
+            ->callTableAction('validate', $play1, arguments: ['nextId' => $play2->id]);
+
+        $this->assertSame(PlayStatus::Validated, $play1->fresh()->status);
+
+        $mountedActions = $component->instance()->mountedActions;
+        $this->assertNotEmpty($mountedActions);
+        $this->assertSame('receipt', $mountedActions[0]['name'] ?? null);
+        $this->assertSame((string) $play2->id, $mountedActions[0]['context']['recordKey'] ?? null);
+    }
+
+    public function test_validate_without_next_id_does_not_remount(): void
+    {
+        $play = Play::factory()->create([
+            'user_id' => User::factory(),
+            'status' => PlayStatus::Pending,
+        ]);
+
+        $component = Livewire::test(ListPlays::class)
+            ->callTableAction('validate', $play);
+
+        $this->assertSame(PlayStatus::Validated, $play->fresh()->status);
+        $this->assertEmpty($component->instance()->mountedActions);
+    }
+
     public function test_validate_overwrites_auto_with_manual(): void
     {
         $play = Play::factory()->create([

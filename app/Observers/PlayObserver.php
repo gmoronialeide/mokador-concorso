@@ -13,6 +13,10 @@ class PlayObserver
             return;
         }
 
+        if ($play->isDirty('verification_type')) {
+            return;
+        }
+
         if (! auth('admin')->check()) {
             return;
         }

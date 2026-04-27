@@ -69,7 +69,7 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("\$wire.replaceMountedAction('validate', [], { table: true, recordKey: '{$play->id}' })", $html);
+        $this->assertStringContainsString("\$wire.replaceMountedAction('validate', { nextId: nextId }, { table: true, recordKey: '{$play->id}' })", $html);
         $this->assertStringNotContainsString('@js(', $html);
     }
 
@@ -82,7 +82,7 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("\$wire.replaceMountedAction('ban', [], { table: true, recordKey: '{$play->id}' })", $html);
+        $this->assertStringContainsString("\$wire.replaceMountedAction('ban', { nextId: nextId }, { table: true, recordKey: '{$play->id}' })", $html);
         $this->assertStringNotContainsString('@js(', $html);
     }
 
@@ -99,10 +99,23 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("\$wire.replaceMountedAction('unban', [], { table: true, recordKey: '{$play->id}' })", $html);
+        $this->assertStringContainsString("\$wire.replaceMountedAction('unban', { nextId: nextId }, { table: true, recordKey: '{$play->id}' })", $html);
         $this->assertStringNotContainsString("replaceMountedAction('ban'", $html);
         $this->assertStringNotContainsString("replaceMountedAction('validate'", $html);
         $this->assertStringNotContainsString('@js(', $html);
+    }
+
+    public function test_keyboard_run_validate_passes_next_id(): void
+    {
+        $admin = Admin::factory()->create(['role' => AdminRole::Admin]);
+        $this->actingAs($admin, 'admin');
+
+        $play = $this->makePlay();
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString("run('validate', true)", $html);
+        $this->assertStringContainsString("run('unban', true)", $html);
+        $this->assertStringContainsString("run('ban', true)", $html);
     }
 
     public function test_notaio_sees_no_action_buttons(): void
@@ -190,6 +203,66 @@ class ReceiptModalTest extends TestCase
         $html = $this->renderModal($play);
 
         $this->assertStringContainsString('Lettura automatica non disponibile', $html);
+    }
+
+    public function test_modal_renders_counter_default_one_of_one(): void
+    {
+        $play = $this->makePlay();
+        $html = $this->renderModal($play);
+        $this->assertStringContainsString('Scontrino 1 / 1', $html);
+    }
+
+    public function test_modal_renders_counter_with_provided_ids(): void
+    {
+        $play = $this->makePlay();
+        $html = view('filament.modals.receipt-preview', [
+            'record' => $play,
+            'ids' => [10, $play->id, 20, 30],
+        ])->render();
+        $this->assertStringContainsString('Scontrino 2 / 4', $html);
+    }
+
+    public function test_modal_renders_prev_next_buttons(): void
+    {
+        $play = $this->makePlay();
+        $html = $this->renderModal($play);
+        $this->assertStringContainsString('Precedente', $html);
+        $this->assertStringContainsString('Successivo', $html);
+    }
+
+    public function test_modal_disables_prev_when_first(): void
+    {
+        $play = $this->makePlay();
+        $html = view('filament.modals.receipt-preview', [
+            'record' => $play,
+            'ids' => [$play->id, 20, 30],
+        ])->render();
+        $this->assertMatchesRegularExpression(
+            '/<button[^>]*disabled[^>]*>[^<]*Precedente/s',
+            $html,
+        );
+    }
+
+    public function test_modal_disables_next_when_last(): void
+    {
+        $play = $this->makePlay();
+        $html = view('filament.modals.receipt-preview', [
+            'record' => $play,
+            'ids' => [10, 20, $play->id],
+        ])->render();
+        $this->assertMatchesRegularExpression(
+            '/<button[^>]*disabled[^>]*>[^<]*Successivo/s',
+            $html,
+        );
+    }
+
+    public function test_modal_renders_keyboard_listener(): void
+    {
+        $play = $this->makePlay();
+        $html = $this->renderModal($play);
+        $this->assertStringContainsString('x-on:keydown.window', $html);
+        $this->assertStringContainsString('ArrowLeft', $html);
+        $this->assertStringContainsString('ArrowRight', $html);
     }
 
     public function test_modal_shows_ocr_data_when_ocr_raw_populated(): void

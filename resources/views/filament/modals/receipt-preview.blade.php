@@ -1,10 +1,20 @@
 @php
     use App\Services\Ocr\ReceiptExtractor;
+    use Illuminate\Support\Js;
 
     $store = $record->store;
     $canManage = auth('admin')->check() && ! auth('admin')->user()->isNotaio();
     $headerLabel = $store ? $store->display_name : $record->store_code;
     $userLabel = $record->user ? trim($record->user->name.' '.$record->user->surname) : null;
+
+    $idsArray = isset($ids) ? array_values(array_map('intval', $ids)) : [(int) $record->id];
+    if (! in_array((int) $record->id, $idsArray, true)) {
+        $idsArray[] = (int) $record->id;
+    }
+    $currentIndex = (int) array_search((int) $record->id, $idsArray, true);
+    $totalCount = count($idsArray);
+    $hasPrev = $currentIndex > 0;
+    $hasNext = $currentIndex < $totalCount - 1;
 
     $ocr = $record->ocr_raw
         ? app(ReceiptExtractor::class)->fromAzureResponse($record->ocr_raw)
@@ -24,7 +34,36 @@
     $ocrTypeLabel = $ocr?->type === 'invoice' ? 'Fattura' : 'Scontrino';
 @endphp
 
-<div style="display: flex; flex-direction: column; gap: 1rem;">
+<div
+    wire:key="receipt-modal-{{ $record->id }}"
+    x-data="{
+        ids: {{ Js::from($idsArray) }},
+        currentId: {{ (int) $record->id }},
+        get idx() { return this.ids.indexOf(this.currentId); },
+        get total() { return this.ids.length; },
+        get prevId() { return this.idx > 0 ? this.ids[this.idx - 1] : null; },
+        get nextId() { return this.idx >= 0 && this.idx < this.total - 1 ? this.ids[this.idx + 1] : null; },
+        goTo(id) {
+            if (id === null || id === undefined) return;
+            $wire.replaceMountedAction('receipt', [], { table: true, recordKey: String(id) });
+        },
+        run(name, sendNext) {
+            const args = sendNext ? { nextId: this.nextId } : [];
+            $wire.replaceMountedAction(name, args, { table: true, recordKey: String(this.currentId) });
+        },
+        onKey(e) {
+            if (e.target && e.target.closest('input, textarea, select, [contenteditable=true]')) return;
+            const k = e.key;
+            if (k === 'ArrowLeft')       { e.preventDefault(); this.goTo(this.prevId); }
+            else if (k === 'ArrowRight') { e.preventDefault(); this.goTo(this.nextId); }
+            else if (k === 'v' || k === 'V') { e.preventDefault(); this.run('validate', true); }
+            else if (k === 'b' || k === 'B') { e.preventDefault(); this.run('ban', true); }
+            else if (k === 'u' || k === 'U') { e.preventDefault(); this.run('unban', true); }
+        },
+    }"
+    x-on:keydown.window="onKey($event)"
+    style="display: flex; flex-direction: column; gap: 1rem;"
+>
     <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: #f9fafb; border-radius: 0.5rem;">
         <div style="display: flex; flex-direction: column;">
             <strong style="font-size: 0.95rem;">{{ $headerLabel }} - ID {{ $record->id }}@if ($userLabel) - {{ $userLabel }}@endif</strong>
@@ -35,43 +74,63 @@
             @endif
         </div>
 
-        @if ($canManage)
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                @if ($record->isPending())
-                    <x-filament::button
-                        color="success"
-                        icon="heroicon-o-check-circle"
-                        size="sm"
-                        x-on:click="$wire.replaceMountedAction('validate', [], { table: true, recordKey: '{{ $record->id }}' })"
-                    >
-                        Valida
-                    </x-filament::button>
-                @endif
-
-                @if (! $record->isBanned())
-                    <x-filament::button
-                        color="danger"
-                        icon="heroicon-o-no-symbol"
-                        size="sm"
-                        x-on:click="$wire.replaceMountedAction('ban', [], { table: true, recordKey: '{{ $record->id }}' })"
-                    >
-                        Banna
-                    </x-filament::button>
-                @endif
-
-                @if ($record->isBanned())
-                    <x-filament::button
-                        color="success"
-                        icon="heroicon-o-check-circle"
-                        size="sm"
-                        x-on:click="$wire.replaceMountedAction('unban', [], { table: true, recordKey: '{{ $record->id }}' })"
-                    >
-                        Sbanna
-                    </x-filament::button>
-                @endif
-            </div>
-        @endif
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span style="font-size: 0.85rem; color: #6b7280; white-space: nowrap;">Scontrino {{ $currentIndex + 1 }} / {{ $totalCount }}</span>
+            <button
+                type="button"
+                style="padding: 0.25rem 0.6rem; font-size: 0.85rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: white; cursor: pointer;"
+                x-on:click="goTo(prevId)"
+                @disabled(! $hasPrev)
+            >
+                ← Precedente
+            </button>
+            <button
+                type="button"
+                style="padding: 0.25rem 0.6rem; font-size: 0.85rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: white; cursor: pointer;"
+                x-on:click="goTo(nextId)"
+                @disabled(! $hasNext)
+            >
+                Successivo →
+            </button>
+        </div>
     </div>
+
+    @if ($canManage)
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; padding: 0 0.25rem;">
+            @if ($record->isPending())
+                <x-filament::button
+                    color="success"
+                    icon="heroicon-o-check-circle"
+                    size="sm"
+                    x-on:click="$wire.replaceMountedAction('validate', { nextId: nextId }, { table: true, recordKey: '{{ $record->id }}' })"
+                >
+                    Valida (V)
+                </x-filament::button>
+            @endif
+
+            @if (! $record->isBanned())
+                <x-filament::button
+                    color="danger"
+                    icon="heroicon-o-no-symbol"
+                    size="sm"
+                    x-on:click="$wire.replaceMountedAction('ban', { nextId: nextId }, { table: true, recordKey: '{{ $record->id }}' })"
+                >
+                    Banna (B)
+                </x-filament::button>
+            @endif
+
+            @if ($record->isBanned())
+                <x-filament::button
+                    color="success"
+                    icon="heroicon-o-check-circle"
+                    size="sm"
+                    x-on:click="$wire.replaceMountedAction('unban', { nextId: nextId }, { table: true, recordKey: '{{ $record->id }}' })"
+                >
+                    Sbanna (U)
+                </x-filament::button>
+            @endif
+        </div>
+    @endif
 
     @if ($record->notes)
         <div style="padding: 0.75rem 1rem; background: #fef3c7; border: 1px solid #fde68a; border-radius: 0.5rem; font-size: 0.875rem; color: #78350f;">

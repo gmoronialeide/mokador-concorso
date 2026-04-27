@@ -9,7 +9,9 @@ use App\Models\Play;
 use App\Models\Prize;
 use App\Models\Store;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
@@ -24,6 +26,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Js;
 
 class PlayResource extends Resource
@@ -48,6 +51,43 @@ class PlayResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with(['user', 'store', 'prize', 'winningSlot']);
+    }
+
+    /**
+     * Snapshot of IDs from the current Livewire-table filtered+sorted query.
+     * Used by the receipt modal to enable prev/next navigation across the visible set.
+     *
+     * @return array<int, int>
+     */
+    public static function getFilteredOrderedIds(\Livewire\Component $livewire): array
+    {
+        $query = method_exists($livewire, 'getFilteredSortedTableQuery')
+            ? $livewire->getFilteredSortedTableQuery()
+            : $livewire->getFilteredTableQuery();
+
+        if ($query === null) {
+            return [];
+        }
+
+        return $query->pluck('plays.id')->all();
+    }
+
+    /**
+     * Re-mount the receipt action on the next record in the snapshot if `nextId` was passed.
+     * Enables auto-advance after Valida/Sbanna in the receipt modal flow.
+     */
+    public static function mountReceiptIfNextId(Action $action, $livewire): void
+    {
+        $nextId = $action->getArguments()['nextId'] ?? null;
+
+        if ($nextId === null) {
+            return;
+        }
+
+        $livewire->replaceMountedAction('receipt', [], [
+            'table' => true,
+            'recordKey' => (string) $nextId,
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -227,7 +267,10 @@ class PlayResource extends Resource
                     ->tooltip('Scontrino')
                     ->modalHeading('Scontrino')
                     ->modalWidth('7xl')
-                    ->modalContent(fn (Play $record) => view('filament.modals.receipt-preview', ['record' => $record]))
+                    ->modalContent(fn (Play $record, $livewire) => view('filament.modals.receipt-preview', [
+                        'record' => $record,
+                        'ids' => static::getFilteredOrderedIds($livewire),
+                    ]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Chiudi'),
                 Action::make('notes')
@@ -262,6 +305,25 @@ class PlayResource extends Resource
                         $record->update(['verification_type' => VerificationType::Manual]);
                     })
                     ->visible(fn (Play $record): bool => $record->verification_type !== VerificationType::Manual
+                        && ! auth('admin')->user()->isNotaio()),
+                Action::make('rerun_auto_check')
+                    ->label('')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->tooltip('Rilancia controllo automatico')
+                    ->requiresConfirmation(fn (Play $record): bool => $record->verification_type === VerificationType::Manual)
+                    ->modalHeading('Rilanciare controllo automatico?')
+                    ->modalDescription('Stai sovrascrivendo una verifica manuale. La giocata tornerà in stato Pending e verrà ripresa dal controllo automatico.')
+                    ->action(function (Play $record): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
+                        $record->update([
+                            'status' => PlayStatus::Pending,
+                            'verification_type' => null,
+                            'notes' => null,
+                            'ocr_raw' => null,
+                        ]);
+                    })
+                    ->visible(fn (Play $record): bool => $record->verification_type !== null
                         && ! auth('admin')->user()->isNotaio()),
                 ViewAction::make()->label('')->tooltip('Dettaglio'),
                 Action::make('assign_store')
@@ -312,6 +374,9 @@ class PlayResource extends Resource
                             'verification_type' => VerificationType::Manual,
                         ]);
                     })
+                    ->after(function (Action $action, $livewire): void {
+                        static::mountReceiptIfNextId($action, $livewire);
+                    })
                     ->visible(fn (Play $record): bool => $record->isPending() && ! auth('admin')->user()->isNotaio()),
                 Action::make('ban')
                     ->label('')
@@ -333,6 +398,9 @@ class PlayResource extends Resource
                             'verification_type' => VerificationType::Manual,
                         ]);
                     })
+                    ->after(function (Action $action, $livewire): void {
+                        static::mountReceiptIfNextId($action, $livewire);
+                    })
                     ->visible(fn (Play $record): bool => ! $record->isBanned() && ! auth('admin')->user()->isNotaio()),
                 Action::make('unban')
                     ->label('')
@@ -351,7 +419,46 @@ class PlayResource extends Resource
                             'verification_type' => VerificationType::Manual,
                         ]);
                     })
+                    ->after(function (Action $action, $livewire): void {
+                        static::mountReceiptIfNextId($action, $livewire);
+                    })
                     ->visible(fn (Play $record): bool => $record->isBanned() && ! auth('admin')->user()->isNotaio()),
+            ])
+            ->bulkActions([
+                BulkAction::make('rerun_auto_check_bulk')
+                    ->label('Rilancia controllo automatico')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Rilancia controllo automatico')
+                    ->modalDescription('Verrà rilanciato solo per giocate con verifica AUTOMATICA. Le verifiche manuali saranno saltate (per quelle usa l\'azione singola).')
+                    ->action(function (Collection $records): void {
+                        abort_if(auth('admin')->user()->isNotaio(), 403);
+
+                        $auto = $records->filter(
+                            fn (Play $play): bool => $play->verification_type === VerificationType::Auto,
+                        );
+                        $skipped = $records->count() - $auto->count();
+
+                        $auto->each(fn (Play $play) => $play->update([
+                            'status' => PlayStatus::Pending,
+                            'verification_type' => null,
+                            'notes' => null,
+                            'ocr_raw' => null,
+                        ]));
+
+                        $body = "Rilanciate {$auto->count()} giocate.";
+                        if ($skipped > 0) {
+                            $body .= " {$skipped} saltate (verifica non automatica).";
+                        }
+
+                        Notification::make()
+                            ->title('Controllo automatico rilanciato')
+                            ->body($body)
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(fn (): bool => ! auth('admin')->user()->isNotaio()),
             ]);
     }
 

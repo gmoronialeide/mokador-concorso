@@ -173,4 +173,57 @@ class ReceiptModalTest extends TestCase
 
         $this->assertStringNotContainsString('<strong>Note', $html);
     }
+
+    public function test_modal_shows_ocr_unavailable_when_ocr_raw_null(): void
+    {
+        $play = $this->makePlay(['ocr_raw' => null]);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString('Lettura automatica non disponibile', $html);
+    }
+
+    public function test_modal_shows_ocr_unavailable_when_parser_returns_null(): void
+    {
+        $play = $this->makePlay(['ocr_raw' => ['analyzeResult' => ['documents' => []]]]);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString('Lettura automatica non disponibile', $html);
+    }
+
+    public function test_modal_shows_ocr_data_when_ocr_raw_populated(): void
+    {
+        $play = $this->makePlay(['ocr_raw' => [
+            'analyzeResult' => [
+                'documents' => [[
+                    'docType' => 'receipt.retailMeal',
+                    'fields' => [
+                        'MerchantName' => ['valueString' => 'Bar Centrale', 'confidence' => 0.95],
+                        'MerchantAddress' => ['valueAddress' => [
+                            'streetAddress' => 'Via Roma 1',
+                            'postalCode' => '48018',
+                            'city' => 'Faenza',
+                            'state' => 'RA',
+                        ]],
+                        'MerchantTaxId' => ['valueString' => '01234567890'],
+                        'TransactionDate' => ['valueDate' => '2026-04-20'],
+                        'Total' => ['valueCurrency' => ['amount' => 12.5]],
+                        'Items' => ['valueArray' => [['x' => 1], ['x' => 2], ['x' => 3]]],
+                    ],
+                ]],
+            ],
+        ]]);
+
+        $html = $this->renderModal($play);
+
+        $this->assertStringContainsString('Bar Centrale', $html);
+        $this->assertStringContainsString('2026-04-20', $html);
+        $this->assertStringContainsString('€ 12,50', $html);
+        $this->assertStringContainsString('01234567890', $html);
+        $this->assertStringContainsString('95%', $html);
+        $this->assertStringContainsString('Scontrino', $html);
+        $this->assertStringContainsString('Via Roma 1', $html);
+        $this->assertStringContainsString('3 articoli', $html);
+    }
 }

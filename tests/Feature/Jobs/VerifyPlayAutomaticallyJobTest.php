@@ -51,7 +51,7 @@ class VerifyPlayAutomaticallyJobTest extends TestCase
         $this->assertStringContainsString('scontrino mancante', (string) $play->notes);
     }
 
-    public function test_ocr_empty_leaves_pending_with_note(): void
+    public function test_ocr_empty_bans_play(): void
     {
         $this->fakeReceipt($user, $store, $play);
 
@@ -69,9 +69,9 @@ class VerifyPlayAutomaticallyJobTest extends TestCase
         );
 
         $play->refresh();
-        $this->assertSame(PlayStatus::Pending, $play->status);
+        $this->assertSame(PlayStatus::Banned, $play->status);
         $this->assertSame(VerificationType::Auto, $play->verification_type);
-        $this->assertStringContainsString('OCR non riuscito', (string) $play->notes);
+        $this->assertStringContainsString('scontrino non riconosciuto', (string) $play->notes);
     }
 
     public function test_valid_receipt_validates_play(): void

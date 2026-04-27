@@ -27,9 +27,11 @@ class PlayVerifier
         }
 
         if ($doc === null) {
-            $notes[] = 'OCR non riuscito';
-
-            return new VerificationResult(PlayStatus::Pending, VerificationType::Auto, $notes);
+            return new VerificationResult(
+                PlayStatus::Banned,
+                VerificationType::Auto,
+                ['scontrino non riconosciuto'],
+            );
         }
 
         $this->checkDate($doc, $notes);

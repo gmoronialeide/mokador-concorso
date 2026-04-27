@@ -37,29 +37,16 @@ class PlayVerifierTest extends TestCase
         $this->assertSame(['scontrino mancante'], $result->notes);
     }
 
-    public function test_null_doc_returns_ocr_failed(): void
+    public function test_null_doc_returns_banned(): void
     {
         $store = $this->sampleStore();
         $play = $this->samplePlay($store);
 
         $result = $this->verifier->verify($play, null);
 
-        $this->assertSame(PlayStatus::Pending, $result->status);
-        $this->assertContains('OCR non riuscito', $result->notes);
-    }
-
-    public function test_missing_store_adds_note(): void
-    {
-        $play = Play::factory()->make([
-            'user_id' => 1,
-            'receipt_image' => 'receipts/x.jpg',
-            'store_id' => null,
-        ]);
-        $play->setRelation('store', null);
-
-        $result = $this->verifier->verify($play, null);
-
-        $this->assertContains('store non assegnato', $result->notes);
+        $this->assertSame(PlayStatus::Banned, $result->status);
+        $this->assertSame(VerificationType::Auto, $result->type);
+        $this->assertSame(['scontrino non riconosciuto'], $result->notes);
     }
 
     public function test_happy_path_vat_match_validates(): void

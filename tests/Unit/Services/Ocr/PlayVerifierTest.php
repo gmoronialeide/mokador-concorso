@@ -88,7 +88,7 @@ class PlayVerifierTest extends TestCase
         $this->assertSame([], $result->notes);
     }
 
-    public function test_date_out_of_range_adds_note(): void
+    public function test_date_out_of_range_returns_banned(): void
     {
         $store = $this->sampleStore();
         $play = $this->samplePlay($store);
@@ -101,8 +101,62 @@ class PlayVerifierTest extends TestCase
 
         $result = $this->verifier->verify($play, $doc);
 
+        $this->assertSame(PlayStatus::Banned, $result->status);
+        $this->assertSame(VerificationType::Auto, $result->type);
+        $this->assertSame(['data scontrino fuori concorso (2025-01-01)'], $result->notes);
+    }
+
+    public function test_date_after_end_returns_banned(): void
+    {
+        $store = $this->sampleStore();
+        $play = $this->samplePlay($store);
+
+        $doc = $this->sampleDoc([
+            'date' => '2026-04-29',
+            'merchantVat' => $store->vat_number,
+            'merchantConfidence' => 0.95,
+        ]);
+
+        $result = $this->verifier->verify($play, $doc);
+
+        $this->assertSame(PlayStatus::Banned, $result->status);
+        $this->assertSame(['data scontrino fuori concorso (2026-04-29)'], $result->notes);
+    }
+
+    public function test_date_out_of_range_skips_other_checks(): void
+    {
+        $store = $this->sampleStore(['vat_number' => '01234567890']);
+        $play = $this->samplePlay($store);
+
+        $doc = $this->sampleDoc([
+            'date' => '2025-01-01',
+            'total' => 0.10,
+            'merchantVat' => '99999999999',
+            'merchantConfidence' => 0.40,
+        ]);
+
+        $result = $this->verifier->verify($play, $doc);
+
+        $this->assertSame(PlayStatus::Banned, $result->status);
+        $this->assertCount(1, $result->notes);
+        $this->assertSame('data scontrino fuori concorso (2025-01-01)', $result->notes[0]);
+    }
+
+    public function test_null_date_stays_pending(): void
+    {
+        $store = $this->sampleStore();
+        $play = $this->samplePlay($store);
+
+        $doc = $this->sampleDoc([
+            'date' => null,
+            'merchantVat' => $store->vat_number,
+            'merchantConfidence' => 0.95,
+        ]);
+
+        $result = $this->verifier->verify($play, $doc);
+
         $this->assertSame(PlayStatus::Pending, $result->status);
-        $this->assertContains('non torna data scontrino (2025-01-01)', $result->notes);
+        $this->assertContains('non torna data scontrino (N/D)', $result->notes);
     }
 
     public function test_total_below_one_adds_note(): void
@@ -187,7 +241,7 @@ class PlayVerifierTest extends TestCase
         $play = $this->samplePlay($store);
 
         $doc = $this->sampleDoc([
-            'date' => '2025-01-01',
+            'date' => '2026-04-15',
             'total' => 0.10,
             'merchantVat' => '99999999999',
             'merchantConfidence' => 0.95,
@@ -196,9 +250,8 @@ class PlayVerifierTest extends TestCase
         $result = $this->verifier->verify($play, $doc);
 
         $this->assertSame(PlayStatus::Pending, $result->status);
-        $this->assertCount(4, $result->notes);
-        $this->assertStringContainsString('controllo automatico: non torna data scontrino', $result->noteString());
-        $this->assertStringContainsString("\ncontrollo automatico: non torna importo", $result->noteString());
+        $this->assertCount(3, $result->notes);
+        $this->assertStringContainsString('controllo automatico: non torna importo', $result->noteString());
         $this->assertStringContainsString("\ncontrollo automatico: non torna punto vendita", $result->noteString());
         $this->assertStringContainsString("\ncontrollo automatico: P.IVA scontrino non in DB stores", $result->noteString());
     }

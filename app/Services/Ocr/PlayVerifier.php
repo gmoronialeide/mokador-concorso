@@ -34,6 +34,14 @@ class PlayVerifier
             );
         }
 
+        if ($this->isDateOutOfRange($doc)) {
+            return new VerificationResult(
+                PlayStatus::Banned,
+                VerificationType::Auto,
+                ["data scontrino fuori concorso ({$doc->date})"],
+            );
+        }
+
         $this->checkDate($doc, $notes);
         $this->checkTotal($doc, $notes);
         if ($play->store_id !== null) {
@@ -46,6 +54,23 @@ class PlayVerifier
         }
 
         return new VerificationResult(PlayStatus::Pending, VerificationType::Auto, $notes);
+    }
+
+    private function isDateOutOfRange(ExtractedDocument $doc): bool
+    {
+        $date = $doc->date;
+        if ($date === null) {
+            return false;
+        }
+
+        $start = (string) config('app.concorso_start_date', '');
+        $end = (string) config('app.concorso_end_date', '');
+
+        if ($start === '' || $end === '') {
+            return false;
+        }
+
+        return $date < $start || $date > $end;
     }
 
     private function checkDate(ExtractedDocument $doc, array &$notes): void

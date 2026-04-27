@@ -104,6 +104,28 @@ class PlayResourceVerificationActionsTest extends TestCase
         $this->assertSame((string) $play2->id, $mountedActions[0]['context']['recordKey'] ?? null);
     }
 
+    public function test_ban_preserves_ids_snapshot_for_chained_receipt_mount(): void
+    {
+        $play1 = Play::factory()->create([
+            'user_id' => User::factory(),
+            'status' => PlayStatus::Pending,
+        ]);
+        $play2 = Play::factory()->create([
+            'user_id' => User::factory(),
+            'status' => PlayStatus::Pending,
+        ]);
+
+        $component = Livewire::test(ListPlays::class)
+            ->callTableAction('ban', $play1, data: ['ban_reason' => 'x'], arguments: [
+                'nextId' => $play2->id,
+                'ids' => [$play1->id, $play2->id],
+            ]);
+
+        $mountedActions = $component->instance()->mountedActions;
+        $this->assertSame('receipt', $mountedActions[0]['name'] ?? null);
+        $this->assertSame([$play1->id, $play2->id], $mountedActions[0]['arguments']['ids'] ?? null);
+    }
+
     public function test_unban_with_next_id_mounts_receipt_on_next_record(): void
     {
         $play1 = Play::factory()->create([

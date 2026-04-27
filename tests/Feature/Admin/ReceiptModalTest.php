@@ -69,7 +69,7 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("\$wire.replaceMountedAction('validate', { nextId: nextId }, { table: true, recordKey: '{$play->id}' })", $html);
+        $this->assertStringContainsString("\$wire.replaceMountedAction('validate', { nextId: nextId, ids: ids }, { table: true, recordKey: '{$play->id}' })", $html);
         $this->assertStringNotContainsString('@js(', $html);
     }
 
@@ -82,7 +82,7 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("\$wire.replaceMountedAction('ban', { nextId: nextId }, { table: true, recordKey: '{$play->id}' })", $html);
+        $this->assertStringContainsString("\$wire.replaceMountedAction('ban', { nextId: nextId, ids: ids }, { table: true, recordKey: '{$play->id}' })", $html);
         $this->assertStringNotContainsString('@js(', $html);
     }
 
@@ -99,7 +99,7 @@ class ReceiptModalTest extends TestCase
 
         $html = $this->renderModal($play);
 
-        $this->assertStringContainsString("\$wire.replaceMountedAction('unban', { nextId: nextId }, { table: true, recordKey: '{$play->id}' })", $html);
+        $this->assertStringContainsString("\$wire.replaceMountedAction('unban', { nextId: nextId, ids: ids }, { table: true, recordKey: '{$play->id}' })", $html);
         $this->assertStringNotContainsString("replaceMountedAction('ban'", $html);
         $this->assertStringNotContainsString("replaceMountedAction('validate'", $html);
         $this->assertStringNotContainsString('@js(', $html);

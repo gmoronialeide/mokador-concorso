@@ -54,13 +54,23 @@ class PlayResource extends Resource
     }
 
     /**
-     * Snapshot of IDs from the current Livewire-table filtered+sorted query.
-     * Used by the receipt modal to enable prev/next navigation across the visible set.
+     * Snapshot of IDs for the receipt modal's prev/next navigation.
+     * If `$providedIds` is supplied (passed forward from a previous modal mount), it is sanitized
+     * and returned as-is — this keeps the navigation stable across data changes (e.g. after a ban).
+     * Otherwise, the snapshot is freshly computed from the current Livewire-table filtered+sorted query.
      *
+     * @param  array<int, mixed>|null  $providedIds
      * @return array<int, int>
      */
-    public static function getFilteredOrderedIds(\Livewire\Component $livewire): array
+    public static function getFilteredOrderedIds(\Livewire\Component $livewire, ?array $providedIds = null): array
     {
+        if ($providedIds !== null) {
+            return array_values(array_filter(
+                array_map(fn ($v): ?int => is_numeric($v) ? (int) $v : null, $providedIds),
+                fn (?int $v): bool => $v !== null,
+            ));
+        }
+
         $query = method_exists($livewire, 'getFilteredSortedTableQuery')
             ? $livewire->getFilteredSortedTableQuery()
             : $livewire->getFilteredTableQuery();
@@ -73,18 +83,24 @@ class PlayResource extends Resource
     }
 
     /**
-     * Re-mount the receipt action on the next record in the snapshot if `nextId` was passed.
-     * Enables auto-advance after Valida/Sbanna in the receipt modal flow.
+     * Re-mount the receipt action on the next record if `nextId` was passed in the action arguments.
+     * Forwards the original `ids` snapshot so prev/next stay coherent with the originally-filtered list.
      */
     public static function mountReceiptIfNextId(Action $action, $livewire): void
     {
-        $nextId = $action->getArguments()['nextId'] ?? null;
+        $args = $action->getArguments();
+        $nextId = $args['nextId'] ?? null;
 
         if ($nextId === null) {
             return;
         }
 
-        $livewire->replaceMountedAction('receipt', [], [
+        $mountArgs = [];
+        if (isset($args['ids']) && is_array($args['ids'])) {
+            $mountArgs['ids'] = $args['ids'];
+        }
+
+        $livewire->replaceMountedAction('receipt', $mountArgs, [
             'table' => true,
             'recordKey' => (string) $nextId,
         ]);
@@ -267,10 +283,14 @@ class PlayResource extends Resource
                     ->tooltip('Scontrino')
                     ->modalHeading('Scontrino')
                     ->modalWidth('7xl')
-                    ->modalContent(fn (Play $record, $livewire) => view('filament.modals.receipt-preview', [
-                        'record' => $record,
-                        'ids' => static::getFilteredOrderedIds($livewire),
-                    ]))
+                    ->modalContent(function (Play $record, $livewire, array $arguments = []) {
+                        $providedIds = isset($arguments['ids']) && is_array($arguments['ids']) ? $arguments['ids'] : null;
+
+                        return view('filament.modals.receipt-preview', [
+                            'record' => $record,
+                            'ids' => static::getFilteredOrderedIds($livewire, $providedIds),
+                        ]);
+                    })
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Chiudi'),
                 Action::make('notes')

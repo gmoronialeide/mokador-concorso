@@ -45,10 +45,12 @@
         get nextId() { return this.idx >= 0 && this.idx < this.total - 1 ? this.ids[this.idx + 1] : null; },
         goTo(id) {
             if (id === null || id === undefined) return;
-            $wire.replaceMountedAction('receipt', [], { table: true, recordKey: String(id) });
+            $wire.replaceMountedAction('receipt', { ids: this.ids }, { table: true, recordKey: String(id) });
         },
         run(name, sendNext) {
-            const args = sendNext ? { nextId: this.nextId } : [];
+            const args = sendNext
+                ? { nextId: this.nextId, ids: this.ids }
+                : { ids: this.ids };
             $wire.replaceMountedAction(name, args, { table: true, recordKey: String(this.currentId) });
         },
         onKey(e) {
@@ -105,7 +107,7 @@
                     color="success"
                     icon="heroicon-o-check-circle"
                     size="sm"
-                    x-on:click="$wire.replaceMountedAction('validate', { nextId: nextId }, { table: true, recordKey: '{{ $record->id }}' })"
+                    x-on:click="$wire.replaceMountedAction('validate', { nextId: nextId, ids: ids }, { table: true, recordKey: '{{ $record->id }}' })"
                 >
                     Valida (V)
                 </x-filament::button>
@@ -116,7 +118,7 @@
                     color="danger"
                     icon="heroicon-o-no-symbol"
                     size="sm"
-                    x-on:click="$wire.replaceMountedAction('ban', { nextId: nextId }, { table: true, recordKey: '{{ $record->id }}' })"
+                    x-on:click="$wire.replaceMountedAction('ban', { nextId: nextId, ids: ids }, { table: true, recordKey: '{{ $record->id }}' })"
                 >
                     Banna (B)
                 </x-filament::button>
@@ -127,7 +129,7 @@
                     color="success"
                     icon="heroicon-o-check-circle"
                     size="sm"
-                    x-on:click="$wire.replaceMountedAction('unban', { nextId: nextId }, { table: true, recordKey: '{{ $record->id }}' })"
+                    x-on:click="$wire.replaceMountedAction('unban', { nextId: nextId, ids: ids }, { table: true, recordKey: '{{ $record->id }}' })"
                 >
                     Sbanna (U)
                 </x-filament::button>

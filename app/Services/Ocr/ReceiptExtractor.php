@@ -21,11 +21,17 @@ class ReceiptExtractor
         $dateField = $fields[$isInvoice ? 'InvoiceDate' : 'TransactionDate'] ?? null;
         $totalField = $fields[$isInvoice ? 'InvoiceTotal' : 'Total'] ?? null;
 
+        $merchantVat = $this->stringOf($merchantVatField);
+        if ($merchantVat === null) {
+            $content = (string) ($response['analyzeResult']['content'] ?? '');
+            $merchantVat = $this->extractVatFromContent($content);
+        }
+
         return new ExtractedDocument(
             type: $isInvoice ? 'invoice' : 'receipt',
             merchantName: $this->stringOf($merchantNameField),
             merchantAddress: $this->addressOf($merchantAddressField),
-            merchantVat: $this->stringOf($merchantVatField),
+            merchantVat: $merchantVat,
             merchantConfidence: isset($merchantNameField['confidence'])
                 ? (float) $merchantNameField['confidence']
                 : null,
@@ -75,6 +81,16 @@ class ReceiptExtractor
         }
         if (isset($field['valueNumber'])) {
             return (float) $field['valueNumber'];
+        }
+
+        return null;
+    }
+
+    private function extractVatFromContent(string $content): ?string
+    {
+        $pattern = '/(?:P\.?\s*IVA|PARTITA\s+IVA|P\.?\s*I\.?\b|VAT(?:\s+number)?)\b[\s.:\/-]*(?:IT)?[\s.:\/-]*(\d{11})\b/i';
+        if (preg_match($pattern, $content, $m) === 1) {
+            return $m[1];
         }
 
         return null;

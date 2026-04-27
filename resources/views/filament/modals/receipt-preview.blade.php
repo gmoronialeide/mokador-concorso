@@ -69,6 +69,9 @@
             <strong style="font-size: 0.95rem;">{{ $headerLabel }} - ID {{ $record->id }}@if ($userLabel) - {{ $userLabel }}@endif</strong>
             @if ($store)
                 <span style="font-size: 0.8rem; color: #6b7280;">{{ $store->city }}, {{ $store->province }}</span>
+                @if ($store->vat_number)
+                    <span style="font-size: 0.8rem; color: #6b7280;">P. IVA: {{ $store->vat_number }}</span>
+                @endif
             @else
                 <span style="font-size: 0.8rem; color: #6b7280;">— P.V. non assegnato</span>
             @endif

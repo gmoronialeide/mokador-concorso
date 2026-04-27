@@ -105,6 +105,10 @@ class ReceiptExtractorTest extends TestCase
             'C.F./P.IVA' => ['C.F./P.IVA 01234567890'],
             'VAT' => ['VAT 01234567890'],
             'P. Iva with spaces and colon' => ['P. Iva : 01234567890'],
+            'PART.IVA' => ['PART.IVA 01234567890'],
+            'PART. IVA' => ['PART. IVA 01234567890'],
+            'PART IVA' => ['PART IVA 01234567890'],
+            'PART.IVA with colon' => ['PART.IVA: 01234567890'],
         ];
     }
 

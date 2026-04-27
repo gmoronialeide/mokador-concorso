@@ -88,7 +88,7 @@ class ReceiptExtractor
 
     private function extractVatFromContent(string $content): ?string
     {
-        $pattern = '/(?:P\.?\s*IVA|PARTITA\s+IVA|P\.?\s*I\.?\b|VAT(?:\s+number)?)\b[\s.:\/-]*(?:IT)?[\s.:\/-]*(\d{11})\b/i';
+        $pattern = '/(?:P\.?\s*IVA|PART\.?\s*IVA|PARTITA\s+IVA|P\.?\s*I\.?\b|VAT(?:\s+number)?)\b[\s.:\/-]*(?:IT)?[\s.:\/-]*(\d{11})\b/i';
         if (preg_match($pattern, $content, $m) === 1) {
             return $m[1];
         }

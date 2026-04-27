@@ -87,7 +87,7 @@ class PlayVerifier
 
     private function checkTotal(ExtractedDocument $doc, array &$notes): void
     {
-        if ($doc->total === null || $doc->total < 1.00) {
+        if ($doc->total === null || $doc->total < 0.80) {
             $totalStr = $doc->total === null ? 'N/D' : number_format($doc->total, 2, ',', '').'€';
             $notes[] = "non torna importo ({$totalStr})";
         }

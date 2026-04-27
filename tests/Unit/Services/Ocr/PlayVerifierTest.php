@@ -159,7 +159,7 @@ class PlayVerifierTest extends TestCase
         $this->assertContains('non torna data scontrino (N/D)', $result->notes);
     }
 
-    public function test_total_below_one_adds_note(): void
+    public function test_total_below_threshold_adds_note(): void
     {
         $store = $this->sampleStore();
         $play = $this->samplePlay($store);
@@ -173,6 +173,39 @@ class PlayVerifierTest extends TestCase
         $result = $this->verifier->verify($play, $doc);
 
         $this->assertContains('non torna importo (0,50€)', $result->notes);
+    }
+
+    public function test_total_at_eighty_cents_validates(): void
+    {
+        $store = $this->sampleStore();
+        $play = $this->samplePlay($store);
+
+        $doc = $this->sampleDoc([
+            'total' => 0.80,
+            'merchantVat' => $store->vat_number,
+            'merchantConfidence' => 0.95,
+        ]);
+
+        $result = $this->verifier->verify($play, $doc);
+
+        $this->assertSame(PlayStatus::Validated, $result->status);
+        $this->assertSame([], $result->notes);
+    }
+
+    public function test_total_just_below_eighty_cents_adds_note(): void
+    {
+        $store = $this->sampleStore();
+        $play = $this->samplePlay($store);
+
+        $doc = $this->sampleDoc([
+            'total' => 0.79,
+            'merchantVat' => $store->vat_number,
+            'merchantConfidence' => 0.95,
+        ]);
+
+        $result = $this->verifier->verify($play, $doc);
+
+        $this->assertContains('non torna importo (0,79€)', $result->notes);
     }
 
     public function test_name_and_city_mismatch_adds_merchant_note(): void

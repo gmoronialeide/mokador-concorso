@@ -5,6 +5,8 @@ namespace App\Services\Ocr;
 use App\Enums\PlayStatus;
 use App\Enums\VerificationType;
 use App\Models\Play;
+use App\Models\Store;
+use Illuminate\Support\Collection;
 
 class PlayVerifier
 {
@@ -71,11 +73,15 @@ class PlayVerifier
             return;
         }
 
-        if (! empty($doc->merchantVat) && ! empty($store->vat_number)) {
-            if (preg_replace('/\D/', '', $doc->merchantVat) === preg_replace('/\D/', '', $store->vat_number)) {
+        $docVat = $this->normalizeVat($doc->merchantVat);
+        $storeVat = $this->normalizeVat($store->vat_number);
+
+        if ($docVat !== null && $storeVat !== null) {
+            if ($docVat === $storeVat) {
                 return;
             }
             $notes[] = 'non torna punto vendita';
+            $this->appendVatLookupNote($docVat, $notes);
 
             return;
         }
@@ -98,6 +104,9 @@ class PlayVerifier
 
         if (! ($nameOk || $cityOk)) {
             $notes[] = 'non torna punto vendita';
+            if ($docVat !== null) {
+                $this->appendVatLookupNote($docVat, $notes);
+            }
         }
     }
 
@@ -106,5 +115,58 @@ class PlayVerifier
         if ($doc->merchantConfidence !== null && $doc->merchantConfidence < 0.80) {
             $notes[] = 'verifica manuale merchant (confidence bassa)';
         }
+    }
+
+    private function normalizeVat(?string $vat): ?string
+    {
+        if ($vat === null || $vat === '') {
+            return null;
+        }
+        $digits = preg_replace('/\D/', '', $vat);
+
+        return $digits === '' ? null : $digits;
+    }
+
+    /**
+     * @return Collection<int, Store>
+     */
+    private function lookupStoresByVat(string $normalizedVat): Collection
+    {
+        return Store::query()
+            ->whereNotNull('vat_number')
+            ->get(['id', 'name', 'sign_name', 'vat_number', 'is_active'])
+            ->filter(fn (Store $s) => $this->normalizeVat($s->vat_number) === $normalizedVat)
+            ->values();
+    }
+
+    private function formatStoreEntry(Store $store): string
+    {
+        $name = $store->sign_name ?: $store->name;
+        $entry = $name.' (#'.$store->id.')';
+        if (! $store->is_active) {
+            $entry .= ' [inattivo]';
+        }
+
+        return $entry;
+    }
+
+    private function appendVatLookupNote(string $normalizedVat, array &$notes): void
+    {
+        $matches = $this->lookupStoresByVat($normalizedVat);
+
+        if ($matches->isEmpty()) {
+            $notes[] = 'P.IVA scontrino non in DB stores';
+
+            return;
+        }
+
+        if ($matches->count() === 1) {
+            $notes[] = 'P.IVA scontrino corrisponde a store: '.$this->formatStoreEntry($matches->first());
+
+            return;
+        }
+
+        $entries = $matches->map(fn (Store $s) => $this->formatStoreEntry($s))->implode(', ');
+        $notes[] = 'P.IVA scontrino corrisponde a '.$matches->count().' store: '.$entries;
     }
 }

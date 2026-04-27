@@ -8,10 +8,13 @@ use App\Models\Play;
 use App\Models\Store;
 use App\Services\Ocr\ExtractedDocument;
 use App\Services\Ocr\PlayVerifier;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PlayVerifierTest extends TestCase
 {
+    use RefreshDatabase;
+
     private PlayVerifier $verifier;
 
     protected function setUp(): void
@@ -206,10 +209,11 @@ class PlayVerifierTest extends TestCase
         $result = $this->verifier->verify($play, $doc);
 
         $this->assertSame(PlayStatus::Pending, $result->status);
-        $this->assertCount(3, $result->notes);
+        $this->assertCount(4, $result->notes);
         $this->assertStringContainsString('controllo automatico: non torna data scontrino', $result->noteString());
         $this->assertStringContainsString("\ncontrollo automatico: non torna importo", $result->noteString());
         $this->assertStringContainsString("\ncontrollo automatico: non torna punto vendita", $result->noteString());
+        $this->assertStringContainsString("\ncontrollo automatico: P.IVA scontrino non in DB stores", $result->noteString());
     }
 
     private function sampleStore(array $overrides = []): Store
